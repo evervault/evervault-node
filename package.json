@@ -1,0 +1,24 @@
+{
+  "name": "evervault-node-sdk",
+  "version": "0.1.0",
+  "description": "Node.js SDK for running evervault cages",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evervault/evervault-node-sdk.git"
+  },
+  "keywords": [
+    "node",
+    "evervault",
+    "cages"
+  ],
+  "author": "evervault (https://evervault.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/evervault/evervault-node-sdk/issues"
+  },
+  "homepage": "https://github.com/evervault/evervault-node-sdk#readme"
+}
