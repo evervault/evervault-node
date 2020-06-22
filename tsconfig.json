@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "lib": ["esnext"],
+    "module": "commonjs",
+    "rootDir": "lib",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2019"
+  },
+  "include": ["lib/**/*.ts", "test/**/*.ts", "*.js"],
+  "exclude": ["node_modules", "dist"]
+}

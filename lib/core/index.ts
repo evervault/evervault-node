@@ -1,15 +1,21 @@
-const { Datatypes } = require('../utils');
-const Http = require('./http');
-const Crypto = require('./crypto');
+import { Datatypes } from '../utils';
+import Http from './http';
+import Crypto from './crypto';
+import { IConfig } from '../config.types';
+import { IEncryptOptions } from './crypto.types';
 
-module.exports = (config) => {
+export default (config: IConfig) => {
   const httpClient = Http(config.axios);
   const encryptionClient = Crypto(config.encryption);
-  let key;
+  let key: string;
 
-  const encrypt = async (cageName, data, options) => {
+  const encrypt = async (
+    cageName: string,
+    data: any,
+    options: IEncryptOptions
+  ) => {
     if (Datatypes.isUndefined(key)) {
-      const cageKey = await httpClient.getCageKey(apiKey);
+      const cageKey = await httpClient.getCageKey();
       if (Datatypes.isString(cageKey)) {
         key = cageKey;
       } else {

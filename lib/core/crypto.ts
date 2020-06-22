@@ -1,15 +1,29 @@
-const crypto = require('crypto');
-const Datatypes = require('../utils/datatypes');
-const uuid = require('uuid').v4;
+import { IEncryptOptions } from './crypto.types';
+import { IEncryptionConfig } from '../config.types';
+import * as crypto from 'crypto';
+import * as Datatypes from '../utils/datatypes';
+import { v4 as uuid } from 'uuid';
 
-const generateBytes = (byteLength) => crypto.randomBytes(byteLength);
+const generateBytes = (byteLength: number): Buffer =>
+  crypto.randomBytes(byteLength);
+
+const DEFAULT_ENCRYPT_OPTIONS: IEncryptOptions = {
+  fieldsToEncrypt: undefined,
+  preserveObjectShape: true,
+};
 
 class CryptoClient {
-  constructor(config) {
+  private config: IEncryptionConfig;
+  constructor(config: IEncryptionConfig) {
     this.config = config;
   }
 
-  encrypt(cageName, key, data, options = {}) {
+  encrypt(
+    cageName: string,
+    key: string,
+    data: any,
+    options: IEncryptOptions = DEFAULT_ENCRYPT_OPTIONS
+  ) {
     if (Datatypes.isUndefined(data)) {
       throw new Error('Data must not be undefined');
     }
@@ -33,25 +47,35 @@ class CryptoClient {
     }
   }
 
-  _encryptObject(cageName, cageKey, data, { fieldsToEncrypt }) {
-    const keys = fieldsToEncrypt || Object.keys(data);
-    const result = { ...data };
+  _encryptObject(
+    cageName: string,
+    cageKey: Buffer,
+    data: {
+      [key: string]: any;
+    },
+    { fieldsToEncrypt }: IEncryptOptions
+  ) {
+    const keys: Array<string> = fieldsToEncrypt || Object.keys(data);
+    const result: {
+      [key: string]: any;
+    } = { ...data };
     for (let key of keys) {
       result[key] = this._encryptString(cageName, cageKey, data[key]);
     }
     return result;
   }
 
-  _encryptString(cageName, cageKey, str) {
+  _encryptString(cageName: string, cageKey: Buffer, str: string) {
     const keyIv = generateBytes(this.config.keyLength / 2);
     const rootKey = generateBytes(this.config.keyLength);
-    const cipher = crypto.createCipheriv(
+    const cipherOptions: crypto.CipherGCMOptions = {
+      authTagLength: this.config.authTagLength,
+    };
+    const cipher: crypto.CipherGCM = crypto.createCipheriv(
       this.config.cipherAlgorithm,
       rootKey,
       keyIv,
-      {
-        authTagLength: this.config.authTagLength,
-      }
+      cipherOptions
     );
 
     const encryptedBuffer = Buffer.concat([
@@ -71,7 +95,11 @@ class CryptoClient {
     });
   }
 
-  _publicEncrypt(publicKey, data, hash = this.config.publicHash) {
+  _publicEncrypt(
+    publicKey: Buffer,
+    data: Buffer,
+    hash: string = this.config.publicHash
+  ) {
     return crypto.publicEncrypt(
       {
         key: publicKey,
@@ -82,13 +110,13 @@ class CryptoClient {
     );
   }
 
-  _format(obj) {
+  _format(obj: object): string {
     const header = Datatypes.utf8ToBase64(JSON.stringify(this.config.header));
     const payload = Datatypes.utf8ToBase64(JSON.stringify(obj));
     return `${header}.${payload}.${uuid()}`;
   }
 }
 
-module.exports = (config) => {
+export default (config: IEncryptionConfig) => {
   return new CryptoClient(config);
 };

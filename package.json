@@ -2,9 +2,19 @@
   "name": "evervault-node-sdk",
   "version": "0.1.0",
   "description": "Node.js SDK for running evervault cages",
-  "main": "lib/index.js",
+  "exports": {
+    "import": "./dist/esm.js",
+    "require": "./dist/cjs.js"
+  },
+  "main": "./dist/cjs.js",
   "scripts": {
-    "test": "mocha 'tests/**/*.test.js'"
+    "test": "mocha 'tests/**/*.test.js'",
+    "clean": "rimraf dist typings",
+    "prebuild": "npm run clean",
+    "build": "rollup --config rollup.config.js",
+    "postbuild": "npm run typings",
+    "pretypings": "rimraf typings",
+    "typings": "tsc --project tsconfig.build.json --declaration --declarationDir typings --emitDeclarationOnly"
   },
   "repository": {
     "type": "git",
@@ -26,7 +36,19 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
+    "@babel/preset-typescript": "^7.10.1",
+    "@rollup/plugin-typescript": "^4.1.2",
+    "@types/axios": "^0.14.0",
+    "@types/node": "^14.0.13",
+    "@types/uuid": "^8.0.0",
     "chai": "^4.2.0",
-    "mocha": "^8.0.1"
+    "mocha": "^8.0.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.18.0",
+    "rollup-plugin-filesize": "^9.0.1",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.5"
   }
 }

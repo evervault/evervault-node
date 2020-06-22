@@ -1,6 +1,7 @@
-const API_URL = 'https://api.evervault.com';
+import { IConfig } from './config.types';
+const API_URL: string = 'https://api.evervault.com';
 
-module.exports = (apikey) => ({
+export default (apikey: string): IConfig => ({
   axios: {
     baseUrl: API_URL,
     headers: {
