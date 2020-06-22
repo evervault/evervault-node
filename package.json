@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/evervault/evervault-node-sdk/issues"
   },
-  "homepage": "https://github.com/evervault/evervault-node-sdk#readme"
+  "homepage": "https://github.com/evervault/evervault-node-sdk#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "uuid": "^8.1.0"
+  }
 }
