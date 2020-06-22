@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { IHttpConfig } from '../config.types';
+import { IHttpConfig } from '../config';
 
 export default (config: IHttpConfig) => {
   const axiosClient = axios.create(config);

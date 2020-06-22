@@ -1,8 +1,12 @@
-import { IEncryptOptions } from './crypto.types';
-import { IEncryptionConfig } from '../config.types';
+import { IEncryptionConfig } from '../config';
 import * as crypto from 'crypto';
 import * as Datatypes from '../utils/datatypes';
 import { v4 as uuid } from 'uuid';
+
+export interface IEncryptOptions {
+  preserveObjectShape: Boolean | undefined;
+  fieldsToEncrypt: Array<string> | undefined;
+}
 
 const generateBytes = (byteLength: number): Buffer =>
   crypto.randomBytes(byteLength);

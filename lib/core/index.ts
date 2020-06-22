@@ -1,8 +1,7 @@
 import { Datatypes } from '../utils';
 import Http from './http';
-import Crypto from './crypto';
-import { IConfig } from '../config.types';
-import { IEncryptOptions } from './crypto.types';
+import Crypto, { IEncryptOptions } from './crypto';
+import { IConfig } from '../config';
 
 export default (config: IConfig) => {
   const httpClient = Http(config.axios);
