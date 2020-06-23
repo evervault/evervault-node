@@ -45,6 +45,35 @@ describe('Datatypes', () => {
     });
   });
 
+  describe('isObjectStrict', () => {
+    context('Data is a json object', () => {
+      it('returns true', () => {
+        expect(Datatypes.isObjectStrict({})).to.be.true;
+      });
+    });
+
+    context('Data is not a json object', () => {
+      it('returns false for null', () => {
+        expect(Datatypes.isObjectStrict(null)).to.be.false;
+      });
+      it('returns false for an array', () => {
+        expect(Datatypes.isObjectStrict([])).to.be.false;
+      });
+      it('returns false for a buffer', () => {
+        expect(Datatypes.isObjectStrict(Buffer.from('test'))).to.be.false;
+      });
+      it('returns false for undefined', () => {
+        expect(Datatypes.isObjectStrict(undefined)).to.be.false;
+      });
+      it('returns false for a number', () => {
+        expect(Datatypes.isObjectStrict(1)).to.be.false;
+      });
+      it('returns false for a string', () => {
+        expect(Datatypes.isObjectStrict('test')).to.be.false;
+      });
+    });
+  });
+
   describe('isString', () => {
     context('Data is a string', () => {
       it('returns true', () => {
@@ -86,6 +115,73 @@ describe('Datatypes', () => {
     context('Data is not undefined', () => {
       it('returns false', () => {
         expect(Datatypes.isUndefined(1)).to.be.false;
+      });
+    });
+  });
+
+  describe('isBuffer', () => {
+    context('Data is a buffer', () => {
+      it('returns true', () => {
+        expect(Datatypes.isBuffer(Buffer.from('test'))).to.be.true;
+      });
+    });
+
+    context('Data is not a buffer', () => {
+      it('returns false', () => {
+        expect(Datatypes.isBuffer(1)).to.be.false;
+      });
+    });
+  });
+
+  describe('ensureString', () => {
+    context('data is null', () => {
+      it('returns stringified null', () => {
+        expect(Datatypes.ensureString(null)).to.equal(JSON.stringify(null));
+      });
+    });
+    context('data is a string already', () => {
+      context('With whitespace', () => {
+        const whitespaceString = 'trailing    whitespace    ';
+        it('Trims the whitespace', () => {
+          expect(Datatypes.ensureString(whitespaceString)).to.equal(
+            whitespaceString.trim()
+          );
+        });
+      });
+
+      context('Without trailing whitespace', () => {
+        const noWhitespaceString = 'no extra space';
+        it('Preserves the string', () => {
+          expect(Datatypes.ensureString(noWhitespaceString)).to.equal(
+            noWhitespaceString
+          );
+        });
+      });
+    });
+
+    context('data is a bigint', () => {
+      it('returns the stringified bigint', () => {
+        expect(Datatypes.ensureString(1n)).to.deep.equal(1n.toString());
+      });
+    });
+
+    context('data is a function', () => {
+      const testFn = () => {};
+      it('returns the function stringified', () => {
+        expect(Datatypes.ensureString(testFn)).to.deep.equal(testFn.toString());
+      });
+    });
+
+    context('data is a buffer', () => {
+      const buffer = Buffer.from('test buffer');
+      it('returns the buffer stringified', () => {
+        expect(Datatypes.ensureString(buffer)).to.equal(buffer.toString());
+      });
+    });
+
+    context('data is undefined', () => {
+      it('returns undefined', () => {
+        expect(Datatypes.ensureString(undefined)).to.equal(undefined);
       });
     });
   });
