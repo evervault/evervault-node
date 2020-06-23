@@ -8,12 +8,14 @@ describe('Datatypes', () => {
         expect(Datatypes.isArray([])).to.be.true;
       });
     });
+
     context('Data is not an array', () => {
       it('returns false', () => {
         expect(Datatypes.isArray(0)).to.be.false;
       });
     });
   });
+
   describe('isObject', () => {
     context('Data is an object', () => {
       it('returns true for json object', () => {
@@ -29,6 +31,7 @@ describe('Datatypes', () => {
         expect(Datatypes.isObject(Buffer.from('test'))).to.be.true;
       });
     });
+
     context('Data is not an object', () => {
       it('returns false for undefined', () => {
         expect(Datatypes.isObject(undefined)).to.be.false;
@@ -41,24 +44,28 @@ describe('Datatypes', () => {
       });
     });
   });
+
   describe('isString', () => {
     context('Data is a string', () => {
       it('returns true', () => {
         expect(Datatypes.isString('test')).to.be.true;
       });
     });
+
     context('Data is not a string', () => {
       it('returns false', () => {
         expect(Datatypes.isString(1)).to.be.false;
       });
     });
   });
+
   describe('isDefined', () => {
     context('Data is defined', () => {
       it('returns true', () => {
         expect(Datatypes.isDefined(1)).to.be.true;
       });
     });
+
     context('Data is not defined', () => {
       it('returns false for null', () => {
         expect(Datatypes.isDefined(null)).to.be.false;
@@ -68,12 +75,14 @@ describe('Datatypes', () => {
       });
     });
   });
+
   describe('isUndefined', () => {
     context('Data is undefined', () => {
       it('returns true', () => {
         expect(Datatypes.isUndefined(undefined)).to.be.true;
       });
     });
+
     context('Data is not undefined', () => {
       it('returns false', () => {
         expect(Datatypes.isUndefined(1)).to.be.false;
