@@ -53,20 +53,41 @@ describe('Crypto Module', () => {
     };
 
     context('Preserve object shape set to true', () => {
-      it('Returns the encrypted data in an object', () => {
-        const encrypted = testCryptoClient.encrypt(
-          testCageName,
-          testKey,
-          testData,
-          { preserveObjectShape: true }
-        );
-        Object.keys(encrypted).map((encryptedKey) =>
-          encryptionTestFactory(
-            encrypted[encryptedKey],
-            testData[encryptedKey],
-            'string'
-          )
-        );
+      context('No fieldsToEncrypt provided', () => {
+        it('It encrypts every field', () => {
+          const encrypted = testCryptoClient.encrypt(
+            testCageName,
+            testKey,
+            testData,
+            { preserveObjectShape: true }
+          );
+          Object.keys(encrypted).map((encryptedKey) =>
+            encryptionTestFactory(
+              encrypted[encryptedKey],
+              testData[encryptedKey],
+              'string'
+            )
+          );
+        });
+      });
+      context('FieldsToEncrypt specified', () => {
+        const testFieldsToEncrypt = ['a', 'b'];
+        it('It encrypts only the specified fields', () => {
+          const encrypted = testCryptoClient.encrypt(
+            testCageName,
+            testKey,
+            testData,
+            { preserveObjectShape: true, fieldsToEncrypt: testFieldsToEncrypt }
+          );
+          testFieldsToEncrypt.map((encryptedKey) =>
+            encryptionTestFactory(
+              encrypted[encryptedKey],
+              testData[encryptedKey],
+              'string'
+            )
+          );
+          expect(encrypted.c).to.deep.equal(testData.c);
+        });
       });
     });
     context('Preserve object shape set to false', () => {
