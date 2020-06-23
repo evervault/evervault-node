@@ -3,22 +3,29 @@ import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import cjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
+import { terser } from 'rollup-plugin-terser';
+import externals from 'rollup-plugin-node-externals';
 
 import pkg from './package.json';
 
-const externals = pkg.dependencies;
-
-const formats = ['cjs', 'esm'];
+const formats = [
+  { format: 'cjs', ext: 'cjs' },
+  { format: 'esm', ext: 'js' },
+];
 
 export default {
   input: 'lib/index.ts',
-  output: formats.map((format) => ({
-    file: `dist/evervault.${format}.js`,
+  output: formats.map(({ format, ext }) => ({
+    file: `dist/${format}/index.${ext}`,
     format,
     name: pkg.name,
     sourcemap: true,
   })),
   plugins: [
+    externals({
+      packagePath: './package.json',
+      builtins: true,
+    }),
     resolve(),
     json(),
     cjs({
@@ -27,7 +34,7 @@ export default {
     typescript({
       tsconfig: './tsconfig.build.json',
     }),
+    terser(),
     filesize(),
   ],
-  external: externals,
 };

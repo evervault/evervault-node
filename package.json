@@ -2,13 +2,14 @@
   "name": "evervault-node-sdk",
   "version": "0.1.0",
   "description": "Node.js SDK for running evervault cages",
-  "exports": {
-    "import": "./dist/evervault.esm.js",
-    "require": "./dist/evervault.cjs.js"
-  },
   "type": "module",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.cjs"
+  },
+  "main": "dist/cjs/index.cjs",
   "scripts": {
-    "test": "mocha 'tests/**/*.test.js'",
+    "test": "mocha 'tests/**/*.test.ts'",
     "clean": "rimraf dist typings",
     "prebuild": "npm run clean",
     "build": "rollup --config rollup.config.js",
@@ -44,13 +45,18 @@
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@rollup/plugin-typescript": "^4.1.2",
     "@types/axios": "^0.14.0",
+    "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.13",
     "@types/uuid": "^8.0.0",
     "chai": "^4.2.0",
+    "esm": "^3.2.25",
     "mocha": "^8.0.1",
     "rimraf": "^3.0.2",
     "rollup": "^2.18.0",
     "rollup-plugin-filesize": "^9.0.1",
+    "rollup-plugin-node-externals": "^2.2.0",
+    "rollup-plugin-terser": "^6.1.0",
+    "ts-node": "^8.10.2",
     "tslib": "^2.0.0",
     "typescript": "^3.9.5"
   }
