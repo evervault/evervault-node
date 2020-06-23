@@ -16,8 +16,7 @@ const testCageName = 'magic-cage';
 const encryptedDataExpectations = (encrypted) => {
   expect(encrypted).to.be.a('string');
   expect(encrypted.split('.').length).to.equal(3);
-
-  const [header, body, uuid] = encrypted.split('.');
+  const [header, _, uuid] = encrypted.split('.');
   expect(uuid).to.equal(testingUuid);
   expect(dataHelpers.parseBase64ToJson(header)).to.deep.equal(
     testConfig.header
@@ -108,6 +107,7 @@ describe('Crypto Module', () => {
         });
       });
     });
+
     context('Preserve object shape set to false', () => {
       const encryptionOptions = { preserveObjectShape: false };
       it('Returns the encrypted data as a string', () => {
@@ -140,6 +140,134 @@ describe('Crypto Module', () => {
       const { body } = dataHelpers.parseEncryptedData(encrypted);
       const decrypted = MockCageService.decrypt(testCageName, body);
       expect(Buffer.from(decrypted)).to.deep.equal(testData);
+    });
+  });
+
+  context('Encrypting numbers', () => {
+    const testKey = MockCageService.getMockCageKey();
+    const testData = 42;
+
+    it('Returns the data encrypted as a string and it decrypts to a number', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      expect(MockCageService.decrypt(testCageName, body)).to.equal(testData);
+    });
+  });
+
+  context('Encrypting a function', () => {
+    const testData = function (x, y) {
+      return x + y;
+    };
+    const testKey = MockCageService.getMockCageKey();
+
+    it('Encrypts the function and decrypts it to a stringified function', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      const decrypted = MockCageService.decrypt(testCageName, body);
+      expect(decrypted).to.equal(testData.toString());
+    });
+  });
+
+  context('Encrypting an array', () => {
+    const testData = [1, 2, 3, 4];
+    const testKey = MockCageService.getMockCageKey();
+
+    it('Encrypts the array and decrypts it to the input data', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+        testData
+      );
+    });
+  });
+
+  context('Data is undefined', () => {
+    const testData = null;
+    const testKey = MockCageService.getMockCageKey();
+
+    it('Throws an error', () => {
+      try {
+        testCryptoClient.encrypt(testCageName, testKey, testData);
+      } catch (err) {
+        expect(err).to.match(/must not be undefined/);
+      }
+    });
+  });
+
+  context('Passing an undefined cage key', () => {
+    const testData = 'Encrypt me';
+    const testKey = null;
+
+    it('Throws an error', () => {
+      try {
+        testCryptoClient.encrypt(testCageName, testKey, testData);
+      } catch (err) {
+        expect(err).to.match(/No key supplied/);
+      }
+    });
+  });
+
+  context('Encrypting an object with null values', () => {
+    const testData = {
+      a: 1,
+      b: true,
+      c: null,
+    };
+    const testKey = MockCageService.getMockCageKey();
+
+    it('Encrypts the object including the null values', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      Object.keys(encrypted).forEach((objectKey) => {
+        encryptedDataExpectations(encrypted[objectKey]);
+        const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
+        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+          testData[objectKey]
+        );
+      });
+    });
+  });
+
+  context('Encrypting an object with undefined and null values', () => {
+    const testData = {
+      a: 1,
+      b: null,
+      c: undefined,
+    };
+    const testKey = MockCageService.getMockCageKey();
+
+    it('Encrypts the object including the null values, presists the undefined values', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      ['a', 'b'].forEach((objectKey) => {
+        encryptedDataExpectations(encrypted[objectKey]);
+        const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
+        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+          testData[objectKey]
+        );
+      });
+      expect(encrypted.c).to.deep.equal(testData.c);
     });
   });
 });
