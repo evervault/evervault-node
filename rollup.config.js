@@ -3,7 +3,7 @@ import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import cjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
+//import { terser } from 'rollup-plugin-terser';
 import externals from 'rollup-plugin-node-externals';
 
 import pkg from './package.json';
@@ -34,7 +34,7 @@ export default {
     typescript({
       tsconfig: './tsconfig.build.json',
     }),
-    terser(),
+    //terser(),
     filesize(),
   ],
 };
