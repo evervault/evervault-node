@@ -65,6 +65,8 @@ describe('Crypto Module', () => {
             encryptionOptions
           );
 
+          expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
+
           Object.keys(encrypted).forEach((objectKey) => {
             encryptedDataExpectations(encrypted[objectKey]);
             const { body } = dataHelpers.parseEncryptedData(
@@ -89,6 +91,8 @@ describe('Crypto Module', () => {
             testData,
             encryptionOptions
           );
+
+          expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
 
           Object.keys(encrypted).forEach((objectKey) => {
             if (testFieldsToEncrypt.includes(objectKey)) {
@@ -236,6 +240,9 @@ describe('Crypto Module', () => {
         testKey,
         testData
       );
+
+      expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
+
       Object.keys(encrypted).forEach((objectKey) => {
         encryptedDataExpectations(encrypted[objectKey]);
         const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
