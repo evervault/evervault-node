@@ -8,19 +8,22 @@ import externals from 'rollup-plugin-node-externals';
 
 import pkg from './package.json';
 
-const formats = [
-  { format: 'cjs', ext: 'cjs' },
-  { format: 'esm', ext: 'js' },
-];
-
 export default {
   input: 'lib/index.ts',
-  output: formats.map(({ format, ext }) => ({
-    file: `dist/${format}/index.${ext}`,
-    format,
-    name: pkg.name,
-    sourcemap: true,
-  })),
+  output: [
+    {
+      name: pkg.name,
+      file: pkg.main,
+      format: 'cjs',
+      sourcemap: true,
+    },
+    {
+      name: pkg.name,
+      file: pkg.module,
+      format: 'es',
+      sourcemap: true,
+    },
+  ],
   plugins: [
     externals({
       packagePath: './package.json',
