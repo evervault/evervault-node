@@ -13,8 +13,8 @@ const testApiKey = 'test-api-key';
 const testConfig = require('../../lib/config')(testApiKey).encryption;
 const testCageName = 'magic-cage';
 
-const encryptionTestFactory = (encrypted, testData, expectedOutputType) => {
-  expect(encrypted).to.be.a(expectedOutputType);
+const encryptedDataExpectations = (encrypted) => {
+  expect(encrypted).to.be.a('string');
   expect(encrypted.split('.').length).to.equal(3);
 
   const [header, body, uuid] = encrypted.split('.');
@@ -22,7 +22,6 @@ const encryptionTestFactory = (encrypted, testData, expectedOutputType) => {
   expect(dataHelpers.parseBase64ToJson(header)).to.deep.equal(
     testConfig.header
   );
-  expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(testData);
 };
 
 describe('Crypto Module', () => {
@@ -38,7 +37,11 @@ describe('Crypto Module', () => {
         testKey,
         testData
       );
-      encryptionTestFactory(encrypted, testData, 'string');
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+        testData
+      );
     });
   });
 
@@ -54,52 +57,89 @@ describe('Crypto Module', () => {
 
     context('Preserve object shape set to true', () => {
       context('No fieldsToEncrypt provided', () => {
+        const encryptionOptions = { preserveObjectShape: true };
         it('It encrypts every field', () => {
           const encrypted = testCryptoClient.encrypt(
             testCageName,
             testKey,
             testData,
-            { preserveObjectShape: true }
+            encryptionOptions
           );
-          Object.keys(encrypted).map((encryptedKey) =>
-            encryptionTestFactory(
-              encrypted[encryptedKey],
-              testData[encryptedKey],
-              'string'
-            )
-          );
+
+          Object.keys(encrypted).forEach((objectKey) => {
+            encryptedDataExpectations(encrypted[objectKey]);
+            const { body } = dataHelpers.parseEncryptedData(
+              encrypted[objectKey]
+            );
+            expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+              testData[objectKey]
+            );
+          });
         });
       });
       context('FieldsToEncrypt specified', () => {
         const testFieldsToEncrypt = ['a', 'b'];
+        const encryptionOptions = {
+          preserveObjectShape: true,
+          fieldsToEncrypt: testFieldsToEncrypt,
+        };
         it('It encrypts only the specified fields', () => {
           const encrypted = testCryptoClient.encrypt(
             testCageName,
             testKey,
             testData,
-            { preserveObjectShape: true, fieldsToEncrypt: testFieldsToEncrypt }
+            encryptionOptions
           );
-          testFieldsToEncrypt.map((encryptedKey) =>
-            encryptionTestFactory(
-              encrypted[encryptedKey],
-              testData[encryptedKey],
-              'string'
-            )
-          );
-          expect(encrypted.c).to.deep.equal(testData.c);
+
+          Object.keys(encrypted).forEach((objectKey) => {
+            if (testFieldsToEncrypt.includes(objectKey)) {
+              encryptedDataExpectations(encrypted[objectKey]);
+              const { body } = dataHelpers.parseEncryptedData(
+                encrypted[objectKey]
+              );
+              return expect(
+                MockCageService.decrypt(testCageName, body)
+              ).to.deep.equal(testData[objectKey]);
+            }
+            return expect(encrypted[objectKey]).to.deep.equal(
+              testData[objectKey]
+            );
+          });
         });
       });
     });
     context('Preserve object shape set to false', () => {
+      const encryptionOptions = { preserveObjectShape: false };
       it('Returns the encrypted data as a string', () => {
         const encrypted = testCryptoClient.encrypt(
           testCageName,
           testKey,
           testData,
-          { preserveObjectShape: false }
+          encryptionOptions
         );
-        encryptionTestFactory(encrypted, testData, 'string');
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+          testData
+        );
       });
+    });
+  });
+
+  context('Encrypting buffer', () => {
+    const testKey = MockCageService.getMockCageKey();
+
+    const testData = Buffer.from('test data in a buffer', 'utf8');
+    it('Returns the buffer encrypted as a string', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      const decrypted = MockCageService.decrypt(testCageName, body);
+      expect(Buffer.from(decrypted)).to.deep.equal(testData);
     });
   });
 });
