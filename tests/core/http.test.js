@@ -1,9 +1,7 @@
-const chai = require('chai');
-chai.use(require('chai-nock'));
-const { expect } = chai;
+const { expect } = require('chai');
 const nock = require('nock');
 
-describe('HttpClient', () => {
+describe('Http Module', () => {
   const testApikey = 'api-key';
   const testValidConfig = require('../../lib/config')(testApikey).http;
   const testHttpClient = require('../../lib/core/http')(testValidConfig);
