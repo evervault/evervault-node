@@ -1,3 +1,5 @@
+import { Z_BUF_ERROR } from 'zlib';
+
 export const isArray = (data: any): Boolean =>
   data.constructor.name === 'Array';
 
@@ -14,6 +16,9 @@ export const ensureString = (data: any): string => {
   if (isString(data)) return data.trim();
   if (['bigint', 'function'].includes(typeof data)) {
     return data.toString();
+  }
+  if (data.constructor.name.toLowerCase() === 'buffer') {
+    return data.toString('utf8');
   }
   return JSON.stringify(data);
 };

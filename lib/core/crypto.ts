@@ -4,9 +4,11 @@ import * as Datatypes from '../utils/datatypes';
 import { v4 as uuid } from 'uuid';
 
 export interface IEncryptOptions {
-  preserveObjectShape: Boolean | undefined;
-  fieldsToEncrypt: Array<string> | undefined;
+  preserveObjectShape?: Boolean;
+  fieldsToEncrypt?: Array<string>;
 }
+
+type Encryptable = object | string | number | Buffer | Function;
 
 const generateBytes = (byteLength: number): Buffer =>
   crypto.randomBytes(byteLength);
@@ -16,18 +18,13 @@ const DEFAULT_ENCRYPT_OPTIONS: IEncryptOptions = {
   preserveObjectShape: true,
 };
 
-class CryptoClient {
-  private config: IEncryptionConfig;
-  constructor(config: IEncryptionConfig) {
-    this.config = config;
-  }
-
-  encrypt(
+export default (config: IEncryptionConfig) => {
+  const encrypt = (
     cageName: string,
     key: string,
-    data: any,
+    data: Encryptable,
     options: IEncryptOptions = DEFAULT_ENCRYPT_OPTIONS
-  ) {
+  ): object | string => {
     if (Datatypes.isUndefined(data)) {
       throw new Error('Data must not be undefined');
     }
@@ -41,42 +38,42 @@ class CryptoClient {
       !Datatypes.isArray(data) &&
       options.preserveObjectShape
     ) {
-      return this._encryptObject(cageName, cryptoKey, data, options);
+      return encryptObject(cageName, cryptoKey, data as object, options);
     } else {
-      return this._encryptString(
-        cageName,
-        cryptoKey,
-        Datatypes.ensureString(data)
-      );
+      return encryptString(cageName, cryptoKey, Datatypes.ensureString(data));
     }
-  }
+  };
 
-  _encryptObject(
+  const encryptObject = (
     cageName: string,
     cageKey: Buffer,
     data: {
       [key: string]: any;
     },
     { fieldsToEncrypt }: IEncryptOptions
-  ) {
+  ): object | string => {
     const keys: Array<string> = fieldsToEncrypt || Object.keys(data);
-    const result: {
+    const encryptedObject: {
       [key: string]: any;
     } = { ...data };
     for (let key of keys) {
-      result[key] = this._encryptString(cageName, cageKey, data[key]);
+      encryptedObject[key] = encryptString(cageName, cageKey, data[key]);
     }
-    return result;
-  }
+    return encryptedObject;
+  };
 
-  _encryptString(cageName: string, cageKey: Buffer, str: string) {
-    const keyIv = generateBytes(this.config.keyLength / 2);
-    const rootKey = generateBytes(this.config.keyLength);
+  const encryptString = (
+    cageName: string,
+    cageKey: Buffer,
+    str: string
+  ): string => {
+    const keyIv = generateBytes(config.keyLength / 2);
+    const rootKey = generateBytes(config.keyLength);
     const cipherOptions: crypto.CipherGCMOptions = {
-      authTagLength: this.config.authTagLength,
+      authTagLength: config.authTagLength,
     };
     const cipher: crypto.CipherGCM = crypto.createCipheriv(
-      this.config.cipherAlgorithm,
+      config.cipherAlgorithm,
       rootKey,
       keyIv,
       cipherOptions
@@ -88,39 +85,33 @@ class CryptoClient {
       cipher.getAuthTag(),
     ]);
 
-    const encryptedKey = this._publicEncrypt(cageKey, rootKey);
+    const encryptedKey = publicEncrypt(cageKey, rootKey);
 
-    return this._format({
+    return format({
       sharedEncryptedKeys: {
         [cageName]: encryptedKey.toString('base64'),
       },
       keyIv: keyIv.toString('base64'),
       encryptedData: encryptedBuffer.toString('base64'),
     });
-  }
+  };
 
-  _publicEncrypt(
-    publicKey: Buffer,
-    data: Buffer,
-    hash: string = this.config.publicHash
-  ) {
+  const publicEncrypt = (publicKey: Buffer, data: Buffer): Buffer => {
     return crypto.publicEncrypt(
       {
         key: publicKey,
-        oaepHash: hash,
+        oaepHash: config.publicHash,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       },
       data
     );
-  }
+  };
 
-  _format(obj: object): string {
-    const header = Datatypes.utf8ToBase64(JSON.stringify(this.config.header));
+  const format = (obj: object): string => {
+    const header = Datatypes.utf8ToBase64(JSON.stringify(config.header));
     const payload = Datatypes.utf8ToBase64(JSON.stringify(obj));
     return `${header}.${payload}.${uuid()}`;
-  }
-}
+  };
 
-export default (config: IEncryptionConfig) => {
-  return new CryptoClient(config);
+  return { encrypt };
 };
