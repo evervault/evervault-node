@@ -22,10 +22,11 @@ const testCageKey = 'im-the-cage-key';
 
 describe('Core exports', () => {
   context('Given a valid config', () => {
-    it('returns an object with encrypt and run', () => {
+    it('returns the expected object', () => {
       const sdk = core(testConfig);
       expect(sdk.encrypt).to.be.a('function');
       expect(sdk.run).to.be.a('function');
+      expect(sdk.encryptAndRun).to.be.a('function');
     });
   });
 
@@ -108,6 +109,49 @@ describe('Core exports', () => {
             testCageKey,
             testData,
             {}
+          );
+        });
+      });
+    });
+  });
+
+  context('Invoking encryptAndRun', () => {
+    const httpStub = sinon.stub();
+    const getCageKeyStub = sinon.stub();
+    const runCageStub = sinon.stub();
+    const testEncryptResult = true;
+
+    beforeEach(() => {
+      getCageKeyStub.resolves({ key: testCageKey });
+      runCageStub.resolves({ result: true });
+      httpStub.returns({ getCageKey: getCageKeyStub, runCage: runCageStub });
+      encryptStub.resolves(testEncryptResult);
+      core.__set__({
+        Http: httpStub,
+      });
+    });
+
+    afterEach(() => {
+      getCageKeyStub.resetHistory();
+      runCageStub.resetHistory();
+      encryptStub.resetHistory();
+    });
+
+    context('First encryption call to sdk', () => {
+      it('Calls getCageKey, encrypts the data and runs the cage', () => {
+        const { encryptAndRun } = core(testConfig);
+
+        return encryptAndRun(cageName, testData).then(() => {
+          expect(getCageKeyStub).to.have.been.calledOnce;
+          expect(encryptStub).to.have.been.calledOnceWith(
+            cageName,
+            testCageKey,
+            testData,
+            {}
+          );
+          expect(runCageStub).to.have.been.calledOnceWith(
+            cageName,
+            testEncryptResult
           );
         });
       });
