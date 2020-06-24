@@ -5,6 +5,8 @@
   "type": "module",
   "main": "dist/cjs/index.cjs",
   "module": "dist/esm/index.js",
+  "types": "typings/index.d.ts",
+  "typings": "typings/index.d.ts",
   "scripts": {
     "test": "mocha 'tests/**/*.test.ts'",
     "clean": "rimraf dist typings",
