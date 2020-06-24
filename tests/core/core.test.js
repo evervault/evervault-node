@@ -8,6 +8,7 @@ const testApiKey = 'test-api-key';
 const testConfig = require('../../lib/config')(testApiKey);
 const sinon = require('sinon');
 const rewire = require('rewire');
+const { errors } = require('../../lib/utils');
 const core = rewire('../../lib/core');
 
 const encryptStub = sinon.stub();
@@ -43,14 +44,14 @@ describe('Core exports', () => {
           },
         })
           .get('/cages/key')
-          .reply(404, { errorMesage: 'error retrieving cage key' });
+          .reply(401, { errorMesage: 'error retrieving cage key' });
       });
 
       it('Throws an error', () => {
         const { encrypt } = core(testConfig);
         return encrypt(cageName, testData).catch((err) => {
           expect(cageKeyNock.isDone()).to.be.true;
-          expect(err).to.match(/Invalid Response/);
+          expect(err).to.be.instanceOf(errors.ApiKeyError);
           expect(encryptStub).to.not.have.been.called;
         });
       });

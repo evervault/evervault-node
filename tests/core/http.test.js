@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const { errors } = require('../../lib/utils');
 const nock = require('nock');
 
 describe('Http Module', () => {
@@ -34,7 +35,7 @@ describe('Http Module', () => {
       });
       context('Request fails', () => {
         let getCageKeyNock;
-        const testResponse = { errorType: 'NotFoundError' };
+        const testResponse = { errorType: 'Unauthorized' };
         before(() => {
           getCageKeyNock = nock(testValidConfig.baseUrl, {
             reqheaders: {
@@ -42,13 +43,13 @@ describe('Http Module', () => {
             },
           })
             .get('/cages/key')
-            .reply(404, testResponse);
+            .reply(401, testResponse);
         });
 
         it('It gets the cage key with the api key', () => {
-          return testHttpClient.getCageKey().then((res) => {
+          return testHttpClient.getCageKey().catch((err) => {
             expect(getCageKeyNock.isDone()).to.be.true;
-            expect(res).to.deep.equal(testResponse);
+            expect(err).to.be.instanceOf(errors.ApiKeyError);
           });
         });
       });

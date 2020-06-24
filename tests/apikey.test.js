@@ -6,13 +6,13 @@ const prepareSdkImport = (...args) => () => init(...args);
 describe('Initialising the sdk', () => {
   context('No api key provided', () => {
     it('throws an error', () => {
-      expect(prepareSdkImport()).to.throw(errors.ApiKeyError);
+      expect(prepareSdkImport()).to.throw(errors.InitializationError);
     });
   });
 
   context('An object is provided instead of an api key', () => {
     it('throws an error', () => {
-      expect(prepareSdkImport({})).to.throw(errors.ApiKeyError);
+      expect(prepareSdkImport({})).to.throw(errors.InitializationError);
     });
   });
 
