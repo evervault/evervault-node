@@ -200,16 +200,30 @@ describe('Crypto Module', () => {
     });
   });
 
-  context('Data is undefined', () => {
+  context('Data is null', () => {
     const testData = null;
     const testKey = MockCageService.getMockCageKey();
 
+    it('Encrypts it and decrypts it to a null value', () => {
+      const encrypted = testCryptoClient.encrypt(
+        testCageName,
+        testKey,
+        testData
+      );
+      encryptedDataExpectations(encrypted);
+      const { body } = dataHelpers.parseEncryptedData(encrypted);
+      expect(MockCageService.decrypt(testCageName, body)).to.equal(testData);
+    });
+  });
+
+  context('Data is undefined', () => {
+    const testData = undefined;
+    const testKey = MockCageService.getMockCageKey();
+
     it('Throws an error', () => {
-      try {
-        testCryptoClient.encrypt(testCageName, testKey, testData);
-      } catch (err) {
-        expect(err).to.match(/must not be undefined/);
-      }
+      expect(() =>
+        testCryptoClient.encrypt(testCageName, testKey, testData)
+      ).to.throw(/not be undefined/);
     });
   });
 
@@ -218,11 +232,9 @@ describe('Crypto Module', () => {
     const testKey = null;
 
     it('Throws an error', () => {
-      try {
-        testCryptoClient.encrypt(testCageName, testKey, testData);
-      } catch (err) {
-        expect(err).to.match(/No key supplied/);
-      }
+      expect(() =>
+        testCryptoClient.encrypt(testCageName, testKey, testData)
+      ).to.throw(/No key supplied/);
     });
   });
 
