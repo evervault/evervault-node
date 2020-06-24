@@ -7,6 +7,13 @@ describe('Http Module', () => {
   const testValidConfig = require('../../lib/config')(testApikey).http;
   const testHttpClient = require('../../lib/core/http')(testValidConfig);
 
+  const setupNock = (url = testValidConfig.baseUrl, apiKey = testApikey) =>
+    nock(url, {
+      reqheaders: {
+        'API-KEY': apiKey,
+      },
+    });
+
   after(() => {
     nock.restore();
   });
@@ -17,11 +24,7 @@ describe('Http Module', () => {
         let getCageKeyNock;
         const testResponse = { test: 'response' };
         before(() => {
-          getCageKeyNock = nock(testValidConfig.baseUrl, {
-            reqheaders: {
-              'API-KEY': testApikey,
-            },
-          })
+          getCageKeyNock = setupNock()
             .get('/cages/key')
             .reply(200, testResponse);
         });
@@ -34,22 +37,34 @@ describe('Http Module', () => {
         });
       });
       context('Request fails', () => {
-        let getCageKeyNock;
-        const testResponse = { errorType: 'Unauthorized' };
-        before(() => {
-          getCageKeyNock = nock(testValidConfig.baseUrl, {
-            reqheaders: {
-              'API-KEY': testApikey,
-            },
-          })
-            .get('/cages/key')
-            .reply(401, testResponse);
-        });
+        context('Response is a 401', () => {
+          let getCageKeyNock;
+          const testResponse = { errorType: 'Unauthorized' };
+          before(() => {
+            getCageKeyNock = setupNock()
+              .get('/cages/key')
+              .reply(401, testResponse);
+          });
 
-        it('It gets the cage key with the api key', () => {
+          it('It gets the cage key with the api key', () => {
+            return testHttpClient.getCageKey().catch((err) => {
+              expect(getCageKeyNock.isDone()).to.be.true;
+              expect(err).to.be.instanceOf(errors.ApiKeyError);
+            });
+          });
+        });
+      });
+      context('Request throws an error', () => {
+        let getCageKeyNock;
+        before(() => {
+          getCageKeyNock = setupNock()
+            .get('/cages/key')
+            .replyWithError('An error occurred');
+        });
+        it('Throws a CageKeyError', () => {
           return testHttpClient.getCageKey().catch((err) => {
             expect(getCageKeyNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ApiKeyError);
+            expect(err).to.be.instanceOf(errors.CageKeyError);
           });
         });
       });
@@ -63,11 +78,7 @@ describe('Http Module', () => {
         const testResponse = { test: 'data' };
         let runCageNock;
         before(() => {
-          runCageNock = nock(testValidConfig.baseUrl, {
-            reqheaders: {
-              'API-KEY': testApikey,
-            },
-          })
+          runCageNock = setupNock()
             .post(`/cages/${testCage}`)
             .reply(200, testResponse);
         });
@@ -85,11 +96,7 @@ describe('Http Module', () => {
         let runCageNock;
         const testResponse = { errorType: 'NotFound' };
         before(() => {
-          runCageNock = nock(testValidConfig.baseUrl, {
-            reqheaders: {
-              'API-KEY': testApikey,
-            },
-          })
+          runCageNock = setupNock()
             .post(`/cages/${testCage}`)
             .reply(404, testResponse);
         });
