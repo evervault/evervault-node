@@ -8,7 +8,10 @@ Encrypt data and run cages from your node environment.
 ```js
 const evervault = require('evervault-node-sdk').init(yourAPIKey);
 
-const cageResult = evervault.encryptAndRun('your-cage-name', { secret: 'data' }, { preserveObjectShape: true });
+const cageResult = evervault.encryptAndRun('your-cage-name', 
+  { secret: 'data' },
+  { preserveObjectShape: true }
+);
 ```
 
 Providing your team's api key to the init function of the sdk returns the encrypt, run, and encryptAndRun functions.
@@ -17,7 +20,7 @@ Providing your team's api key to the init function of the sdk returns the encryp
 
 ### init
 ```js
-evervault.init(yourApiKey: string): object
+evervault.init(yourApiKey): object
 ```
 Param | Type | Description
 ------|------|------------
@@ -26,7 +29,7 @@ yourApiKey | `string` | Your team's api key
 -------
 ### encrypt
 ```js
-evervault.encrypt(cageName: string, data: any[, options: object]): Promise<object | string>
+evervault.encrypt(cageName, data[, options]): Promise<object | string>
 ```
 Param | Type | Description
 ------|------|------------
@@ -43,7 +46,7 @@ fieldsToEncrypt | `string[]` | If the data to encrypt is an object and `preserve
 ------------
 ### run
 ```js
-evervault.run(cageName: string, data: object | string): Promise<object>
+evervault.run(cageName, data): Promise<object>
 ```
 Param | Type | Description
 ------|------|------------
@@ -52,7 +55,7 @@ data | `object | string` | The data to be sent to the cage
 
 ### encryptAndRun
 ```js
-evervault.encryptAndRun(cageName: string, data: any, options: object): Promise<object>
+evervault.encryptAndRun(cageName, data, options): Promise<object>
 ```
 Param | Type | Description
 ------|------|------------
