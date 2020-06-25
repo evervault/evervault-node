@@ -38,9 +38,7 @@ describe('Crypto Module', () => {
       );
       encryptedDataExpectations(encrypted);
       const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
-        testData
-      );
+      expect(MockCageService.decrypt(body)).to.deep.equal(testData);
     });
   });
 
@@ -72,7 +70,7 @@ describe('Crypto Module', () => {
             const { body } = dataHelpers.parseEncryptedData(
               encrypted[objectKey]
             );
-            expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+            expect(MockCageService.decrypt(body)).to.deep.equal(
               testData[objectKey]
             );
           });
@@ -100,9 +98,9 @@ describe('Crypto Module', () => {
               const { body } = dataHelpers.parseEncryptedData(
                 encrypted[objectKey]
               );
-              return expect(
-                MockCageService.decrypt(testCageName, body)
-              ).to.deep.equal(testData[objectKey]);
+              return expect(MockCageService.decrypt(body)).to.deep.equal(
+                testData[objectKey]
+              );
             }
             return expect(encrypted[objectKey]).to.deep.equal(
               testData[objectKey]
@@ -123,9 +121,7 @@ describe('Crypto Module', () => {
         );
         encryptedDataExpectations(encrypted);
         const { body } = dataHelpers.parseEncryptedData(encrypted);
-        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
-          testData
-        );
+        expect(MockCageService.decrypt(body)).to.deep.equal(testData);
       });
     });
   });
@@ -142,7 +138,7 @@ describe('Crypto Module', () => {
       );
       encryptedDataExpectations(encrypted);
       const { body } = dataHelpers.parseEncryptedData(encrypted);
-      const decrypted = MockCageService.decrypt(testCageName, body);
+      const decrypted = MockCageService.decrypt(body);
       expect(Buffer.from(decrypted)).to.deep.equal(testData);
     });
   });
@@ -159,7 +155,7 @@ describe('Crypto Module', () => {
       );
       encryptedDataExpectations(encrypted);
       const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(testCageName, body)).to.equal(testData);
+      expect(MockCageService.decrypt(body)).to.equal(testData);
     });
   });
 
@@ -177,7 +173,7 @@ describe('Crypto Module', () => {
       );
       encryptedDataExpectations(encrypted);
       const { body } = dataHelpers.parseEncryptedData(encrypted);
-      const decrypted = MockCageService.decrypt(testCageName, body);
+      const decrypted = MockCageService.decrypt(body);
       expect(decrypted).to.equal(testData.toString());
     });
   });
@@ -194,9 +190,7 @@ describe('Crypto Module', () => {
       );
       encryptedDataExpectations(encrypted);
       const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
-        testData
-      );
+      expect(MockCageService.decrypt(body)).to.deep.equal(testData);
     });
   });
 
@@ -246,7 +240,7 @@ describe('Crypto Module', () => {
       Object.keys(encrypted).forEach((objectKey) => {
         encryptedDataExpectations(encrypted[objectKey]);
         const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
-        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+        expect(MockCageService.decrypt(body)).to.deep.equal(
           testData[objectKey]
         );
       });
@@ -270,7 +264,7 @@ describe('Crypto Module', () => {
       ['a', 'b'].forEach((objectKey) => {
         encryptedDataExpectations(encrypted[objectKey]);
         const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
-        expect(MockCageService.decrypt(testCageName, body)).to.deep.equal(
+        expect(MockCageService.decrypt(body)).to.deep.equal(
           testData[objectKey]
         );
       });
