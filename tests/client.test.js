@@ -1,30 +1,44 @@
 const chai = require('chai');
 chai.use(require('sinon-chai'));
 const { expect } = chai;
-
 const nock = require('nock');
-
-const testApiKey = 'test-api-key';
-const testConfig = require('../../lib/config')(testApiKey);
 const sinon = require('sinon');
-const rewire = require('rewire');
-const { errors } = require('../../lib/utils');
-const core = rewire('../../lib/core');
 
+const rewire = require('rewire');
+const EvervaultClient = rewire('../lib');
 const encryptStub = sinon.stub();
-core.__set__({
+EvervaultClient.__set__({
   Crypto: () => ({
     encrypt: encryptStub,
   }),
 });
+const { errors } = require('../lib/utils');
+
 const cageName = 'test-cage',
   testData = { a: 1 };
 const testCageKey = 'im-the-cage-key';
+const testApiKey = 'test-api-key';
 
-describe('Core exports', () => {
-  context('Given a valid config', () => {
-    it('returns the expected object', () => {
-      const sdk = core(testConfig);
+const prepareSdkImport = (...args) => () => {
+  return new EvervaultClient(...args);
+};
+
+describe('Initialising the sdk', () => {
+  context('No api key provided', () => {
+    it('throws an error', () => {
+      expect(prepareSdkImport()).to.throw(errors.InitializationError);
+    });
+  });
+
+  context('An object is provided instead of an api key', () => {
+    it('throws an error', () => {
+      expect(prepareSdkImport({})).to.throw(errors.InitializationError);
+    });
+  });
+
+  context('An api key is provided', () => {
+    it('returns an sdk object', () => {
+      const sdk = new EvervaultClient('my-api-key');
       expect(sdk.encrypt).to.be.a('function');
       expect(sdk.run).to.be.a('function');
       expect(sdk.encryptAndRun).to.be.a('function');
@@ -32,14 +46,19 @@ describe('Core exports', () => {
   });
 
   context('Invoking returned encrypt', () => {
+    let sdk;
+    beforeEach(() => {
+      sdk = new EvervaultClient(testApiKey);
+    });
+
     afterEach(() => {
       encryptStub.reset();
     });
 
     context('getCageKey fails', () => {
       let cageKeyNock;
-      before(() => {
-        cageKeyNock = nock(testConfig.http.baseUrl, {
+      beforeEach(() => {
+        cageKeyNock = nock(sdk.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,
           },
@@ -49,8 +68,7 @@ describe('Core exports', () => {
       });
 
       it('Throws an error', () => {
-        const { encrypt } = core(testConfig);
-        return encrypt(testData).catch((err) => {
+        return sdk.encrypt(testData).catch((err) => {
           expect(cageKeyNock.isDone()).to.be.true;
           expect(err).to.be.instanceOf(errors.ApiKeyError);
           expect(encryptStub).to.not.have.been.called;
@@ -61,7 +79,7 @@ describe('Core exports', () => {
     context('getCageKey succeeds', () => {
       let cageKeyNock;
       beforeEach(() => {
-        cageKeyNock = nock(testConfig.http.baseUrl, {
+        cageKeyNock = nock(sdk.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,
           },
@@ -72,8 +90,7 @@ describe('Core exports', () => {
       });
 
       it('Calls encrypt with the returned key', () => {
-        const { encrypt } = core(testConfig);
-        return encrypt(testData).then(() => {
+        return sdk.encrypt(testData).then(() => {
           expect(cageKeyNock.isDone()).to.be.true;
           expect(encryptStub).to.have.been.calledWith(
             testCageKey,
@@ -87,22 +104,21 @@ describe('Core exports', () => {
     context('multiple encrypt calls', () => {
       const httpStub = sinon.stub();
       const getCageKeyStub = sinon.stub();
-
+      let sdk;
       before(() => {
         getCageKeyStub.resolves({ key: testCageKey });
         httpStub.returns({ getCageKey: getCageKeyStub });
         encryptStub.resolves(true);
-        core.__set__({
+        EvervaultClient.__set__({
           Http: httpStub,
         });
+        sdk = new EvervaultClient(testApiKey);
       });
 
       it('Only requests the key once', async () => {
-        const { encrypt } = core(testConfig);
-        await encrypt(testData);
+        await sdk.encrypt(testData);
 
-        return encrypt(testData).then(() => {
-          expect(httpStub).to.have.been.calledOnce;
+        return sdk.encrypt(testData).then(() => {
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.always.have.been.calledWith(
             testCageKey,
@@ -119,15 +135,17 @@ describe('Core exports', () => {
     const getCageKeyStub = sinon.stub();
     const runCageStub = sinon.stub();
     const testEncryptResult = true;
+    let sdk;
 
     beforeEach(() => {
       getCageKeyStub.resolves({ key: testCageKey });
       runCageStub.resolves({ result: true });
       httpStub.returns({ getCageKey: getCageKeyStub, runCage: runCageStub });
       encryptStub.resolves(testEncryptResult);
-      core.__set__({
+      EvervaultClient.__set__({
         Http: httpStub,
       });
+      sdk = new EvervaultClient(testApiKey);
     });
 
     afterEach(() => {
@@ -138,9 +156,7 @@ describe('Core exports', () => {
 
     context('First encryption call to sdk', () => {
       it('Calls getCageKey, encrypts the data and runs the cage', () => {
-        const { encryptAndRun } = core(testConfig);
-
-        return encryptAndRun(cageName, testData).then(() => {
+        return sdk.encryptAndRun(cageName, testData).then(() => {
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.have.been.calledOnceWith(
             testCageKey,
