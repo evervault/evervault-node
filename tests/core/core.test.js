@@ -50,7 +50,7 @@ describe('Core exports', () => {
 
       it('Throws an error', () => {
         const { encrypt } = core(testConfig);
-        return encrypt(cageName, testData).catch((err) => {
+        return encrypt(testData).catch((err) => {
           expect(cageKeyNock.isDone()).to.be.true;
           expect(err).to.be.instanceOf(errors.ApiKeyError);
           expect(encryptStub).to.not.have.been.called;
@@ -73,10 +73,9 @@ describe('Core exports', () => {
 
       it('Calls encrypt with the returned key', () => {
         const { encrypt } = core(testConfig);
-        return encrypt(cageName, testData).then(() => {
+        return encrypt(testData).then(() => {
           expect(cageKeyNock.isDone()).to.be.true;
           expect(encryptStub).to.have.been.calledWith(
-            cageName,
             testCageKey,
             testData,
             {}
@@ -100,13 +99,12 @@ describe('Core exports', () => {
 
       it('Only requests the key once', async () => {
         const { encrypt } = core(testConfig);
-        await encrypt(cageName, testData);
+        await encrypt(testData);
 
-        return encrypt(cageName, testData).then(() => {
+        return encrypt(testData).then(() => {
           expect(httpStub).to.have.been.calledOnce;
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.always.have.been.calledWith(
-            cageName,
             testCageKey,
             testData,
             {}
@@ -145,7 +143,6 @@ describe('Core exports', () => {
         return encryptAndRun(cageName, testData).then(() => {
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.have.been.calledOnceWith(
-            cageName,
             testCageKey,
             testData,
             {}
