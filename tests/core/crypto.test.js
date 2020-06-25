@@ -11,7 +11,6 @@ Crypto.__set__({
 
 const testApiKey = 'test-api-key';
 const testConfig = require('../../lib/config')(testApiKey).encryption;
-const testCageName = 'magic-cage';
 
 const encryptedDataExpectations = (encrypted) => {
   expect(encrypted).to.be.a('string');
@@ -31,14 +30,11 @@ describe('Crypto Module', () => {
     const testData = 'testing-data';
 
     it('Returns the encrypted string in the ev string format', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      encryptedDataExpectations(encrypted);
-      const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+      });
     });
   });
 
@@ -56,24 +52,23 @@ describe('Crypto Module', () => {
       context('No fieldsToEncrypt provided', () => {
         const encryptionOptions = { preserveObjectShape: true };
         it('It encrypts every field', () => {
-          const encrypted = testCryptoClient.encrypt(
-            testCageName,
-            testKey,
-            testData,
-            encryptionOptions
-          );
+          return testCryptoClient
+            .encrypt(testKey, testData, encryptionOptions)
+            .then((encrypted) => {
+              expect(Object.keys(encrypted)).to.deep.equal(
+                Object.keys(testData)
+              );
 
-          expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
-
-          Object.keys(encrypted).forEach((objectKey) => {
-            encryptedDataExpectations(encrypted[objectKey]);
-            const { body } = dataHelpers.parseEncryptedData(
-              encrypted[objectKey]
-            );
-            expect(MockCageService.decrypt(body)).to.deep.equal(
-              testData[objectKey]
-            );
-          });
+              Object.keys(encrypted).forEach((objectKey) => {
+                encryptedDataExpectations(encrypted[objectKey]);
+                const { body } = dataHelpers.parseEncryptedData(
+                  encrypted[objectKey]
+                );
+                expect(MockCageService.decrypt(body)).to.deep.equal(
+                  testData[objectKey]
+                );
+              });
+            });
         });
       });
       context('FieldsToEncrypt specified', () => {
@@ -83,29 +78,28 @@ describe('Crypto Module', () => {
           fieldsToEncrypt: testFieldsToEncrypt,
         };
         it('It encrypts only the specified fields', () => {
-          const encrypted = testCryptoClient.encrypt(
-            testCageName,
-            testKey,
-            testData,
-            encryptionOptions
-          );
-
-          expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
-
-          Object.keys(encrypted).forEach((objectKey) => {
-            if (testFieldsToEncrypt.includes(objectKey)) {
-              encryptedDataExpectations(encrypted[objectKey]);
-              const { body } = dataHelpers.parseEncryptedData(
-                encrypted[objectKey]
+          return testCryptoClient
+            .encrypt(testKey, testData, encryptionOptions)
+            .then((encrypted) => {
+              expect(Object.keys(encrypted)).to.deep.equal(
+                Object.keys(testData)
               );
-              return expect(MockCageService.decrypt(body)).to.deep.equal(
-                testData[objectKey]
-              );
-            }
-            return expect(encrypted[objectKey]).to.deep.equal(
-              testData[objectKey]
-            );
-          });
+
+              Object.keys(encrypted).forEach((objectKey) => {
+                if (testFieldsToEncrypt.includes(objectKey)) {
+                  encryptedDataExpectations(encrypted[objectKey]);
+                  const { body } = dataHelpers.parseEncryptedData(
+                    encrypted[objectKey]
+                  );
+                  return expect(MockCageService.decrypt(body)).to.deep.equal(
+                    testData[objectKey]
+                  );
+                }
+                return expect(encrypted[objectKey]).to.deep.equal(
+                  testData[objectKey]
+                );
+              });
+            });
         });
       });
     });
@@ -113,15 +107,13 @@ describe('Crypto Module', () => {
     context('Preserve object shape set to false', () => {
       const encryptionOptions = { preserveObjectShape: false };
       it('Returns the encrypted data as a string', () => {
-        const encrypted = testCryptoClient.encrypt(
-          testCageName,
-          testKey,
-          testData,
-          encryptionOptions
-        );
-        encryptedDataExpectations(encrypted);
-        const { body } = dataHelpers.parseEncryptedData(encrypted);
-        expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+        return testCryptoClient
+          .encrypt(testKey, testData, encryptionOptions)
+          .then((encrypted) => {
+            encryptedDataExpectations(encrypted);
+            const { body } = dataHelpers.parseEncryptedData(encrypted);
+            expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+          });
       });
     });
   });
@@ -131,15 +123,12 @@ describe('Crypto Module', () => {
 
     const testData = Buffer.from('test data in a buffer', 'utf8');
     it('Returns the buffer encrypted as a string', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      encryptedDataExpectations(encrypted);
-      const { body } = dataHelpers.parseEncryptedData(encrypted);
-      const decrypted = MockCageService.decrypt(body);
-      expect(Buffer.from(decrypted)).to.deep.equal(testData);
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        const decrypted = MockCageService.decrypt(body);
+        expect(Buffer.from(decrypted)).to.deep.equal(testData);
+      });
     });
   });
 
@@ -148,14 +137,11 @@ describe('Crypto Module', () => {
     const testData = 42;
 
     it('Returns the data encrypted as a string and it decrypts to a number', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      encryptedDataExpectations(encrypted);
-      const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(body)).to.equal(testData);
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        expect(MockCageService.decrypt(body)).to.equal(testData);
+      });
     });
   });
 
@@ -166,15 +152,12 @@ describe('Crypto Module', () => {
     const testKey = MockCageService.getMockCageKey();
 
     it('Encrypts the function and decrypts it to a stringified function', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      encryptedDataExpectations(encrypted);
-      const { body } = dataHelpers.parseEncryptedData(encrypted);
-      const decrypted = MockCageService.decrypt(body);
-      expect(decrypted).to.equal(testData.toString());
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        const decrypted = MockCageService.decrypt(body);
+        expect(decrypted).to.equal(testData.toString());
+      });
     });
   });
 
@@ -183,14 +166,11 @@ describe('Crypto Module', () => {
     const testKey = MockCageService.getMockCageKey();
 
     it('Encrypts the array and decrypts it to the input data', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      encryptedDataExpectations(encrypted);
-      const { body } = dataHelpers.parseEncryptedData(encrypted);
-      expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        encryptedDataExpectations(encrypted);
+        const { body } = dataHelpers.parseEncryptedData(encrypted);
+        expect(MockCageService.decrypt(body)).to.deep.equal(testData);
+      });
     });
   });
 
@@ -199,11 +179,9 @@ describe('Crypto Module', () => {
     const testKey = MockCageService.getMockCageKey();
 
     it('Throws an error', () => {
-      try {
-        testCryptoClient.encrypt(testCageName, testKey, testData);
-      } catch (err) {
+      return testCryptoClient.encrypt(testKey, testData).catch((err) => {
         expect(err).to.match(/must not be undefined/);
-      }
+      });
     });
   });
 
@@ -212,11 +190,9 @@ describe('Crypto Module', () => {
     const testKey = null;
 
     it('Throws an error', () => {
-      try {
-        testCryptoClient.encrypt(testCageName, testKey, testData);
-      } catch (err) {
+      return testCryptoClient.encrypt(testKey, testData).catch((err) => {
         expect(err).to.match(/No key supplied/);
-      }
+      });
     });
   });
 
@@ -229,20 +205,16 @@ describe('Crypto Module', () => {
     const testKey = MockCageService.getMockCageKey();
 
     it('Encrypts the object including the null values', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
 
-      expect(Object.keys(encrypted)).to.deep.equal(Object.keys(testData));
-
-      Object.keys(encrypted).forEach((objectKey) => {
-        encryptedDataExpectations(encrypted[objectKey]);
-        const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
-        expect(MockCageService.decrypt(body)).to.deep.equal(
-          testData[objectKey]
-        );
+        Object.keys(encrypted).forEach((objectKey) => {
+          encryptedDataExpectations(encrypted[objectKey]);
+          const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
+          expect(MockCageService.decrypt(body)).to.deep.equal(
+            testData[objectKey]
+          );
+        });
       });
     });
   });
@@ -256,19 +228,16 @@ describe('Crypto Module', () => {
     const testKey = MockCageService.getMockCageKey();
 
     it('Encrypts the object including the null values, presists the undefined values', () => {
-      const encrypted = testCryptoClient.encrypt(
-        testCageName,
-        testKey,
-        testData
-      );
-      ['a', 'b'].forEach((objectKey) => {
-        encryptedDataExpectations(encrypted[objectKey]);
-        const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
-        expect(MockCageService.decrypt(body)).to.deep.equal(
-          testData[objectKey]
-        );
+      return testCryptoClient.encrypt(testKey, testData).then((encrypted) => {
+        ['a', 'b'].forEach((objectKey) => {
+          encryptedDataExpectations(encrypted[objectKey]);
+          const { body } = dataHelpers.parseEncryptedData(encrypted[objectKey]);
+          expect(MockCageService.decrypt(body)).to.deep.equal(
+            testData[objectKey]
+          );
+        });
+        expect(encrypted.c).to.deep.equal(testData.c);
       });
-      expect(encrypted.c).to.deep.equal(testData.c);
     });
   });
 });
