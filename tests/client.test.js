@@ -93,7 +93,7 @@ describe('Initialising the sdk', () => {
         return sdk.encrypt(testData).then(() => {
           expect(cageKeyNock.isDone()).to.be.true;
           expect(encryptStub).to.have.been.calledWith(
-            testCageKey,
+            `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
             testData,
             {}
           );
@@ -121,7 +121,7 @@ describe('Initialising the sdk', () => {
         return sdk.encrypt(testData).then(() => {
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.always.have.been.calledWith(
-            testCageKey,
+            `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
             testData,
             {}
           );
@@ -159,7 +159,7 @@ describe('Initialising the sdk', () => {
         return sdk.encryptAndRun(cageName, testData).then(() => {
           expect(getCageKeyStub).to.have.been.calledOnce;
           expect(encryptStub).to.have.been.calledOnceWith(
-            testCageKey,
+            `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
             testData,
             {}
           );
