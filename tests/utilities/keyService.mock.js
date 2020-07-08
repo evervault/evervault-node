@@ -34,14 +34,14 @@ module.exports = () => {
       base64ToBuffer(parsedData.cageData)
     );
 
-    const { encryptedData, keyIv } = parsedData;
+    const { sharedEncryptedData, keyIv } = parsedData;
     const decipher = crypto.createDecipheriv(
       'aes-256-gcm',
       encryptionKey,
       base64ToBuffer(keyIv)
     );
 
-    const dataBuffer = Buffer.from(encryptedData, 'base64');
+    const dataBuffer = Buffer.from(sharedEncryptedData, 'base64');
     const authTagFirstByte = dataBuffer.byteLength - 16;
     const authTag = dataBuffer.slice(authTagFirstByte);
     const trimmedData = dataBuffer.slice(0, authTagFirstByte);
