@@ -185,4 +185,16 @@ describe('Datatypes', () => {
       });
     });
   });
+
+  describe('utf8ToBase64Url', () => {
+    const testString = 'test me boi';
+    it('Base64 url encodes the string', () => {
+      const base64Url = Datatypes.utf8ToBase64Url(testString);
+      expect(base64Url).to.not.contain('+');
+      expect(base64Url).to.not.contain('/');
+      expect(base64Url).to.match(/[a-zA-Z0-9-_=]/);
+      const decoded = Buffer.from(base64Url, 'base64').toString('utf8');
+      expect(decoded).to.equal(testString);
+    });
+  });
 });
