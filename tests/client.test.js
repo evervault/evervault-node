@@ -86,7 +86,9 @@ describe('Initialising the sdk', () => {
         })
           .get('/cages/key')
           .reply(200, { key: testCageKey });
-        encryptStub.resolves(true);
+        encryptStub.resolves({
+          data: 'yes'
+        });
       });
 
       it('Calls encrypt with the returned key', () => {
@@ -108,7 +110,9 @@ describe('Initialising the sdk', () => {
       before(() => {
         getCageKeyStub.resolves({ key: testCageKey });
         httpStub.returns({ getCageKey: getCageKeyStub });
-        encryptStub.resolves(true);
+        encryptStub.resolves({
+          data: 'yes'
+        });
         EvervaultClient.__set__({
           Http: httpStub,
         });
@@ -134,7 +138,9 @@ describe('Initialising the sdk', () => {
     const httpStub = sinon.stub();
     const getCageKeyStub = sinon.stub();
     const runCageStub = sinon.stub();
-    const testEncryptResult = true;
+    const testEncryptResult = {
+      data: 'yes'
+    };
     let sdk;
 
     beforeEach(() => {

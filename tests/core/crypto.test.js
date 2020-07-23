@@ -103,19 +103,6 @@ describe('Crypto Module', () => {
         });
       });
     });
-
-    context('Preserve object shape set to false', () => {
-      const encryptionOptions = { preserveObjectShape: false };
-      it('Returns the encrypted data as a string', () => {
-        return testCryptoClient
-          .encrypt(testKey, testData, encryptionOptions)
-          .then((encrypted) => {
-            encryptedDataExpectations(encrypted);
-            const { body } = dataHelpers.parseEncryptedData(encrypted);
-            expect(MockCageService.decrypt(body)).to.deep.equal(testData);
-          });
-      });
-    });
   });
 
   context('Encrypting buffer', () => {
