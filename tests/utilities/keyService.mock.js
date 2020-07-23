@@ -29,7 +29,6 @@ module.exports = () => {
       {
         key: keyPair.privateKey,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-        oaepHash: 'sha256',
       },
       base64ToBuffer(parsedData.cageData)
     );
