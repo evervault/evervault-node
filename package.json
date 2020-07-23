@@ -1,7 +1,7 @@
 {
-  "name": "evervault-node-sdk",
-  "version": "0.1.0",
-  "description": "Node.js SDK for running evervault cages",
+  "name": "@evervault/sdk",
+  "version": "1.0.0",
+  "description": "Node.js SDK for working with evervault cages",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha 'tests/**/*.test.js'",
