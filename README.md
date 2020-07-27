@@ -42,7 +42,7 @@ yarn add @evervault/sdk
 const Evervault = require('@evervault/sdk');
 
 // Initialize the client with your team's api key
-const evervaultClient = new Evervault("API KEY");
+const evervaultClient = new Evervault(<API-KEY>);
 
 // Encrypt your data and run a cage
 const result = await evervaultClient.encryptAndRun("CAGE NAME", { hello: 'World!' });
