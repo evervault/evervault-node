@@ -45,7 +45,7 @@ const Evervault = require('@evervault/sdk');
 const evervaultClient = new Evervault(<API-KEY>);
 
 // Encrypt your data and run a cage
-const result = await evervaultClient.encryptAndRun("CAGE NAME", { hello: 'World!' });
+const result = await evervaultClient.encryptAndRun(<CAGE-NAME>, { hello: 'World!' });
 ```
 
 ## API Reference
