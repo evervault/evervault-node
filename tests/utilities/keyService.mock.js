@@ -22,7 +22,7 @@ module.exports = () => {
     return keyPair.publicKey;
   };
 
-  const decrypt = (data) => {
+  const decrypt = (header, data) => {
     const parsedData = parseBase64ToJson(data);
 
     const encryptionKey = crypto.privateDecrypt(
@@ -54,6 +54,9 @@ module.exports = () => {
     );
     decrypted += decipher.final('utf8');
     try {
+      if (header.datatypes === 'number') {
+        return Number(decrypted);
+      }
       return JSON.parse(decrypted);
     } catch (e) {
       return decrypted;

@@ -197,4 +197,36 @@ describe('Datatypes', () => {
       expect(decoded).to.equal(testString);
     });
   });
+
+  describe('isEncryptable', () => {
+    it('number is encryptable', () => {
+      expect(Datatypes.isEncryptable(1)).to.be.true;
+    });
+
+    it('undefined isnt encryptable', () => {
+      expect(Datatypes.isEncryptable(undefined)).to.be.false;
+    });
+
+    it('object isnt encryptable', () => {
+      expect(Datatypes.isEncryptable({})).to.be.false;
+    });
+  });
+
+  describe('getHeaderType', () => {
+    it('undefined objects return nothing', () => {
+      expect(Datatypes.getHeaderType(undefined)).to.be.undefined;
+    });
+
+    it('array returns "Array"', () => {
+      expect(Datatypes.getHeaderType([1, 2, 3])).to.equal('Array');
+    });
+
+    it('number returns "number"', () => {
+      expect(Datatypes.getHeaderType(1)).to.equal('number');
+    });
+
+    it('string returns "string"', () => {
+      expect(Datatypes.getHeaderType('test')).to.equal('string');
+    });
+  });
 });
