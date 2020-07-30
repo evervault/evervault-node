@@ -1,6 +1,6 @@
 {
   "name": "@evervault/sdk",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Node.js SDK for working with evervault cages",
   "main": "lib/index.js",
   "scripts": {
@@ -23,6 +23,11 @@
   },
   "homepage": "https://github.com/evervault/evervault-node-sdk#readme",
   "dependencies": {
+    "escodegen": "^1.14.3",
+    "esprima": "^4.0.1",
+    "haikunator": "^2.1.2",
+    "konan": "^2.1.1",
+    "lodash": "^4.17.19",
     "phin": "^3.5.0",
     "uuid": "^8.1.0"
   },
