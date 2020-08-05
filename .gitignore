@@ -108,3 +108,5 @@ dist
 
 # VSCode
 .vscode/
+
+.debug
