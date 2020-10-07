@@ -1,0 +1,22 @@
+{
+  "type": "cage-lock",
+  "updatedAt": "2020-10-07T16:21:06.224Z",
+  "cages": {
+    "my": {
+      "deployedBy": "shane@evervault.com",
+      "deployedTeam": {
+        "name": "Evervault (59a96deeef03)",
+        "id": "59a96deeef03"
+      },
+      "cageHash": "9viq1vrVjFr+myGfHS2WGkGISXIoXtoajb3H0UHFXkI=",
+      "cageName": "my",
+      "cageVersion": "13",
+      "deployedAt": "Wed Oct 07 2020 17:21:06 GMT+0100 (Irish Standard Time)"
+    }
+  },
+  "lastUpdatedBy": "shane@evervault.com",
+  "lastUpdatedTeam": {
+    "name": "Evervault (59a96deeef03)",
+    "id": "59a96deeef03"
+  }
+}
