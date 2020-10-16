@@ -78,8 +78,8 @@ describe('Http Module', () => {
         const testResponse = { test: 'data' };
         let runCageNock;
         before(() => {
-          runCageNock = setupNock()
-            .post(`/cages/${testCage}`)
+          runCageNock = setupNock('https://cage.run')
+            .post(`/${testCage}`)
             .reply(200, testResponse);
         });
         it('It posts to the cage name with the api key', () => {
@@ -96,8 +96,8 @@ describe('Http Module', () => {
         let runCageNock;
         const testResponse = { errorType: 'NotFound' };
         before(() => {
-          runCageNock = setupNock()
-            .post(`/cages/${testCage}`)
+          runCageNock = setupNock('https://cage.run')
+            .post(`/${testCage}`)
             .reply(404, testResponse);
         });
         it('It throws an error', () => {
