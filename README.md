@@ -57,7 +57,16 @@ async evervaultClient.run(cageName: String, payload: Object);
 | --------- | ---- | ----------- |
 | cageName | String | Name of the Cage to be run |
 | data | Object | Payload for the Cage |
-| options | Object | Options for the Cage run |
+| options | Object | [Options for the Cage run](#Cage-Run-Options) |
+
+#### Cage Run Options
+
+Options to control how your Cage is run
+
+| Option | Default | Description |
+| ------ | ------- | ----------- |
+| async | false | Run your Cage in async mode. Cage runs will be queued and processed asynchronously. |
+| version | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
 #### evervaultClient.encryptAndRun
 
@@ -71,12 +80,3 @@ async evervaultClient.encryptAndRun(cageName: String, data: Object, options: Obj
 | --------- | ---- | ----------- |
 | cageName | String | Name of the cage to be run |
 | data | Object | Data to be encrypted |
-
-#### Cage Run Options
-
-Options to control how your Cage is run
-
-| Option | Default | Description |
-| ------ | ------- | ----------- |
-| async | false | Run your Cage in async mode. Cage runs will be queued and processed asynchronously. |
-| version | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
