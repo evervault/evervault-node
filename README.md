@@ -50,7 +50,7 @@ async evervaultClient.encrypt(data: Object | String);
 Run lets you invoke your Evervault cages with a given payload.
 
 ```javascript
-async evervaultClient.run(cageName: String, payload: Object);
+async evervaultClient.run(cageName: String, payload: Object, options?: Object);
 ```
 
 | Parameter | Type | Description |
@@ -73,10 +73,11 @@ Options to control how your Cage is run
 Encrypt your data and use it as the payload to invoke the Cage.
 
 ```javascript
-async evervaultClient.encryptAndRun(cageName: String, data: Object, options: Object);
+async evervaultClient.encryptAndRun(cageName: String, data: Object, options?: Object);
 ```
 
 | Parameter | Type | Description |
 | --------- | ---- | ----------- |
 | cageName | String | Name of the cage to be run |
 | data | Object | Data to be encrypted |
+| options | Object | [Options for the Cage run](#Cage-Run-Options) |
