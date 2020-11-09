@@ -68,16 +68,3 @@ Options to control how your Cage is run
 | async | false | Run your Cage in async mode. Cage runs will be queued and processed asynchronously. |
 | version | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
-### evervaultClient.encryptAndRun
-
-Encrypt your data and use it as the payload to invoke the Cage.
-
-```javascript
-async evervaultClient.encryptAndRun(cageName: String, data: Object, options?: Object);
-```
-
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| cageName | String | Name of the cage to be run |
-| data | Object | Data to be encrypted |
-| options | Object | [Options for the Cage run](#Cage-Run-Options) |
