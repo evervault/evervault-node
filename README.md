@@ -63,8 +63,8 @@ async evervaultClient.run(cageName: String, payload: Object, options?: Object);
 
 Options to control how your Cage is run
 
-| Option | Default | Description |
-| ------ | ------- | ----------- |
-| async | false | Run your Cage in async mode. Cage runs will be queued and processed asynchronously. |
-| version | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| async | Boolean | false | Run your Cage in async mode. Async Cage runs will be queued for processing. |
+| version | Number | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
