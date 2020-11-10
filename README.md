@@ -1,6 +1,6 @@
 # Evervault Node SDK
 
-The Node.js SDK for working with Evervault cages.
+The Node.js SDK for working with Evervault Cages.
 
 ### Prerequisites
 
@@ -67,4 +67,3 @@ Options to control how your Cage is run
 | ------ | ---- | ------- | ----------- |
 | async | Boolean | false | Run your Cage in async mode. Async Cage runs will be queued for processing. |
 | version | Number | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
-
