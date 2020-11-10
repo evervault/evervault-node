@@ -1,34 +1,14 @@
-# evervault node sdk
+# Evervault Node SDK
 
-The Node.js SDK for working with evervault cages.
+The Node.js SDK for working with Evervault Cages.
 
-## Table of Contents
+### Prerequisites
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Setup](#setup)
-- [API Reference](#api-reference)
-    - [evervaultClient.encrypt](#evervaultclientencrypt)
-    - [evervaultClient.run](#evervaultclientrun)
-    - [evervaultClient.encryptAndRun](#evervaultclientencryptandrun)
-    - [Encryption Options](#encryption-options)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## Getting Started
-
-#### Prerequisites
-
-To get started with the evervault Node.js SDK, you will need to have created a team on the evervault dashboard.
+To get started with the Evervault Node.js SDK, you will need to have created a team on the Evervault Dashboard.
 
 We are currently in invite-only early access. You can apply for early access [here](https://evervault.com).
 
-#### Installation
+### Installation
 
 ```sh
 npm install --save @evervault/sdk
@@ -36,64 +16,54 @@ npm install --save @evervault/sdk
 yarn add @evervault/sdk
 ```
 
-#### Setup
+### Setup
 
 ```js
 const Evervault = require('@evervault/sdk');
 
 // Initialize the client with your team's api key
-const evervaultClient = new Evervault(<API-KEY>);
+const evervaultClient = new Evervault('<API-KEY>');
 
-// Encrypt your data and run a cage
-const result = await evervaultClient.encryptAndRun(<CAGE-NAME>, { hello: 'World!' });
+// Encrypt your sensitive data
+const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
+
+// Process the encrypted data in a Cage
+const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
 ```
 
 ## API Reference
 
-#### evervaultClient.encrypt
+### evervaultClient.encrypt
 
-Encrypt lets you encrypt data for use in any of your evervault cages. You can use it to store encrypted data to be used in a cage at another time.
+Encrypt lets you encrypt data for use in any of your Evervault Cages. You can use it to store encrypted data to be used in a Cage at another time.
 
 ```javascript
-async evervaultClient.encrypt(data: Object | String, options?: Object);
+async evervaultClient.encrypt(data: Object | String);
 ```
 
 | Parameter | Type | Description |
 | --------- | ---- | ----------- |
 | data | Object or String | Data to be encrypted |
-| options | Object | [Standard evervault encryption options](#Encryption-Options) |
 
-#### evervaultClient.run
+### evervaultClient.run
 
-Run lets you invoke your evervault cages with a given payload.
+Run lets you invoke your Evervault Cages with a given payload.
 
 ```javascript
-async evervaultClient.run(cageName: String, payload: Object);
+async evervaultClient.run(cageName: String, payload: Object, options?: Object);
 ```
 
 | Parameter | Type | Description |
 | --------- | ---- | ----------- |
-| cageName | String | Name of the cage to be run |
-| data | Object | Payload for the cage |
+| cageName | String | Name of the Cage to be run |
+| data | Object | Payload for the Cage |
+| options | Object | [Options for the Cage run](#Cage-Run-Options) |
 
-#### evervaultClient.encryptAndRun
+#### Cage Run Options
 
-Encrypt your data and use it as the payload to invoke the cage.
+Options to control how your Cage is run
 
-```javascript
-async evervaultClient.encryptAndRun(cageName: String, data: Object, options: Object);
-```
-
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| cageName | String | Name of the cage to be run |
-| data | Object | Data to be encrypted |
-| options | Object | [Standard evervault encryption options](#Encryption-Options) |
-
-#### Encryption Options
-
-Options to control how your data is encrypted.
-
-| Option | Default | Description |
-| --------- | ---- | ----------- |
-| fieldsToEncrypt | All keys | If the data is an object, fieldsToEncrypt specifies the keys to encrypt. |
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| async | Boolean | false | Run your Cage in async mode. Async Cage runs will be queued for processing. |
+| version | Number | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
