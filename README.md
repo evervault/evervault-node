@@ -4,7 +4,7 @@ The Node.js SDK for working with Evervault Cages.
 
 ### Prerequisites
 
-To get started with the Evervault Node.js SDK, you will need to have created a team on the Evervault dashboard.
+To get started with the Evervault Node.js SDK, you will need to have created a team on the Evervault Dashboard.
 
 We are currently in invite-only early access. You can apply for early access [here](https://evervault.com).
 
