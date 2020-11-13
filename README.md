@@ -43,7 +43,7 @@ const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
 
 ## Reference
 
-At present, there are three functions available in the Node.js SDK: `evervault.encrypt()`,`evervault.run()`, and `evervault.cagify`.
+The Evervault Node.js SDK exposes three functions.
 
 
 ### evervault.encrypt()
