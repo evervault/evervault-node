@@ -1,14 +1,22 @@
-# Evervault Node SDK
+[![Evervault](https://evervault.com/evervault.svg)](https://welcome.evervault.com/)
 
-The Node.js SDK for working with Evervault Cages.
+# Evervault Node.js SDK
 
-### Prerequisites
+The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Cages.
 
-To get started with the Evervault Node.js SDK, you will need to have created a team on the Evervault Dashboard.
+## Getting Started
 
-We are currently in invite-only early access. You can apply for early access [here](https://evervault.com).
+Before starting with the Evervault Node.js SDK, you will need to [create an account](https://app.evervault.com/register) and a team.
 
-### Installation
+For full installation support, [book time here](https://calendly.com/evervault/cages-onboarding).
+
+## Documentation
+
+See the Evervault [Node.js SDK documentation](https://docs.evervault.com/nodejs).
+
+## Installation
+
+Our Node.js SDK is distributed via [npm](https://www.npmjs.com/), and can be installed using your preferred package manager.
 
 ```sh
 npm install --save @evervault/sdk
@@ -16,7 +24,9 @@ npm install --save @evervault/sdk
 yarn add @evervault/sdk
 ```
 
-### Setup
+## Setup
+
+To make Evervault available for use in your app:
 
 ```js
 const Evervault = require('@evervault/sdk');
@@ -31,26 +41,29 @@ const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
 const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
 ```
 
-## API Reference
+## Reference
 
-### evervaultClient.encrypt
+The Evervault Node.js SDK exposes three functions.
 
-Encrypt lets you encrypt data for use in any of your Evervault Cages. You can use it to store encrypted data to be used in a Cage at another time.
+
+### evervault.encrypt()
+
+`evervault.encrypt()`encrypts data for use in your [Cages](https://docs.evervault.com/tutorial). To encrypt data at the server, simply pass an object or string into the evervault.encrypt() function. Store the encrypted data in your database as normal.
 
 ```javascript
-async evervaultClient.encrypt(data: Object | String);
+async evervault.encrypt(data: Object | String);
 ```
 
 | Parameter | Type | Description |
 | --------- | ---- | ----------- |
-| data | Object or String | Data to be encrypted |
+| data | Object or String | Data to be encrypted. |
 
-### evervaultClient.run
+### evervault.run()
 
-Run lets you invoke your Evervault Cages with a given payload.
+`evervault.run()` invokes a Cage with a given payload.
 
 ```javascript
-async evervaultClient.run(cageName: String, payload: Object, options?: Object);
+async evervault.run(cageName: String, payload: Object[, options: Object]);
 ```
 
 | Parameter | Type | Description |
@@ -67,3 +80,27 @@ Options to control how your Cage is run
 | ------ | ---- | ------- | ----------- |
 | async | Boolean | false | Run your Cage in async mode. Async Cage runs will be queued for processing. |
 | version | Number | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
+
+### evervault.cagify()
+
+`evervault.cagify()` lets you deploy and run ordinary Node.js functions as Cages, inline.
+
+This function will automatically deploy a function as a Cage and return a native async Node.js function that accepts the original parameters, but which invokes a Cage when run.
+
+**Note:** `evervault.cagify()` is a synchronous function and will block your event loop if no cage-lock.json file is present for the Caged functions.
+
+```javascript
+evervault.cagify(cageName: String, cageFunction: Function);
+```
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| cageName | String | Name of the Cage to be run |
+| cageFunction | Function | The function to deploy as a Cage |
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-node.
+
+## Feedback
+
+Questions or feedback? [Let us know](mailto:support@evervault.com).
