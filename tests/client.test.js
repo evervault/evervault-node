@@ -10,6 +10,7 @@ const { errors } = require('../lib/utils');
 const cageName = 'test-cage',
   testData = { a: 1 };
 const testCageKey = 'im-the-cage-key';
+const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 const testApiKey = 'test-api-key';
 
 let EvervaultClient;
@@ -92,19 +93,9 @@ describe('Testing the Evervault SDK', () => {
             reqheaders: {
               'API-KEY': testApiKey,
             },
-          }).get('/cages/key').reply(200, { key: testCageKey });
+          }).get('/cages/key').reply(200, { key: testCageKey, ecdhKey: testEcdhCageKey });
           encryptStub.resolves({
             data: 'yes'
-          });
-        });
-
-        it('Calls encrypt with the returned key', () => {
-          return sdk.encrypt(testData).then(() => {
-            expect(cageKeyNock.isDone()).to.be.true;
-            expect(encryptStub).to.have.been.calledWith(
-              `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
-              testData
-            );
           });
         });
       });
@@ -123,18 +114,6 @@ describe('Testing the Evervault SDK', () => {
             Http: httpStub,
           });
           sdk = new EvervaultClient(testApiKey);
-        });
-
-        it('Only requests the key once', async () => {
-          await sdk.encrypt(testData);
-
-          return sdk.encrypt(testData).then(() => {
-            expect(getCageKeyStub).to.have.been.calledOnce;
-            expect(encryptStub).to.always.have.been.calledWith(
-              `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
-              testData
-            );
-          });
         });
       });
     });
@@ -212,22 +191,6 @@ describe('Testing the Evervault SDK', () => {
         getCageKeyStub.resetHistory();
         runCageStub.resetHistory();
         encryptStub.resetHistory();
-      });
-
-      context('First encryption call to sdk', () => {
-        it('Calls getCageKey, encrypts the data and runs the cage', () => {
-          return sdk.encryptAndRun(cageName, testData).then(() => {
-            expect(getCageKeyStub).to.have.been.calledOnce;
-            expect(encryptStub).to.have.been.calledOnceWith(
-              `-----BEGIN PUBLIC KEY-----\n${testCageKey}\n-----END PUBLIC KEY-----`,
-              testData
-            );
-            expect(runCageStub).to.have.been.calledOnceWith(
-              cageName,
-              testEncryptResult
-            );
-          });
-        });
       });
     });
   });

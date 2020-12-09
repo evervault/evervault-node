@@ -217,8 +217,8 @@ describe('Datatypes', () => {
       expect(Datatypes.getHeaderType(undefined)).to.be.undefined;
     });
 
-    it('array returns "Array"', () => {
-      expect(Datatypes.getHeaderType([1, 2, 3])).to.equal('Array');
+    it('array returns "array"', () => {
+      expect(Datatypes.getHeaderType([1, 2, 3])).to.equal('array');
     });
 
     it('number returns "number"', () => {
