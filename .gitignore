@@ -110,3 +110,6 @@ dist
 .vscode/
 
 .debug
+
+# MAC
+*.DS_Store
