@@ -14,6 +14,13 @@ describe('Datatypes', () => {
         expect(Datatypes.isArray(0)).to.be.false;
       });
     });
+
+    context('Data is null or undefined', () => {
+      it('returns false', () => {
+        expect(Datatypes.isArray(null)).to.be.false;
+        expect(Datatypes.isArray(undefined)).to.be.false;
+      });
+    })
   });
 
   describe('isObject', () => {
