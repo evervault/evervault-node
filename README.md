@@ -99,7 +99,7 @@ evervault.cagify(cageName: String, cageFunction: Function);
 
 ### Outbound Relay
 
-You may configure the SDK to automatically route all outbound HTTPS traffic through [Relay](https://docs.evervault.com/product/relay) by setting `relay` to `true` in the initialization options.
+You may configure the SDK to automatically route all outbound HTTPS requests through [Relay](https://docs.evervault.com/product/relay) by setting `relay` to `true` in the initialization options.
 
 ```javascript
 const evervaultClient = new Evervault('<API-KEY>', { relay: true });
