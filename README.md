@@ -97,6 +97,14 @@ evervault.cagify(cageName: String, cageFunction: Function);
 | cageName | String | Name of the Cage to be run |
 | cageFunction | Function | The function to deploy as a Cage |
 
+### Outbound Relay
+
+You may configure the SDK to automatically route all outbound HTTPS traffic through [Relay](https://docs.evervault.com/product/relay) by setting `relay` to `true` in the initialization options.
+
+```javascript
+const evervaultClient = new Evervault('<API-KEY>', { relay: true });
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-node.
