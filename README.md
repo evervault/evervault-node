@@ -110,7 +110,7 @@ You may also optionally pass in an array of domains which you **don't** want to 
 ```javascript
 const evervaultClient = new Evervault(
     '<API-KEY>',
-    { relay: true , ignoreDomains: ['httpbin.org', 'www.facebook.com'] }
+    { relay: true , ignoreDomains: ['httpbin.org', 'facebook.com'] }
 );
 // requests sent to urls such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
 ```
