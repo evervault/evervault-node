@@ -112,7 +112,7 @@ const evervaultClient = new Evervault(
     '<API-KEY>',
     { relay: true , ignoreDomains: ['httpbin.org', 'facebook.com'] }
 );
-// requests sent to urls such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
+// Requests sent to URLs such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
 ```
 
 ## Contributing
