@@ -78,7 +78,7 @@ describe('Http Module', () => {
         const testResponse = { test: 'data' };
         let runCageNock;
         before(() => {
-          runCageNock = setupNock('https://cage.run')
+          runCageNock = setupNock('https://run.evervault.com')
             .post(`/${testCage}`)
             .reply(200, testResponse);
         });
@@ -96,7 +96,7 @@ describe('Http Module', () => {
         let runCageNock;
         const testResponse = { errorType: 'NotFound' };
         before(() => {
-          runCageNock = setupNock('https://cage.run')
+          runCageNock = setupNock('https://run.evervault.com')
             .post(`/${testCage}`)
             .reply(404, testResponse);
         });
