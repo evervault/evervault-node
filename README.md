@@ -97,22 +97,21 @@ evervault.cagify(cageName: String, cageFunction: Function);
 | cageName | String | Name of the Cage to be run |
 | cageFunction | Function | The function to deploy as a Cage |
 
-### Outbound Relay
+### Disable Relay interception on requests to specfic domains
 
-You may configure the SDK to automatically route all outbound HTTPS requests through [Relay](https://docs.evervault.com/product/relay) by setting `relay` to `true` in the initialization options. Note: Cage runs will not be sent through Relay; your data will be decrypted as it enters the Cage.
+You may pass in an array of domains which you **don't** want to be intercepted by Relay, i.e. requests sent to these domains will not go through Relay, and hence will not be decrypted. This array is passed in the `ignoreDomains` option.
 
 ```javascript
-const evervaultClient = new Evervault('<API-KEY>', { relay: true });
+const evervaultClient = new Evervault('<API-KEY>', { ignoreDomains: ['httpbin.org', 'facebook.com'] });
+// Requests sent to URLs such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
 ```
 
-You may also optionally pass in an array of domains which you **don't** want to go through Relay, i.e. requests sent to these domains will not be decrypted.
+### Disable Relay interception on all requests
+
+To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK. 
 
 ```javascript
-const evervaultClient = new Evervault(
-    '<API-KEY>',
-    { relay: true , ignoreDomains: ['httpbin.org', 'facebook.com'] }
-);
-// Requests sent to URLs such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
+const evervault = new Evervault('<API-KEY>', { intercept: false });
 ```
 
 ## Contributing
