@@ -107,8 +107,7 @@ const evervaultClient = new Evervault('<API-KEY>', { ignoreDomains: ['httpbin.or
 ```
 
 ### Disable Relay interception on all requests
-
-To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK. 
+To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK.
 
 ```javascript
 const evervault = new Evervault('<API-KEY>', { intercept: false });
