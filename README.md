@@ -97,7 +97,7 @@ evervault.cagify(cageName: String, cageFunction: Function);
 | cageName | String | Name of the Cage to be run |
 | cageFunction | Function | The function to deploy as a Cage |
 
-### Disable Relay interception on requests to specfic domains
+### Disable interception on requests to specific domains
 
 You may pass in an array of domains which you **don't** want to be intercepted by Relay, i.e. requests sent to these domains will not go through Relay, and hence will not be decrypted. This array is passed in the `ignoreDomains` option.
 
