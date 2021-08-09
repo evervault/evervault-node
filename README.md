@@ -108,6 +108,7 @@ const evervaultClient = new Evervault('<API-KEY>', {
 ```
 
 ### Disable interception on all requests
+
 To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK.
 
 ```javascript
