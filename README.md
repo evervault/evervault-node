@@ -2,7 +2,7 @@
 
 # Evervault Node.js SDK
 
-The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Cages.
+The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Cages. By default, initializing the SDK will result in all outbound HTTPS requests being intercepted and decrypted.
 
 ## Getting Started
 
@@ -97,22 +97,21 @@ evervault.cagify(cageName: String, cageFunction: Function);
 | cageName | String | Name of the Cage to be run |
 | cageFunction | Function | The function to deploy as a Cage |
 
-### Outbound Relay
+### Disable interception on requests to specific domains
 
-You may configure the SDK to automatically route all outbound HTTPS requests through [Relay](https://docs.evervault.com/product/relay) by setting `relay` to `true` in the initialization options. Note: Cage runs will not be sent through Relay; your data will be decrypted as it enters the Cage.
+You may pass in an array of domains which you **don’t** want to be intercepted, i.e. requests sent to these domains will not be intercepted, and hence not decrypted. This array is passed in the `ignoreDomains` option.
 
 ```javascript
-const evervaultClient = new Evervault('<API-KEY>', { relay: true });
+const evervaultClient = new Evervault('<API-KEY>', {
+  ignoreDomains: ['httpbin.org', 'facebook.com'], // requests to these domains will not be sent thorough Relay
+});
 ```
 
-You may also optionally pass in an array of domains which you **don't** want to go through Relay, i.e. requests sent to these domains will not be decrypted.
+### Disable interception on all requests
+To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK.
 
 ```javascript
-const evervaultClient = new Evervault(
-    '<API-KEY>',
-    { relay: true , ignoreDomains: ['httpbin.org', 'facebook.com'] }
-);
-// Requests sent to URLs such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
+const evervault = new Evervault('<API-KEY>', { intercept: false });
 ```
 
 ## Contributing
