@@ -102,8 +102,9 @@ evervault.cagify(cageName: String, cageFunction: Function);
 You may pass in an array of domains which you **don’t** want to be intercepted, i.e. requests sent to these domains will not be intercepted, and hence not decrypted. This array is passed in the `ignoreDomains` option.
 
 ```javascript
-const evervaultClient = new Evervault('<API-KEY>', { ignoreDomains: ['httpbin.org', 'facebook.com'] });
-// Requests sent to https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
+const evervaultClient = new Evervault('<API-KEY>', {
+  ignoreDomains: ['httpbin.org', 'facebook.com'], // requests to these domains will not be sent thorough Relay
+});
 ```
 
 ### Disable interception on all requests
