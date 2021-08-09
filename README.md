@@ -16,7 +16,7 @@ See the Evervault [Node.js SDK documentation](https://docs.evervault.com/sdk/nod
 
 ## Installation
 
-Our Node.js SDK is distributed via [npm](https://www.npmjs.com/), and can be installed using your preferred package manager.
+Our Node.js SDK is distributed via [npm](https://www.npmjs.com/package/@evervault/sdk), and can be installed using your preferred package manager.
 
 ```sh
 npm install --save @evervault/sdk
