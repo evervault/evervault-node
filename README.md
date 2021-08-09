@@ -103,7 +103,7 @@ You may pass in an array of domains which you **don’t** want to be intercepted
 
 ```javascript
 const evervaultClient = new Evervault('<API-KEY>', { ignoreDomains: ['httpbin.org', 'facebook.com'] });
-// Requests sent to URLs such as https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
+// Requests sent to https://httpbin.org/post or https://api.facebook.com will not be sent through Relay
 ```
 
 ### Disable interception on all requests
