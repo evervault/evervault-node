@@ -23,6 +23,7 @@ describe('Testing the Evervault SDK Config', () => {
     process.env.EV_API_URL = undefined;
     process.env.EV_CAGE_RUN_URL = undefined;
     process.env.EV_TUNNEL_HOSTNAME = undefined;
+    process.env.EV_CERT_HOSTNAME = undefined
 
   })
 
@@ -37,6 +38,7 @@ describe('Testing the Evervault SDK Config', () => {
         expect(sdk.config.http.baseUrl).to.equal('https://api.evervault.com');
         expect(sdk.config.http.cageRunUrl).to.equal('https://run.evervault.com');
         expect(sdk.config.http.tunnelHostname).to.equal('https://relay.evervault.com:443');
+        expect(sdk.config.http.certHostname).to.equal('https://ca.evervault.com');
       });
     });
 
@@ -45,15 +47,18 @@ describe('Testing the Evervault SDK Config', () => {
         const relay_url = 'https://custom.url.com';
         const run_url = 'https://custom.run.url.com';
         const tunnel_hostname = 'https://custom.tunnel.url.com';
+        const ca_hostname = 'https://ca.custom.url.com';
 
         process.env.EV_API_URL = relay_url;
         process.env.EV_CAGE_RUN_URL = run_url;
         process.env.EV_TUNNEL_HOSTNAME = tunnel_hostname;
+        process.env.EV_CERT_HOSTNAME = ca_hostname;
 
         const sdk = new EvervaultClient('my-api-key');
         expect(sdk.config.http.baseUrl).to.equal(relay_url);
         expect(sdk.config.http.cageRunUrl).to.equal(run_url);
         expect(sdk.config.http.tunnelHostname).to.equal(tunnel_hostname);
+        xpect(sdk.config.http.certHostname).to.equal(ca_hostname);
       });
     });
   });
