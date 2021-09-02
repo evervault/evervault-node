@@ -29,7 +29,6 @@
     "escodegen": "^1.14.3",
     "esprima": "^4.0.1",
     "haikunator": "^2.1.2",
-    "https-proxy-agent": "^5.0.0",
     "konan": "^2.1.1",
     "lodash": "^4.17.21",
     "phin": "^3.5.0",
