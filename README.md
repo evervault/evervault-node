@@ -45,7 +45,6 @@ const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
 
 The Evervault Node.js SDK exposes three functions.
 
-
 ### evervault.encrypt()
 
 `evervault.encrypt()`encrypts data for use in your [Cages](https://docs.evervault.com/tutorial). To encrypt data at the server, simply pass an object or string into the evervault.encrypt() function. Store the encrypted data in your database as normal.
@@ -54,9 +53,9 @@ The Evervault Node.js SDK exposes three functions.
 async evervault.encrypt(data: Object | String);
 ```
 
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| data | Object or String | Data to be encrypted. |
+| Parameter | Type             | Description           |
+| --------- | ---------------- | --------------------- |
+| data      | Object or String | Data to be encrypted. |
 
 ### evervault.run()
 
@@ -66,20 +65,20 @@ async evervault.encrypt(data: Object | String);
 async evervault.run(cageName: String, payload: Object[, options: Object]);
 ```
 
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| cageName | String | Name of the Cage to be run |
-| data | Object | Payload for the Cage |
-| options | Object | [Options for the Cage run](#Cage-Run-Options) |
+| Parameter | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| cageName  | String | Name of the Cage to be run                    |
+| data      | Object | Payload for the Cage                          |
+| options   | Object | [Options for the Cage run](#Cage-Run-Options) |
 
 #### Cage Run Options
 
 Options to control how your Cage is run
 
-| Option | Type | Default | Description |
-| ------ | ---- | ------- | ----------- |
-| async | Boolean | false | Run your Cage in async mode. Async Cage runs will be queued for processing. |
-| version | Number | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
+| Option  | Type    | Default   | Description                                                                          |
+| ------- | ------- | --------- | ------------------------------------------------------------------------------------ |
+| async   | Boolean | false     | Run your Cage in async mode. Async Cage runs will be queued for processing.          |
+| version | Number  | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
 ### evervault.cagify()
 
@@ -92,9 +91,10 @@ This function will automatically deploy a function as a Cage and return a native
 ```javascript
 evervault.cagify(cageName: String, cageFunction: Function);
 ```
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| cageName | String | Name of the Cage to be run |
+
+| Parameter    | Type     | Description                      |
+| ------------ | -------- | -------------------------------- |
+| cageName     | String   | Name of the Cage to be run       |
 | cageFunction | Function | The function to deploy as a Cage |
 
 ### Disable interception on requests to specific domains
@@ -108,6 +108,7 @@ const evervaultClient = new Evervault('<API-KEY>', {
 ```
 
 ### Disable interception on all requests
+
 To disable all outbound requests being decrypted, you may set the `intercept` option to `false` when initializing the SDK.
 
 ```javascript
