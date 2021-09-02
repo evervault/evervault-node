@@ -28,7 +28,6 @@
   "dependencies": {
     "escodegen": "^1.14.3",
     "esprima": "^4.0.1",
-    "global-agent": "^2.1.12",
     "haikunator": "^2.1.2",
     "https-proxy-agent": "^5.0.0",
     "konan": "^2.1.1",
