@@ -4,6 +4,7 @@
   "description": "Node.js SDK for Evervault",
   "main": "lib/index.js",
   "scripts": {
+    "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'",
     "test:coverage": "nyc --reporter=text npm run test",
     "prepare": "husky install"
