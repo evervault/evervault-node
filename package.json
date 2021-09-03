@@ -4,10 +4,10 @@
   "description": "Node.js SDK for Evervault",
   "main": "lib/index.js",
   "scripts": {
+    "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'",
-    "test:coverage": "nyc --reporter=text npm run test",
-    "prepare": "husky install"
+    "test:coverage": "nyc --reporter=text npm run test"
   },
   "repository": {
     "type": "git",
@@ -38,7 +38,11 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^13.1.0",
+    "@commitlint/config-conventional": "^13.1.0",
     "chai": "^4.2.0",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "^3.2.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "mocha": "^8.2.1",
@@ -57,5 +61,10 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown ."
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
