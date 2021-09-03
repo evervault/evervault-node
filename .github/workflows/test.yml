@@ -3,8 +3,8 @@ name: Test
 on:
   push:
     branches:
-      - "**"
-      - "!master"
+      - '**'
+      - '!master'
 
 jobs:
   run-tests:
@@ -24,9 +24,10 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      
+
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
+      - run: npm run lint
       - run: npm run test:coverage

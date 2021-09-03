@@ -27,12 +27,14 @@ describe('Testing the Evervault SDK', () => {
 
   afterEach(() => {
     encryptStub.reset();
-  })
+  });
 
   context('Initialising the sdk', () => {
-    const prepareSdkImport = (...args) => () => {
-      return new EvervaultClient(...args);
-    };
+    const prepareSdkImport =
+      (...args) =>
+      () => {
+        return new EvervaultClient(...args);
+      };
 
     context('No api key provided', () => {
       it('throws an error', () => {
@@ -72,9 +74,9 @@ describe('Testing the Evervault SDK', () => {
             reqheaders: {
               'API-KEY': testApiKey,
             },
-          }).
-            get('/cages/key').
-            reply(401, { errorMesage: 'error retrieving cage key' });
+          })
+            .get('/cages/key')
+            .reply(401, { errorMesage: 'error retrieving cage key' });
         });
 
         it('Throws an error', () => {
@@ -93,9 +95,11 @@ describe('Testing the Evervault SDK', () => {
             reqheaders: {
               'API-KEY': testApiKey,
             },
-          }).get('/cages/key').reply(200, { key: testCageKey, ecdhKey: testEcdhCageKey });
+          })
+            .get('/cages/key')
+            .reply(200, { key: testCageKey, ecdhKey: testEcdhCageKey });
           encryptStub.resolves({
-            data: 'yes'
+            data: 'yes',
           });
         });
       });
@@ -108,7 +112,7 @@ describe('Testing the Evervault SDK', () => {
           getCageKeyStub.resolves({ key: testCageKey });
           httpStub.returns({ getCageKey: getCageKeyStub });
           encryptStub.resolves({
-            data: 'yes'
+            data: 'yes',
           });
           EvervaultClient.__set__({
             Http: httpStub,
@@ -128,11 +132,13 @@ describe('Testing the Evervault SDK', () => {
       context('Cage run with no options', () => {
         beforeEach(() => {
           testRunResult = {
-            data: 'yes'
+            data: 'yes',
           };
           runNock = nock(sdk.config.http.cageRunUrl, {
             reqheaders: sdk.config.http.headers,
-          }).post(`/${cageName}`).reply(200, { result: testRunResult });
+          })
+            .post(`/${cageName}`)
+            .reply(200, { result: testRunResult });
         });
 
         it('Calls the cage run api', () => {
@@ -146,20 +152,23 @@ describe('Testing the Evervault SDK', () => {
       context('Cage run with options', () => {
         beforeEach(() => {
           testRunResult = {
-            status: 'queued'
+            status: 'queued',
           };
           runNock = nock(sdk.config.http.cageRunUrl, {
             reqheaders: {
               ...sdk.config.http.headers,
               'x-async': 'true',
-              'x-version-id': '3'
+              'x-version-id': '3',
             },
-          }).post(`/${cageName}`).reply(200, { result: testRunResult });
+          })
+            .post(`/${cageName}`)
+            .reply(200, { result: testRunResult });
         });
 
         it('Calls the cage run api', () => {
-          return sdk.run(cageName, testData, { async: true, version: 3 }).
-            then((result) => {
+          return sdk
+            .run(cageName, testData, { async: true, version: 3 })
+            .then((result) => {
               expect(result).to.deep.equal({ result: testRunResult });
               expect(runNock.isDone()).to.be.true;
             });
@@ -172,7 +181,7 @@ describe('Testing the Evervault SDK', () => {
       const getCageKeyStub = sinon.stub();
       const runCageStub = sinon.stub();
       const testEncryptResult = {
-        data: 'yes'
+        data: 'yes',
       };
       let sdk;
 

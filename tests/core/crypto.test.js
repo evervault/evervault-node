@@ -6,14 +6,15 @@ const testApiKey = 'test-api-key';
 const testConfig = require('../../lib/config')(testApiKey).encryption;
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
-
 describe('Crypto Module', () => {
   const testCryptoClient = Crypto(testConfig);
 
   const ecdh = crypto.createECDH(testConfig.ecdhCurve);
   ecdh.generateKeys();
   const publicKey = ecdh.getPublicKey(null, 'compressed').toString('base64');
-  const derivedSecret = ecdh.computeSecret(Buffer.from(testEcdhCageKey, 'base64'));
+  const derivedSecret = ecdh.computeSecret(
+    Buffer.from(testEcdhCageKey, 'base64')
+  );
 
   context('Encrypting object', () => {
     const testData = {
@@ -21,68 +22,74 @@ describe('Crypto Module', () => {
       age: 20,
       array: ['team1', 1],
       dict: {
-          subname: 'subtestname',
-          subnumber: 2
-      }
-    }
+        subname: 'subtestname',
+        subnumber: 2,
+      },
+    };
 
     it('Maintains JSON structure', () => {
-      return testCryptoClient.encrypt(publicKey, derivedSecret, testData).then((res) => {
-        expect('name' in res).to.be.true;
-        expect('dict' in res).to.be.true;
-        expect(typeof(res['dict']) === 'object' && res['dict'] !== null).to.be.true;
-        expect(isEvervaultString(res['dict']['subnumber'], 'number')).to.be.true;
-      })
+      return testCryptoClient
+        .encrypt(publicKey, derivedSecret, testData)
+        .then((res) => {
+          expect('name' in res).to.be.true;
+          expect('dict' in res).to.be.true;
+          expect(typeof res['dict'] === 'object' && res['dict'] !== null).to.be
+            .true;
+          expect(isEvervaultString(res['dict']['subnumber'], 'number')).to.be
+            .true;
+        });
     });
 
     it('Encrypts to Evervault string', () => {
-      return testCryptoClient.encrypt(publicKey, derivedSecret, testData).then((res) => {
-        recursiveIsEvervaultStringFormat(res);
-        expect(isEvervaultString(res['name'], 'string')).to.be.true;
-        expect(isEvervaultString(res['age'], 'number')).to.be.true;
-      })
+      return testCryptoClient
+        .encrypt(publicKey, derivedSecret, testData)
+        .then((res) => {
+          recursiveIsEvervaultStringFormat(res);
+          expect(isEvervaultString(res['name'], 'string')).to.be.true;
+          expect(isEvervaultString(res['age'], 'number')).to.be.true;
+        });
     });
   });
 
   context('Data is undefined', () => {
     it('Throws an error', () => {
-      return testCryptoClient.encrypt(publicKey, derivedSecret, null).catch((err) => {
-        expect(err).to.match(/must not be undefined/);
-      });
+      return testCryptoClient
+        .encrypt(publicKey, derivedSecret, null)
+        .catch((err) => {
+          expect(err).to.match(/must not be undefined/);
+        });
     });
   });
 
   const recursiveIsEvervaultStringFormat = (data) => {
-    if(data !== null && typeof data == "object" ) {
+    if (data !== null && typeof data == 'object') {
       Object.entries(data).forEach(([key, value]) => {
         recursiveIsEvervaultStringFormat(value);
       });
-    }
-    else {
+    } else {
       expect(isEvervaultStringFormat(data)).to.be.true;
     }
-  }
+  };
 
   const isEvervaultString = (data, type) => {
     parts = data.split(':');
-    if(!isEvervaultStringFormat(data)){
+    if (!isEvervaultStringFormat(data)) {
       return false;
     }
-    if(type != 'string' && type != parts[2]){
+    if (type != 'string' && type != parts[2]) {
       return false;
     }
     return true;
-  }
+  };
 
   const isEvervaultStringFormat = (data) => {
     parts = data.split(':');
-    if(parts.length < 6){
+    if (parts.length < 6) {
       return false;
     }
-    if(parts[2] == "number" || parts[2] == "boolean"){
+    if (parts[2] == 'number' || parts[2] == 'boolean') {
       return parts.length == 7;
     }
     return true;
-  }
-
+  };
 });

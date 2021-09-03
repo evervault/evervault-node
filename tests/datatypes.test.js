@@ -20,7 +20,7 @@ describe('Datatypes', () => {
         expect(Datatypes.isArray(null)).to.be.false;
         expect(Datatypes.isArray(undefined)).to.be.false;
       });
-    })
+    });
   });
 
   describe('isObject', () => {
