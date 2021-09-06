@@ -119,6 +119,8 @@ const evervault = new Evervault('<API-KEY>', { intercept: false });
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-node.
 
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
+
 ## Feedback
 
 Questions or feedback? [Let us know](mailto:support@evervault.com).
