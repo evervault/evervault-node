@@ -29,6 +29,7 @@
   "homepage": "https://github.com/evervault/evervault-node#readme",
   "dependencies": {
     "agent-base": "^6.0.2",
+    "async-retry": "^1.3.3",
     "escodegen": "^1.14.3",
     "esprima": "^4.0.1",
     "haikunator": "^2.1.2",
