@@ -43,9 +43,9 @@ describe('Testing the Evervault SDK Config', () => {
         expect(sdk.config.http.tunnelHostname).to.equal(
           'https://relay.evervault.com:443'
         );
-        expect(sdk.config.http.certHostname).to.equal(
-          'https://ca.evervault.com'
-        );
+        expect(sdk.config.http.certHostname).to.deep.equal([
+          'https://ca.evervault.com',
+        ]);
       });
     });
 
@@ -65,7 +65,7 @@ describe('Testing the Evervault SDK Config', () => {
         expect(sdk.config.http.baseUrl).to.equal(relay_url);
         expect(sdk.config.http.cageRunUrl).to.equal(run_url);
         expect(sdk.config.http.tunnelHostname).to.equal(tunnel_hostname);
-        expect(sdk.config.http.certHostname).to.equal(ca_hostname);
+        expect(sdk.config.http.certHostname).to.deep.equal([ca_hostname]);
       });
     });
   });
