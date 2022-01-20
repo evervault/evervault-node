@@ -6,7 +6,7 @@ const testApiKey = 'test-api-key';
 const testConfigSecP256k1 =
   require('../../lib/config')(testApiKey).encryption.secp256k1;
 const testConfigSecP256r1 =
-  require('../../lib/config')(testApiKey).encryption.secp256r1;
+  require('../../lib/config')(testApiKey).encryption.prime256v1;
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
 describe('Crypto Module', () => {
