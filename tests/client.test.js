@@ -6,7 +6,7 @@ const sinon = require('sinon');
 
 const rewire = require('rewire');
 const { errors } = require('../lib/utils');
-const { ForbiddenIPError, DecryptError } = require('../lib/utils/errors')
+const { ForbiddenIPError, DecryptError } = require('../lib/utils/errors');
 
 const cageName = 'test-cage',
   testData = { a: 1 };
@@ -183,14 +183,16 @@ describe('Testing the Evervault SDK', () => {
               ...sdk.config.http.headers,
             },
           })
-          .post(`/${cageName}`)
-          .reply(403, { error: 'forbidden address'  }, { 'x-evervault-error-code': 'forbidden-ip-error' });
+            .post(`/${cageName}`)
+            .reply(
+              403,
+              { error: 'forbidden address' },
+              { 'x-evervault-error-code': 'forbidden-ip-error' }
+            );
         });
 
         it('Calls the cage run api and throws a forbidden ip error', () => {
-          return sdk
-          .run(cageName, testData)
-          .catch((err) => {
+          return sdk.run(cageName, testData).catch((err) => {
             expect(runNock.isDone()).to.be.true;
             expect(err).to.be.instanceOf(ForbiddenIPError);
           });
@@ -207,17 +209,17 @@ describe('Testing the Evervault SDK', () => {
               ...sdk.config.http.headers,
             },
           })
-          .post(`/${cageName}`)
-          .reply(422, { error: 'decrypt failed' } );
+            .post(`/${cageName}`)
+            .reply(422, { error: 'decrypt failed' });
         });
 
         it('Calls the cage run api and throws a decrypt failed error', () => {
           return sdk
-          .run(cageName, testData, { async: true, version: 3 })
-          .catch((err) => {
-            expect(runNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(DecryptError);
-          });
+            .run(cageName, testData, { async: true, version: 3 })
+            .catch((err) => {
+              expect(runNock.isDone()).to.be.true;
+              expect(err).to.be.instanceOf(DecryptError);
+            });
         });
       });
     });

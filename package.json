@@ -61,7 +61,7 @@
     ]
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown ."
+    "**/*.js": "prettier --write --ignore-unknown \"./**/*.js\""
   },
   "config": {
     "commitizen": {
