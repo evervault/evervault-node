@@ -36,6 +36,7 @@
     "konan": "^2.1.1",
     "lodash": "^4.17.21",
     "phin": "^3.5.0",
+    "uasn1": "^0.7.1",
     "uuid": "^8.1.0"
   },
   "devDependencies": {

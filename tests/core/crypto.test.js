@@ -9,6 +9,9 @@ const testConfigSecP256r1 =
   require('../../lib/config')(testApiKey).encryption.prime256v1;
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
+const curveSecp256k1 = 'SECP256K1';
+const curvePrime256v1 = 'PRIME256V1';
+
 describe('Crypto Module', () => {
   const testCryptoClient = Crypto(testConfigSecP256k1);
 
@@ -32,7 +35,13 @@ describe('Crypto Module', () => {
 
     it('Maintains JSON structure', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, testData)
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
         .then((res) => {
           expect('name' in res).to.be.true;
           expect('dict' in res).to.be.true;
@@ -45,7 +54,13 @@ describe('Crypto Module', () => {
 
     it('Encrypts to Evervault string', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, testData)
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
         .then((res) => {
           recursiveIsEvervaultStringFormat(res);
           expect(isEvervaultString(res['name'], 'string')).to.be.true;
@@ -57,7 +72,13 @@ describe('Crypto Module', () => {
   context('Data is undefined', () => {
     it('Throws an error', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, null)
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          null
+        )
         .catch((err) => {
           expect(err).to.match(/must not be undefined/);
         });
@@ -103,8 +124,10 @@ describe('Crypto Module with P256 Curve', () => {
   const ecdh = crypto.createECDH(testConfigSecP256r1.ecdhCurve);
   ecdh.generateKeys();
   const publicKey = ecdh.getPublicKey(null, 'compressed').toString('base64');
-  const derivedSecret = ecdh.computeSecret(
-    Buffer.from(testEcdhCageKey, 'base64')
+  const derivedSecret = testCryptoClient.getSharedSecret(
+    ecdh,
+    Buffer.from(testEcdhCageKey, 'base64'),
+    publicKey
   );
 
   context('Encrypting object', () => {
@@ -120,7 +143,13 @@ describe('Crypto Module with P256 Curve', () => {
 
     it('Maintains JSON structure', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, testData)
+        .encrypt(
+          curvePrime256v1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
         .then((res) => {
           expect('name' in res).to.be.true;
           expect('dict' in res).to.be.true;
@@ -133,7 +162,13 @@ describe('Crypto Module with P256 Curve', () => {
 
     it('Encrypts to Evervault string', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, testData)
+        .encrypt(
+          curvePrime256v1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
         .then((res) => {
           recursiveIsEvervaultStringFormat(res);
           expect(isEvervaultString(res['name'], 'string')).to.be.true;
@@ -145,7 +180,13 @@ describe('Crypto Module with P256 Curve', () => {
   context('Data is undefined', () => {
     it('Throws an error', () => {
       return testCryptoClient
-        .encrypt(publicKey, derivedSecret, null)
+        .encrypt(
+          curvePrime256v1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          null
+        )
         .catch((err) => {
           expect(err).to.match(/must not be undefined/);
         });
