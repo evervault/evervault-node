@@ -262,7 +262,9 @@ describe('Testing the Evervault SDK', () => {
       });
 
       const wasProxied = (result) => {
-        return result.socket?._parent?._host === 'relay.evervault.com';
+        return result.socket._parent
+          ? result.socket._parent._host === 'relay.evervault.com'
+          : false;
       };
 
       it("Doesn't proxy when no proxy args are set", () => {
