@@ -3,6 +3,8 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const nock = require('nock');
 const sinon = require('sinon');
+const phin = require('phin');
+const https = require('https');
 
 const rewire = require('rewire');
 const { errors } = require('../lib/utils');
@@ -248,6 +250,68 @@ describe('Testing the Evervault SDK', () => {
         getCageKeyStub.resetHistory();
         runCageStub.resetHistory();
         encryptStub.resetHistory();
+      });
+    });
+
+    context('Testing outbound decryption', () => {
+      const test_url = 'https://google.com';
+      const originalRequest = https.request;
+
+      afterEach(() => {
+        https.request = originalRequest;
+      });
+
+      const wasProxied = (result) => {
+        return result.socket?._parent?._host === 'relay.evervault.com';
+      };
+
+      it("Doesn't proxy when no proxy args are set", () => {
+        new EvervaultClient('testing');
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.false;
+        });
+      });
+
+      it("Doesn't proxy when intercept is false", () => {
+        new EvervaultClient('testing', { intercept: false });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.false;
+        });
+      });
+
+      it('Proxies all when intercept is true', () => {
+        new EvervaultClient('testing', { intercept: true });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.true;
+        });
+      });
+
+      it('Proxies all when ignoreDomains is present', () => {
+        new EvervaultClient('testing', { ignoreDomains: [''] });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.true;
+        });
+      });
+
+      it("Doesn't proxy domain included in ignoreDomains", () => {
+        new EvervaultClient('testing', { ignoreDomains: ['google.com'] });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.false;
+        });
+      });
+
+      it('Proxies domain included in decryptionDomains', () => {
+        new EvervaultClient('testing', { decryptionDomains: ['google.com'] });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.true;
+        });
+      });
+
+      it("Doesn't proxy domain not in decryptionDomains", () => {
+        new EvervaultClient('testing', { decryptionDomains: [''] });
+        return phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.false;
+        });
       });
     });
   });
