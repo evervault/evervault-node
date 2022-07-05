@@ -103,7 +103,7 @@ You may pass in an array of domains which you **do** want to be intercepted, i.e
 
 ```javascript
 const evervaultClient = new Evervault('<API-KEY>', {
-  decryptionDomains: ['httpbin.org', 'facebook.com'], // requests to these domains will be sent through Relay
+  decryptionDomains: ['httpbin.org', 'api.acme.com'], // requests to these domains will be sent through Relay
 });
 ```
 

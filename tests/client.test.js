@@ -254,7 +254,7 @@ describe('Testing the Evervault SDK', () => {
     });
 
     context('Testing outbound decryption', () => {
-      const test_url = 'https://google.com';
+      const test_url = 'https://evervault.com';
       const originalRequest = https.request;
 
       afterEach(() => {
@@ -296,14 +296,16 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it("Doesn't proxy domain included in ignoreDomains", () => {
-        new EvervaultClient('testing', { ignoreDomains: ['google.com'] });
+        new EvervaultClient('testing', { ignoreDomains: ['evervault.com'] });
         return phin(test_url).then((result) => {
           expect(wasProxied(result)).to.be.false;
         });
       });
 
       it('Proxies domain included in decryptionDomains', () => {
-        new EvervaultClient('testing', { decryptionDomains: ['google.com'] });
+        new EvervaultClient('testing', {
+          decryptionDomains: ['evervault.com'],
+        });
         return phin(test_url).then((result) => {
           expect(wasProxied(result)).to.be.true;
         });
