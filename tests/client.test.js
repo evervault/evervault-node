@@ -311,6 +311,15 @@ describe('Testing the Evervault SDK', () => {
         });
       });
 
+      it('Proxies a wildcard domain included in decryptionDomains', () => {
+        new EvervaultClient('testing', {
+          decryptionDomains: ['*.evervault.com'],
+        });
+        return phin('https://app.evervault.com').then((result) => {
+          expect(wasProxied(result)).to.be.true;
+        });
+      });
+
       it("Doesn't proxy domain not in decryptionDomains", () => {
         new EvervaultClient('testing', { decryptionDomains: [''] });
         return phin(test_url).then((result) => {
