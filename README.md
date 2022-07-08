@@ -99,11 +99,11 @@ evervault.cagify(cageName: String, cageFunction: Function);
 
 ### Enable outbound interception for specific domains
 
-You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option.
+You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option. Wildcards domains are supported.
 
 ```javascript
 const evervaultClient = new Evervault('<API-KEY>', {
-  decryptionDomains: ['httpbin.org', 'api.acme.com'], // requests to these domains will be sent through Relay
+  decryptionDomains: ['httpbin.org', 'api.acme.com', '*.acme.com'], // requests to these domains will be sent through Relay
 });
 ```
 
