@@ -80,6 +80,8 @@ Options to control how your Cage is run
 | async   | Boolean | false     | Run your Cage in async mode. Async Cage runs will be queued for processing.          |
 | version | Number  | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
+### Enable outbound interception for specific domains
+
 You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option. Wildcards domains are supported.
 
 ```javascript
