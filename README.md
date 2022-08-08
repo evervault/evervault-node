@@ -80,23 +80,6 @@ Options to control how your Cage is run
 | async   | Boolean | false     | Run your Cage in async mode. Async Cage runs will be queued for processing.          |
 | version | Number  | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
-### evervault.cagify()
-
-`evervault.cagify()` lets you deploy and run ordinary Node.js functions as Cages, inline.
-
-This function will automatically deploy a function as a Cage and return a native async Node.js function that accepts the original parameters, but which invokes a Cage when run.
-
-**Note:** `evervault.cagify()` is a synchronous function and will block your event loop if no cage-lock.json file is present for the Caged functions.
-
-```javascript
-evervault.cagify(cageName: String, cageFunction: Function);
-```
-
-| Parameter    | Type     | Description                      |
-| ------------ | -------- | -------------------------------- |
-| cageName     | String   | Name of the Cage to be run       |
-| cageFunction | Function | The function to deploy as a Cage |
-
 ### Enable outbound interception for specific domains
 
 You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option. Wildcards domains are supported.
