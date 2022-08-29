@@ -120,8 +120,8 @@ describe('Http Module', () => {
         const testResponse = { test: 'data' };
         let createRunTokenNock;
         before(() => {
-          createRunTokenNock = setupNock('https://run.evervault.com')
-            .post(`/${testCage}/run-token`)
+          createRunTokenNock = setupNock('https://api.evervault.com')
+            .post(`/v2/functions/${testCage}/run-token`)
             .reply(200, testResponse);
         });
         it('It posts to the cage name with the api key', () => {
@@ -138,8 +138,8 @@ describe('Http Module', () => {
         let createRunTokenNock;
         const testResponse = { errorType: 'NotFound' };
         before(() => {
-          createRunTokenNock = setupNock('https://run.evervault.com')
-            .post(`/${testCage}/run-token`)
+          createRunTokenNock = setupNock('https://api.evervault.com')
+            .post(`/v2/functions/${testCage}/run-token`)
             .reply(404, testResponse);
         });
         it('It throws an error', () => {
