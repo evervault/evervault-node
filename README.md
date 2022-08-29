@@ -92,7 +92,7 @@ const evervaultClient = new Evervault('<API-KEY>', {
 
 ### evervault.createRunToken()
 
-`evervault.createRunToken()` creates a run token so a cage can be run without an api key.
+`evervault.createRunToken()` creates a run token so a Cage can be run without an api key.
 
 ```javascript
 async evervault.createRunToken(cageName: String, payload: Object);
