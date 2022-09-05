@@ -112,4 +112,46 @@ describe('Http Module', () => {
       });
     });
   });
+
+  describe('createRunToken', () => {
+    context('Given an api key', () => {
+      const testCage = 'my-magic-cage';
+      context('Request is successful', () => {
+        const testResponse = { test: 'data' };
+        let createRunTokenNock;
+        before(() => {
+          createRunTokenNock = setupNock('https://api.evervault.com')
+            .post(`/v2/functions/${testCage}/run-token`)
+            .reply(200, testResponse);
+        });
+        it('It posts to the cage name with the api key', () => {
+          return testHttpClient
+            .createRunToken(testCage, { test: 'data' })
+            .then((res) => {
+              expect(createRunTokenNock.isDone()).to.be.true;
+              expect(res.body).to.deep.equal(testResponse);
+            });
+        });
+      });
+
+      context('Request fails', () => {
+        let createRunTokenNock;
+        const testResponse = { errorType: 'NotFound' };
+        before(() => {
+          createRunTokenNock = setupNock('https://api.evervault.com')
+            .post(`/v2/functions/${testCage}/run-token`)
+            .reply(404, testResponse);
+        });
+        it('It throws an error', () => {
+          return testHttpClient
+            .createRunToken(testCage, { test: 'data' })
+            .then((res) => {
+              expect(createRunTokenNock.isDone()).to.be.true;
+              expect(res.statusCode).to.equal(404);
+              expect(res.body).to.deep.equal(testResponse);
+            });
+        });
+      });
+    });
+  });
 });

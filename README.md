@@ -90,6 +90,19 @@ const evervaultClient = new Evervault('<API-KEY>', {
 });
 ```
 
+### evervault.createRunToken()
+
+`evervault.createRunToken()` creates a single use, time bound token for invoking a cage.
+
+```javascript
+async evervault.createRunToken(cageName: String, payload: Object);
+```
+
+| Parameter | Type   | Description                                          |
+| --------- | ------ | ---------------------------------------------------- |
+| cageName  | String | Name of the Cage the run token should be created for |
+| data      | Object | Payload that the token can be used with              |
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-node.
