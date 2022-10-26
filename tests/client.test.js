@@ -5,10 +5,16 @@ const nock = require('nock');
 const sinon = require('sinon');
 const phin = require('phin');
 const https = require('https');
-
+const fs = require('fs');
 const rewire = require('rewire');
 const { errors } = require('../lib/utils');
-const { ForbiddenIPError, DecryptError } = require('../lib/utils/errors');
+const {
+  ForbiddenIPError,
+  DecryptError,
+  RelayOutboundConfigError,
+} = require('../lib/utils/errors');
+const fixtures = require('./utilities/fixtures');
+const { assert } = require('console');
 
 const cageName = 'test-cage',
   testData = { a: 1 };
@@ -230,6 +236,7 @@ describe('Testing the Evervault SDK', () => {
       const httpStub = sinon.stub();
       const getCageKeyStub = sinon.stub();
       const runCageStub = sinon.stub();
+      const getRelayOutboundConfigStub = sinon.stub();
       const testEncryptResult = {
         data: 'yes',
       };
@@ -238,7 +245,11 @@ describe('Testing the Evervault SDK', () => {
       beforeEach(() => {
         getCageKeyStub.resolves({ key: testCageKey });
         runCageStub.resolves({ result: true });
-        httpStub.returns({ getCageKey: getCageKeyStub, runCage: runCageStub });
+        httpStub.returns({
+          getCageKey: getCageKeyStub,
+          runCage: runCageStub,
+          getRelayOutboundConfig: getRelayOutboundConfigStub,
+        });
         encryptStub.resolves(testEncryptResult);
         EvervaultClient.__set__({
           Http: httpStub,
@@ -250,28 +261,51 @@ describe('Testing the Evervault SDK', () => {
         getCageKeyStub.resetHistory();
         runCageStub.resetHistory();
         encryptStub.resetHistory();
+        getRelayOutboundConfigStub.resetHistory();
       });
     });
 
     context('Testing outbound decryption', () => {
       const test_url = 'https://evervault.com';
       const originalRequest = https.request;
+      const httpOverloadSpy = sinon.spy();
+      const getRelayOutboundConfigStub = sinon
+        .stub()
+        .resolves(fixtures.relayOutboundResponse);
+
+      beforeEach(() => {
+        EvervaultClient.__set__({
+          Http: () => ({
+            getRelayOutboundConfig: getRelayOutboundConfigStub,
+            getCert: sinon
+              .stub()
+              .returns(
+                fs.readFileSync(`${__dirname}/utilities/ssl-cert-snakeoil.pem`)
+              ),
+          }),
+          httpsHelper: {
+            overloadHttpsModule: httpOverloadSpy,
+          },
+        });
+      });
 
       afterEach(() => {
+        httpOverloadSpy.resetHistory();
         https.request = originalRequest;
       });
 
-      const wasProxied = (result) => {
-        return result.socket._parent
-          ? result.socket._parent._host === 'relay.evervault.com'
-          : false;
+      const wasProxied = () => {
+        return httpOverloadSpy.called;
       };
 
-      it("Doesn't proxy when no proxy args are set", () => {
-        new EvervaultClient('testing');
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.false;
+      it('Starts polling when outbound relay is enabled', async () => {
+        const client = new EvervaultClient('testing', {
+          enableOutboundRelay: true,
         });
+        await phin(test_url).then((result) => {
+          expect(wasProxied(result)).to.be.true;
+        });
+        clearInterval(client.intervalId);
       });
 
       it("Doesn't proxy when intercept is false", () => {
@@ -295,13 +329,6 @@ describe('Testing the Evervault SDK', () => {
         });
       });
 
-      it("Doesn't proxy domain included in ignoreDomains", () => {
-        new EvervaultClient('testing', { ignoreDomains: ['evervault.com'] });
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.false;
-        });
-      });
-
       it('Proxies domain included in decryptionDomains', () => {
         new EvervaultClient('testing', {
           decryptionDomains: ['evervault.com'],
@@ -320,9 +347,27 @@ describe('Testing the Evervault SDK', () => {
         });
       });
 
-      it("Doesn't proxy domain not in decryptionDomains", () => {
-        new EvervaultClient('testing', { decryptionDomains: [''] });
-        return phin(test_url).then((result) => {
+      it('Should handle an error from the API', async () => {
+        EvervaultClient.__set__({
+          Http: () => ({
+            getRelayOutboundConfig: Promise.reject(
+              new RelayOutboundConfigError('502 Bad Request')
+            ),
+            getCert: sinon
+              .stub()
+              .returns(
+                fs.readFileSync(`${__dirname}/utilities/ssl-cert-snakeoil.pem`)
+              ),
+          }),
+          httpsHelper: {
+            overloadHttpsModule: httpOverloadSpy,
+          },
+        });
+        const client = new EvervaultClient('testing', {
+          enableOutboundRelay: true,
+        });
+        await phin('https://app.evervault.com').then((result) => {
+          clearInterval(client.intervalId);
           expect(wasProxied(result)).to.be.false;
         });
       });
