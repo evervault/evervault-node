@@ -154,4 +154,58 @@ describe('Http Module', () => {
       });
     });
   });
+
+  describe('getRelayOutboundConfig', () => {
+    context('Given an api key', () => {
+      context('Request is successful', () => {
+        let getRelayOutboundConfigNock;
+        const testResponse = { test: 'response' };
+        before(() => {
+          getRelayOutboundConfigNock = setupNock()
+            .get('/v2/relay-outbound')
+            .reply(200, testResponse);
+        });
+
+        it('It gets the relay outbound config with the api key', () => {
+          return testHttpClient.getRelayOutboundConfig().then((res) => {
+            expect(getRelayOutboundConfigNock.isDone()).to.be.true;
+            expect(res).to.deep.equal(testResponse);
+          });
+        });
+      });
+      context('Request fails', () => {
+        context('Response is a 401', () => {
+          let getRelayOutboundConfigNock;
+          const testResponse = { errorType: 'Unauthorized' };
+          before(() => {
+            getRelayOutboundConfigNock = setupNock()
+              .get('/v2/relay-outbound')
+              .reply(401, testResponse);
+          });
+
+          it('It gets the relay outbound config with the api key', () => {
+            return testHttpClient.getRelayOutboundConfig().catch((err) => {
+              expect(getRelayOutboundConfigNock.isDone()).to.be.true;
+              expect(err).to.be.instanceOf(errors.ApiKeyError);
+            });
+          });
+        });
+      });
+      context('Request throws an error', () => {
+        let getRelayOutboundConfigNock;
+        before(() => {
+          getRelayOutboundConfigNock = setupNock()
+            .get('/v2/relay-outbound')
+            .replyWithError('An error occurred');
+        });
+        it('Throws a RelayOutboundConfig Error', () => {
+          return testHttpClient.getRelayOutboundConfig().catch((err) => {
+            expect(getRelayOutboundConfigNock.isDone()).to.be.true;
+            console.error(err);
+            expect(err).to.be.instanceOf(errors.RelayOutboundConfigError);
+          });
+        });
+      });
+    });
+  });
 });
