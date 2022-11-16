@@ -80,13 +80,13 @@ Options to control how your Cage is run
 | async   | Boolean | false     | Run your Cage in async mode. Async Cage runs will be queued for processing.          |
 | version | Number  | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
 
-### Enable Outbound Relay for specific domains
+### Enable Outbound interception for specific domains
 
-Outbound Relay will decrypt any Evervault encrypted data sent to a domain that is configured as an Outbound Relay Destination in the [UI](https://app.evervault.com). Setting the `enableOutboundRelay` option to `true` will enable and sync your Outbound Relay destinations with the SDK.
+You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option. Wildcards domains are supported.
 
 ```javascript
 const evervaultClient = new Evervault('<API-KEY>', {
-  enableOutboundRelay: true
+  decryptionDomains: ['httpbin.org', 'api.acme.com', '*.acme.com'], // requests to these domains will be sent through Relay
 });
 ```
 
