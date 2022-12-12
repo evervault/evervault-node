@@ -7,6 +7,7 @@ const phin = require('phin');
 const https = require('https');
 const fs = require('fs');
 const rewire = require('rewire');
+const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
 const {
   ForbiddenIPError,
@@ -15,6 +16,7 @@ const {
 } = require('../lib/utils/errors');
 const fixtures = require('./utilities/fixtures');
 const { assert } = require('console');
+const { doesNotMatch } = require('assert');
 
 const cageName = 'test-cage',
   testData = { a: 1 };
@@ -298,14 +300,31 @@ describe('Testing the Evervault SDK', () => {
         return httpOverloadSpy.called;
       };
 
-      it('Starts polling when outbound relay is enabled', async () => {
-        const client = new EvervaultClient('testing', {
-          enableOutboundRelay: true,
-        });
-        await phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-        clearInterval(client.intervalId);
+      it('Proxies when outbound relay is enabled', async () => {
+        const client = new EvervaultClient('testing');
+        await client.enableOutboundRelay();
+        const result = await phin('https://destination1.evervault.test');
+        expect(wasProxied(result)).to.be.true;
+        RelayOutboundConfig.disablePolling();
+        RelayOutboundConfig.clearCache();
+      });
+
+      it('Proxies when outbound relay is enabled', async () => {
+        const client = new EvervaultClient('testing');
+        await client.enableOutboundRelay();
+        const result = await phin('https://app.evervault.io');
+        expect(wasProxied(result)).to.be.true;
+        RelayOutboundConfig.disablePolling();
+        RelayOutboundConfig.clearCache();
+      });
+
+      it('Proxies when outbound relay is enabled and a wildcard domain is included in the config', async () => {
+        const client = new EvervaultClient('testing');
+        await client.enableOutboundRelay();
+        const result = await phin(test_url);
+        expect(wasProxied(result)).to.be.true;
+        RelayOutboundConfig.disablePolling();
+        RelayOutboundConfig.clearCache();
       });
 
       it("Doesn't proxy when intercept is false", () => {
@@ -349,7 +368,7 @@ describe('Testing the Evervault SDK', () => {
 
       it('Should handle an error from the API', async () => {
         EvervaultClient.__set__({
-          Http: () => ({
+          http: () => ({
             getRelayOutboundConfig: Promise.reject(
               new RelayOutboundConfigError('502 Bad Request')
             ),
@@ -363,13 +382,12 @@ describe('Testing the Evervault SDK', () => {
             overloadHttpsModule: httpOverloadSpy,
           },
         });
-        const client = new EvervaultClient('testing', {
-          enableOutboundRelay: true,
-        });
+        const client = new EvervaultClient('testing');
+        await client.enableOutboundRelay();
         await phin('https://app.evervault.com').then((result) => {
-          clearInterval(client.intervalId);
           expect(wasProxied(result)).to.be.false;
         });
+        RelayOutboundConfig.disablePolling();
       });
     });
   });

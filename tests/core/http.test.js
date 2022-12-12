@@ -160,16 +160,44 @@ describe('Http Module', () => {
       context('Request is successful', () => {
         let getRelayOutboundConfigNock;
         const testResponse = { test: 'response' };
-        before(() => {
+        it('It gets the relay outbound config with the api key', () => {
           getRelayOutboundConfigNock = setupNock()
             .get('/v2/relay-outbound')
-            .reply(200, testResponse);
-        });
-
-        it('It gets the relay outbound config with the api key', () => {
+            .reply(200, testResponse, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'max-age=5, must-revalidate',
+              'X-Poll-Interval': '5',
+            });
           return testHttpClient.getRelayOutboundConfig().then((res) => {
             expect(getRelayOutboundConfigNock.isDone()).to.be.true;
-            expect(res).to.deep.equal(testResponse);
+            expect(res.pollInterval).to.equal(5);
+            expect(res.data).to.deep.equal(testResponse);
+          });
+        });
+        it('It gets the relay outbound config with the api key and the poll interval header in the response is not set', () => {
+          getRelayOutboundConfigNock = setupNock()
+            .get('/v2/relay-outbound')
+            .reply(200, testResponse, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'max-age=5, must-revalidate',
+            });
+          return testHttpClient.getRelayOutboundConfig().then((res) => {
+            expect(getRelayOutboundConfigNock.isDone()).to.be.true;
+            expect(res.pollInterval).to.equal(null);
+            expect(res.data).to.deep.equal(testResponse);
+          });
+        });
+        it('It gets the relay outbound config with the api key and the poll interval header in the response is invalid', () => {
+          getRelayOutboundConfigNock = setupNock()
+            .get('/v2/relay-outbound')
+            .reply(200, testResponse, {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'max-age=5, must-revalidate',
+            });
+          return testHttpClient.getRelayOutboundConfig().then((res) => {
+            expect(getRelayOutboundConfigNock.isDone()).to.be.true;
+            expect(res.pollInterval).to.equal(null);
+            expect(res.data).to.deep.equal(testResponse);
           });
         });
       });

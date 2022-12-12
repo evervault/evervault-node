@@ -37,13 +37,17 @@ const evervaultClient = new Evervault('<API-KEY>');
 // Encrypt your sensitive data
 const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
 
-// Process the encrypted data in a Cage
-const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
+// Process the encrypted data in a Function
+const result = await evervaultClient.run('<FUNCTION_NAME>', encrypted);
+
+// Send the decrypted data to a third-party API
+await evervault.enableOutboundRelay()
+const response = await axios.post('https://example.com', encrypted)
 ```
 
 ## Reference
 
-The Evervault Node.js SDK exposes three functions.
+The Evervault Node.js SDK exposes four functions.
 
 ### evervault.encrypt()
 
@@ -102,6 +106,19 @@ async evervault.createRunToken(cageName: String, payload: Object);
 | --------- | ------ | ---------------------------------------------------- |
 | cageName  | String | Name of the Cage the run token should be created for |
 | data      | Object | Payload that the token can be used with              |
+
+### evervault.enableOutboundRelay()
+
+`evervault.enableOutboundRelay()` configures your application to proxy HTTP requests using Outbound Relay based on the configuration created in the Evervault dashboard. See [Outbound Relay](https://docs.evervault.com/concepts/outbound-relay/overview) to learn more.  
+
+```javascript
+async evervault.enableOutboundRelay([options: Object])
+```
+
+| Option                | Type      | Default     | Description                                                                              |
+| --------------------- | --------- | ----------- | ---------------------------------------------------------------------------------------- |
+| `decryptionDomains`   | `Array`   | `undefined` | Requests sent to any of the domains listed will be proxied through Outbound Relay. This will override the configuration created in the Evervault dashboard. |
+| `debugRequests`       | `Boolean` | `False`     | Output request domains and whether they were sent through Outbound Relay.                |
 
 ## Contributing
 
