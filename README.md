@@ -2,13 +2,13 @@
 
 # Evervault Node.js SDK
 
-The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Cages. By default, initializing the SDK will result in all outbound HTTPS requests being intercepted and decrypted.
+The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Functions. By default, initializing the SDK will result in all outbound HTTPS requests being intercepted and decrypted.
 
 ## Getting Started
 
 Before starting with the Evervault Node.js SDK, you will need to [create an account](https://app.evervault.com/register) and a team.
 
-For full installation support, [book time here](https://calendly.com/evervault/cages-onboarding).
+For full installation support, [book time here](https://calendly.com/evervault/support).
 
 ## Documentation
 
@@ -37,8 +37,8 @@ const evervaultClient = new Evervault('<API-KEY>');
 // Encrypt your sensitive data
 const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
 
-// Process the encrypted data in a Cage
-const result = await evervaultClient.run('<CAGE_NAME>', encrypted);
+// Process the encrypted data in a Function
+const result = await evervaultClient.run('<FUNCTION_NAME>', encrypted);
 ```
 
 ## Reference
@@ -47,7 +47,7 @@ The Evervault Node.js SDK exposes three functions.
 
 ### evervault.encrypt()
 
-`evervault.encrypt()`encrypts data for use in your [Cages](https://docs.evervault.com/tutorial). To encrypt data at the server, simply pass an object or string into the evervault.encrypt() function. Store the encrypted data in your database as normal.
+`evervault.encrypt()`encrypts data for use in your [Functions](https://docs.evervault.com/tutorial). To encrypt data at the server, simply pass an object or string into the evervault.encrypt() function. Store the encrypted data in your database as normal.
 
 ```javascript
 async evervault.encrypt(data: Object | String);
@@ -59,26 +59,39 @@ async evervault.encrypt(data: Object | String);
 
 ### evervault.run()
 
-`evervault.run()` invokes a Cage with a given payload.
+`evervault.run()` invokes a Function with a given payload.
 
 ```javascript
-async evervault.run(cageName: String, payload: Object[, options: Object]);
+async evervault.run(functionName: String, payload: Object[, options: Object]);
 ```
 
 | Parameter | Type   | Description                                   |
 | --------- | ------ | --------------------------------------------- |
-| cageName  | String | Name of the Cage to be run                    |
-| data      | Object | Payload for the Cage                          |
-| options   | Object | [Options for the Cage run](#Cage-Run-Options) |
+| functionName  | String | Name of the Function to be run                    |
+| data      | Object | Payload for the Function                          |
+| options   | Object | [Options for the Function run](#Function-Run-Options) |
 
-#### Cage Run Options
+#### Function Run Options
 
-Options to control how your Cage is run
+Options to control how your Function is run
 
 | Option  | Type    | Default   | Description                                                                          |
 | ------- | ------- | --------- | ------------------------------------------------------------------------------------ |
-| async   | Boolean | false     | Run your Cage in async mode. Async Cage runs will be queued for processing.          |
-| version | Number  | undefined | Specify the version of your Cage to run. By default, the latest version will be run. |
+| async   | Boolean | false     | Run your Function in async mode. Async Function runs will be queued for processing.          |
+| version | Number  | undefined | Specify the version of your Function to run. By default, the latest version will be run. |
+
+### evervault.createRunToken()
+
+`evervault.createRunToken()` creates a single use, time bound token for invoking a Function.
+
+```javascript
+async evervault.createRunToken(functionName: String, payload: Object);
+```
+
+| Parameter     | Type   | Description                                              |
+| ------------- | ------ | -------------------------------------------------------- |
+| functionName  | String | Name of the Function the run token should be created for |
+| data          | Object | Payload that the token can be used with                  |
 
 ### Enable Outbound interception for specific domains
 
@@ -89,19 +102,6 @@ const evervaultClient = new Evervault('<API-KEY>', {
   decryptionDomains: ['httpbin.org', 'api.acme.com', '*.acme.com'], // requests to these domains will be sent through Relay
 });
 ```
-
-### evervault.createRunToken()
-
-`evervault.createRunToken()` creates a single use, time bound token for invoking a cage.
-
-```javascript
-async evervault.createRunToken(cageName: String, payload: Object);
-```
-
-| Parameter | Type   | Description                                          |
-| --------- | ------ | ---------------------------------------------------- |
-| cageName  | String | Name of the Cage the run token should be created for |
-| data      | Object | Payload that the token can be used with              |
 
 ## Contributing
 
