@@ -41,7 +41,7 @@ const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
 const result = await evervaultClient.run('<FUNCTION_NAME>', encrypted);
 
 // Send the decrypted data to a third-party API
-await evervault.enableOutboundRelay()
+await evervaultClient.enableOutboundRelay()
 const response = await axios.post('https://example.com', encrypted)
 ```
 
