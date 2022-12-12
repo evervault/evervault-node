@@ -303,6 +303,29 @@ describe('Testing the Evervault SDK', () => {
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
+      it('Proxies when outbound relay is enabled and debugRequests option is present', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay({ debugRequests: true });
+
+        nockrandom = nock('https://destination1.evervault.test', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
       it('Proxies when outbound relay is enabled and a wildcard domain is included in the config', async () => {
         const client = new EvervaultClient(testApiKey);
         relayOutboundConfigNock = nock(client.config.http.baseUrl, {
@@ -389,6 +412,21 @@ describe('Testing the Evervault SDK', () => {
         const client = new EvervaultClient(testApiKey);
         await client.enableOutboundRelay({
           decryptionDomains: ['destination1.evervault.test'],
+        });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies domain included in decryptionDomains and debugRequests option is present', async () => {
+        const client = new EvervaultClient(testApiKey);
+        await client.enableOutboundRelay({
+          decryptionDomains: ['destination1.evervault.test'],
+          debugRequests: true,
         });
 
         nockrandom = nock('https://destination1.evervault.test', {})
