@@ -11,7 +11,7 @@ describe('OutboundRelayConfig Module', () => {
 
   context('constructor', () => {
     it('retrieves the Outbound Relay Config from the API and starts polling', (done) => {
-      var httpStub = {
+      let httpStub = {
         getRelayOutboundConfig: sinon.stub().resolves({
           data: {
             outboundDestinations: {
@@ -55,7 +55,7 @@ describe('OutboundRelayConfig Module', () => {
     });
 
     it('updates the poll interval based on the server response', async () => {
-      var httpStub = {
+      let httpStub = {
         getRelayOutboundConfig: sinon.stub().resolves({
           data: {
             outboundDestinations: {
@@ -77,7 +77,7 @@ describe('OutboundRelayConfig Module', () => {
 
   context('clearCache()', () => {
     it('clears the cache', async () => {
-      var httpStub = {
+      let httpStub = {
         getRelayOutboundConfig: sinon.stub().resolves({
           data: {
             outboundDestinations: {
@@ -100,7 +100,7 @@ describe('OutboundRelayConfig Module', () => {
 
   context('getDecryptionDomains()', () => {
     it('returns the config', async () => {
-      var httpStub = {
+      let httpStub = {
         getRelayOutboundConfig: sinon.stub().resolves({
           data: {
             outboundDestinations: {
@@ -125,7 +125,7 @@ describe('OutboundRelayConfig Module', () => {
 
   context('disablePolling()', () => {
     it('stops polling', (done) => {
-      var httpStub = {
+      let httpStub = {
         getRelayOutboundConfig: sinon.stub().resolves({
           data: {
             outboundDestinations: {

@@ -4,7 +4,7 @@ const RepeatedTimer = require('../../lib/core/repeatedTimer');
 
 describe('RepeatedTimer Module', () => {
   it('It polls at regular interval', (done) => {
-    var counter = 0;
+    let counter = 0;
     const interval = 0.05;
     const callback = () => {
       counter++;
@@ -20,7 +20,7 @@ describe('RepeatedTimer Module', () => {
   });
 
   it('It updates poll interval if updatePollInterval() is called', (done) => {
-    var counter = 0;
+    let counter = 0;
     const interval = 0.025;
     const callback = () => {
       counter++;
@@ -39,7 +39,7 @@ describe('RepeatedTimer Module', () => {
   });
 
   it('It stops polling when stop() is called', (done) => {
-    var counter = 0;
+    let counter = 0;
     const interval = 0.05;
     const callback = () => {
       counter++;
