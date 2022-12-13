@@ -97,29 +97,6 @@ async evervault.createRunToken(functionName: String, payload: Object);
 | functionName  | String | Name of the Function the run token should be created for |
 | data          | Object | Payload that the token can be used with                  |
 
-### Enable Outbound interception for specific domains
-
-You may pass in an array of domains which you **do** want to be intercepted, i.e. requests sent to these domains will be intercepted, and hence will be decrypted. This array is passed in the `decryptionDomains` option. Wildcards domains are supported.
-
-```javascript
-const evervaultClient = new Evervault('<API-KEY>', {
-  decryptionDomains: ['httpbin.org', 'api.acme.com', '*.acme.com'], // requests to these domains will be sent through Relay
-});
-```
-
-### evervault.createRunToken()
-
-`evervault.createRunToken()` creates a single use, time bound token for invoking a cage.
-
-```javascript
-async evervault.createRunToken(cageName: String, payload: Object);
-```
-
-| Parameter | Type   | Description                                          |
-| --------- | ------ | ---------------------------------------------------- |
-| cageName  | String | Name of the Cage the run token should be created for |
-| data      | Object | Payload that the token can be used with              |
-
 ### evervault.enableOutboundRelay()
 
 `evervault.enableOutboundRelay()` configures your application to proxy HTTP requests using Outbound Relay based on the configuration created in the Evervault dashboard. See [Outbound Relay](https://docs.evervault.com/concepts/outbound-relay/overview) to learn more.  
