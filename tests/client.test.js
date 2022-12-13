@@ -7,6 +7,7 @@ const phin = require('phin');
 const https = require('https');
 const fs = require('fs');
 const rewire = require('rewire');
+const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
 const {
   ForbiddenIPError,
@@ -15,6 +16,7 @@ const {
 } = require('../lib/utils/errors');
 const fixtures = require('./utilities/fixtures');
 const { assert } = require('console');
+const { doesNotMatch } = require('assert');
 
 const cageName = 'test-cage',
   testData = { a: 1 };
@@ -266,109 +268,201 @@ describe('Testing the Evervault SDK', () => {
     });
 
     context('Testing outbound decryption', () => {
-      const test_url = 'https://evervault.com';
       const originalRequest = https.request;
-      const httpOverloadSpy = sinon.spy();
-      const getRelayOutboundConfigStub = sinon
-        .stub()
-        .resolves(fixtures.relayOutboundResponse);
 
-      beforeEach(() => {
-        EvervaultClient.__set__({
-          Http: () => ({
-            getRelayOutboundConfig: getRelayOutboundConfigStub,
-            getCert: sinon
-              .stub()
-              .returns(
-                fs.readFileSync(`${__dirname}/utilities/ssl-cert-snakeoil.pem`)
-              ),
-          }),
-          httpsHelper: {
-            overloadHttpsModule: httpOverloadSpy,
-          },
-        });
-      });
-
-      afterEach(() => {
-        httpOverloadSpy.resetHistory();
-        https.request = originalRequest;
-      });
-
-      const wasProxied = () => {
-        return httpOverloadSpy.called;
+      const wasProxied = (request, apiKey) => {
+        return request.req.headers['proxy-authorization'] === apiKey;
       };
 
-      it('Starts polling when outbound relay is enabled', async () => {
-        const client = new EvervaultClient('testing', {
-          enableOutboundRelay: true,
-        });
-        await phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-        clearInterval(client.intervalId);
+      afterEach(() => {
+        https.request = originalRequest;
+        RelayOutboundConfig.clearCache();
+        RelayOutboundConfig.disablePolling();
       });
 
-      it("Doesn't proxy when intercept is false", () => {
-        new EvervaultClient('testing', { intercept: false });
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.false;
-        });
-      });
-
-      it('Proxies all when intercept is true', () => {
-        new EvervaultClient('testing', { intercept: true });
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-      });
-
-      it('Proxies all when ignoreDomains is present', () => {
-        new EvervaultClient('testing', { ignoreDomains: [''] });
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-      });
-
-      it('Proxies domain included in decryptionDomains', () => {
-        new EvervaultClient('testing', {
-          decryptionDomains: ['evervault.com'],
-        });
-        return phin(test_url).then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-      });
-
-      it('Proxies a wildcard domain included in decryptionDomains', () => {
-        new EvervaultClient('testing', {
-          decryptionDomains: ['*.evervault.com'],
-        });
-        return phin('https://app.evervault.com').then((result) => {
-          expect(wasProxied(result)).to.be.true;
-        });
-      });
-
-      it('Should handle an error from the API', async () => {
-        EvervaultClient.__set__({
-          Http: () => ({
-            getRelayOutboundConfig: Promise.reject(
-              new RelayOutboundConfigError('502 Bad Request')
-            ),
-            getCert: sinon
-              .stub()
-              .returns(
-                fs.readFileSync(`${__dirname}/utilities/ssl-cert-snakeoil.pem`)
-              ),
-          }),
-          httpsHelper: {
-            overloadHttpsModule: httpOverloadSpy,
+      it('Proxies when outbound relay is enabled', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
           },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay();
+
+        nockrandom = nock('https://destination1.evervault.test', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies when outbound relay is enabled and debugRequests option is present', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay({ debugRequests: true });
+
+        nockrandom = nock('https://destination1.evervault.test', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies when outbound relay is enabled and a wildcard domain is included in the config', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay();
+
+        nockrandom = nock('https://destination1.evervault.io', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.io');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it("Doesn't proxy when intercept is false", async () => {
+        const client = new EvervaultClient(testApiKey, { intercept: false });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.false;
+      });
+
+      it('Proxies all when intercept is true', async () => {
+        const client = new EvervaultClient(testApiKey, { intercept: true });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies all when ignoreDomains is present', async () => {
+        const client = new EvervaultClient(testApiKey, { ignoreDomains: [''] });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies domain included in decryptionDomains (constructor)', async () => {
+        const client = new EvervaultClient(testApiKey, {
+          decryptionDomains: ['destination1.evervault.test'],
         });
-        const client = new EvervaultClient('testing', {
-          enableOutboundRelay: true,
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies a wildcard domain included in decryptionDomains (constructor)', async () => {
+        const client = new EvervaultClient(testApiKey, {
+          decryptionDomains: ['*.evervault.test'],
         });
-        await phin('https://app.evervault.com').then((result) => {
-          clearInterval(client.intervalId);
-          expect(wasProxied(result)).to.be.false;
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies domain included in decryptionDomains', async () => {
+        const client = new EvervaultClient(testApiKey);
+        await client.enableOutboundRelay({
+          decryptionDomains: ['destination1.evervault.test'],
+        });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies domain included in decryptionDomains and debugRequests option is present', async () => {
+        const client = new EvervaultClient(testApiKey);
+        await client.enableOutboundRelay({
+          decryptionDomains: ['destination1.evervault.test'],
+          debugRequests: true,
+        });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies a wildcard domain included in decryptionDomains', async () => {
+        const client = new EvervaultClient(testApiKey);
+        await client.enableOutboundRelay({
+          decryptionDomains: ['*.evervault.test'],
+        });
+
+        nockrandom = nock('https://destination1.evervault.test', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://destination1.evervault.test');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Should throw an exception if outbound relay failed to be enabled', (done) => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(500, fixtures.relayOutboundResponse.data);
+        client.enableOutboundRelay().catch((err) => {
+          expect(err).to.be.an('error');
+          done();
         });
       });
     });
