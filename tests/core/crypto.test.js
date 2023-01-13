@@ -17,7 +17,7 @@ describe('Crypto Module', () => {
 
   const ecdh = crypto.createECDH(testConfigSecP256k1.ecdhCurve);
   ecdh.generateKeys();
-  const publicKey = ecdh.getPublicKey(null, 'compressed').toString('base64');
+  const publicKey = ecdh.getPublicKey(null, 'compressed');
   const derivedSecret = ecdh.computeSecret(
     Buffer.from(testEcdhCageKey, 'base64')
   );
@@ -85,6 +85,39 @@ describe('Crypto Module', () => {
     });
   });
 
+  context('Encrypting a File (Buffer)', () => {
+    const testData = Buffer.from([0x01]);
+
+    it('it encrypts a file', async () => {
+      return testCryptoClient
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
+        .then((encryptedFile) => {
+          expect(encryptedFile).instanceOf(Buffer);
+
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(0, 6),
+              Buffer.from('%EVENC', 'utf-8')
+            ) == 0
+          ).to.be.true;
+
+          // Test that the debug flag is not set
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(54, 55),
+              Buffer.from([0x00])
+            ) == 0
+          ).to.be.true;
+        });
+    });
+  });
+
   const recursiveIsEvervaultStringFormat = (data) => {
     if (data !== null && typeof data == 'object') {
       Object.entries(data).forEach(([key, value]) => {
@@ -123,7 +156,7 @@ describe('Crypto Module with P256 Curve', () => {
 
   const ecdh = crypto.createECDH(testConfigSecP256r1.ecdhCurve);
   ecdh.generateKeys();
-  const publicKey = ecdh.getPublicKey(null, 'compressed').toString('base64');
+  const publicKey = ecdh.getPublicKey(null, 'compressed');
   const derivedSecret = testCryptoClient.getSharedSecret(
     ecdh,
     Buffer.from(testEcdhCageKey, 'base64'),
@@ -189,6 +222,39 @@ describe('Crypto Module with P256 Curve', () => {
         )
         .catch((err) => {
           expect(err).to.match(/must not be undefined/);
+        });
+    });
+  });
+
+  context('Encrypting a File (Buffer)', () => {
+    const testData = Buffer.from([0x01]);
+
+    it('it encrypts a file', async () => {
+      return testCryptoClient
+        .encrypt(
+          curvePrime256v1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          testData
+        )
+        .then((encryptedFile) => {
+          expect(encryptedFile).instanceOf(Buffer);
+
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(0, 6),
+              Buffer.from('%EVENC', 'utf-8')
+            ) == 0
+          ).to.be.true;
+
+          // Test that the debug flag is not set
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(54, 55),
+              Buffer.from([0x00])
+            ) == 0
+          ).to.be.true;
         });
     });
   });
