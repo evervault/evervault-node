@@ -37,7 +37,7 @@ describe('Testing the Evervault SDK Config', () => {
       it('uses the default endpoints', () => {
         const sdk = new EvervaultClient('my-api-key');
         expect(sdk.config.http.baseUrl).to.equal('https://api.evervault.com');
-        expect(sdk.config.http.cageRunUrl).to.equal(
+        expect(sdk.config.http.functionRunUrl).to.equal(
           'https://run.evervault.com'
         );
         expect(sdk.config.http.tunnelHostname).to.equal(
@@ -63,7 +63,7 @@ describe('Testing the Evervault SDK Config', () => {
 
         const sdk = new EvervaultClient('my-api-key');
         expect(sdk.config.http.baseUrl).to.equal(relay_url);
-        expect(sdk.config.http.cageRunUrl).to.equal(run_url);
+        expect(sdk.config.http.functionRunUrl).to.equal(run_url);
         expect(sdk.config.http.tunnelHostname).to.equal(tunnel_hostname);
         expect(sdk.config.http.certHostname).to.equal(ca_hostname);
       });

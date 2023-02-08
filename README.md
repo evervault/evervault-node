@@ -41,8 +41,16 @@ const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
 const result = await evervaultClient.run('<FUNCTION_NAME>', encrypted);
 
 // Send the decrypted data to a third-party API
-await evervaultClient.enableOutboundRelay()
-const response = await axios.post('https://example.com', encrypted)
+await evervaultClient.enableOutboundRelay();
+const response = await axios.post('https://example.com', encrypted);
+
+// Enable the Cages beta client
+await evervaultClient.enableCagesBeta({ 'my-cage': { pcr8: '...' } });
+// This connection will be attested by the Cages beta client
+const response = await axios.post(
+  'https://my-cage.my-app.cages.evervault.com',
+  encrypted
+);
 ```
 
 ## Reference
@@ -69,19 +77,19 @@ async evervault.encrypt(data: Object | String);
 async evervault.run(functionName: String, payload: Object[, options: Object]);
 ```
 
-| Parameter | Type   | Description                                   |
-| --------- | ------ | --------------------------------------------- |
-| functionName  | String | Name of the Function to be run                    |
-| data      | Object | Payload for the Function                          |
-| options   | Object | [Options for the Function run](#Function-Run-Options) |
+| Parameter    | Type   | Description                                           |
+| ------------ | ------ | ----------------------------------------------------- |
+| functionName | String | Name of the Function to be run                        |
+| data         | Object | Payload for the Function                              |
+| options      | Object | [Options for the Function run](#Function-Run-Options) |
 
 #### Function Run Options
 
 Options to control how your Function is run
 
-| Option  | Type    | Default   | Description                                                                          |
-| ------- | ------- | --------- | ------------------------------------------------------------------------------------ |
-| async   | Boolean | false     | Run your Function in async mode. Async Function runs will be queued for processing.          |
+| Option  | Type    | Default   | Description                                                                              |
+| ------- | ------- | --------- | ---------------------------------------------------------------------------------------- |
+| async   | Boolean | false     | Run your Function in async mode. Async Function runs will be queued for processing.      |
 | version | Number  | undefined | Specify the version of your Function to run. By default, the latest version will be run. |
 
 ### evervault.createRunToken()
@@ -92,23 +100,45 @@ Options to control how your Function is run
 async evervault.createRunToken(functionName: String, payload: Object);
 ```
 
-| Parameter     | Type   | Description                                              |
-| ------------- | ------ | -------------------------------------------------------- |
-| functionName  | String | Name of the Function the run token should be created for |
-| data          | Object | Payload that the token can be used with                  |
+| Parameter    | Type   | Description                                              |
+| ------------ | ------ | -------------------------------------------------------- |
+| functionName | String | Name of the Function the run token should be created for |
+| data         | Object | Payload that the token can be used with                  |
 
 ### evervault.enableOutboundRelay()
 
-`evervault.enableOutboundRelay()` configures your application to proxy HTTP requests using Outbound Relay based on the configuration created in the Evervault dashboard. See [Outbound Relay](https://docs.evervault.com/concepts/outbound-relay/overview) to learn more.  
+`evervault.enableOutboundRelay()` configures your application to proxy HTTP requests using Outbound Relay based on the configuration created in the Evervault dashboard. See [Outbound Relay](https://docs.evervault.com/concepts/outbound-relay/overview) to learn more.
 
 ```javascript
 async evervault.enableOutboundRelay([options: Object])
 ```
 
-| Option                | Type      | Default     | Description                                                                              |
-| --------------------- | --------- | ----------- | ---------------------------------------------------------------------------------------- |
-| `decryptionDomains`   | `Array`   | `undefined` | Requests sent to any of the domains listed will be proxied through Outbound Relay. This will override the configuration created in the Evervault dashboard. |
-| `debugRequests`       | `Boolean` | `False`     | Output request domains and whether they were sent through Outbound Relay.                |
+| Option              | Type      | Default     | Description                                                                                                                                                 |
+| ------------------- | --------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decryptionDomains` | `Array`   | `undefined` | Requests sent to any of the domains listed will be proxied through Outbound Relay. This will override the configuration created in the Evervault dashboard. |
+| `debugRequests`     | `Boolean` | `False`     | Output request domains and whether they were sent through Outbound Relay.                                                                                   |
+
+### evervault.enableCagesBeta()
+
+`evervault.enableCagesBeta()` configures your client to automatically attest any requests to Cages. See the [Cage attestation docs](https://docs.evervault.com/products/cages#how-does-attestation-work-with-cages) to learn more.
+
+```javascript
+async evervault.enableCagesBeta([cageAttestationData: Object])
+```
+
+| Key          | Type     | Default     | Description                                                                                                                                               |
+| ------------ | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<CageName>` | `Object` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. |
+
+#### Cages Beta Example
+
+```javascript
+await evervault.enableCagesBeta({
+  'hello-cage': {
+    pcr8: '97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca',
+  },
+});
+```
 
 ## Contributing
 

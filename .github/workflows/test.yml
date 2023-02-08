@@ -31,3 +31,8 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm run test:coverage
+      - run: |
+          apt-get install -y libfaketime
+          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 npm run test:filter attestCageConnection
+        env:
+          FAKETIME: '2023-01-18 15:15:00'
