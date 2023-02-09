@@ -33,7 +33,6 @@
     "async-retry": "^1.3.3",
     "escodegen": "^1.14.3",
     "esprima": "^4.0.1",
-    "evervault-attestation-bindings": "^0.1.0-alpha.2",
     "haikunator": "^2.1.2",
     "konan": "^2.1.1",
     "lodash": "^4.17.21",
@@ -70,5 +69,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "optionalDependencies": {
+    "evervault-attestation-bindings": "^0.1.0-alpha.2"
   }
 }

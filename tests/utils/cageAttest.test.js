@@ -1,22 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
-const { tlsHelper, errors } = require('../../lib/utils');
+const { cageAttest, errors } = require('../../lib/utils');
 
 /**
  * Note: these tests are time sensitive, so are expected to fail when used without libfaketime
  * To avoid false negatives, these tests will only run when the FAKETIME env var is set
  */
-const fakeTimeTests = process.env.FAKETIME != null ? describe : describe.skip;
+const fakeTimeTests =
+  process.env.FAKETIME != null && cageAttest.hasAttestationBindings()
+    ? describe
+    : describe.skip;
 
-describe('TlsHelper', () => {
+describe('cageAttest', () => {
   describe('parseCageNameFromHost', () => {
     const testCage = 'my-cage';
     const testApp = 'my-app';
     const hostname = 'cages.evervault.com';
     context('Request to base cage host name', () => {
       it('returns expected cage name', () => {
-        const cageName = tlsHelper.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameFromHost(
           `${testCage}.${testApp}.${hostname}`
         );
         expect(cageName).to.deep.equal(testCage);
@@ -24,7 +27,7 @@ describe('TlsHelper', () => {
     });
     context('Request to cage nonce subdomain', () => {
       it('returns expected cage name', () => {
-        const cageName = tlsHelper.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameFromHost(
           `noncey.attest.${testCage}.${testApp}.${hostname}`
         );
         expect(cageName).to.deep.equal(testCage);
@@ -51,7 +54,7 @@ describe('TlsHelper', () => {
 
     context('given a valid cert and PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = tlsHelper.attestCageConnection(
+        const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -66,7 +69,7 @@ describe('TlsHelper', () => {
 
     context('given a valid cert and no PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = tlsHelper.attestCageConnection(
+        const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -78,7 +81,7 @@ describe('TlsHelper', () => {
 
     context('given a valid cert and some PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = tlsHelper.attestCageConnection(
+        const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -98,7 +101,7 @@ describe('TlsHelper', () => {
         try {
           const invalidPCRs = { ...validPCRs };
           invalidPCRs.pcr8 = validPCRs.pcr0;
-          tlsHelper.attestCageConnection(
+          cageAttest.attestCageConnection(
             `${cageName}.${appUuid}.${hostname}`,
             {
               raw: derCert,
