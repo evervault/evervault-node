@@ -7,6 +7,7 @@
     "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'",
+    "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test"
   },
   "repository": {
@@ -68,5 +69,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "optionalDependencies": {
+    "evervault-attestation-bindings": "^0.1.0-alpha.2"
   }
 }

@@ -5,18 +5,11 @@ const nock = require('nock');
 const sinon = require('sinon');
 const phin = require('phin');
 const https = require('https');
-const fs = require('fs');
 const rewire = require('rewire');
 const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
-const {
-  ForbiddenIPError,
-  DecryptError,
-  RelayOutboundConfigError,
-} = require('../lib/utils/errors');
+const { ForbiddenIPError, DecryptError } = require('../lib/utils/errors');
 const fixtures = require('./utilities/fixtures');
-const { assert } = require('console');
-const { doesNotMatch } = require('assert');
 
 const cageName = 'test-cage',
   testData = { a: 1 };
@@ -145,7 +138,7 @@ describe('Testing the Evervault SDK', () => {
           testRunResult = {
             data: 'yes',
           };
-          runNock = nock(sdk.config.http.cageRunUrl, {
+          runNock = nock(sdk.config.http.functionRunUrl, {
             reqheaders: sdk.config.http.headers,
           })
             .post(`/${cageName}`)
@@ -165,7 +158,7 @@ describe('Testing the Evervault SDK', () => {
           testRunResult = {
             status: 'queued',
           };
-          runNock = nock(sdk.config.http.cageRunUrl, {
+          runNock = nock(sdk.config.http.functionRunUrl, {
             reqheaders: {
               ...sdk.config.http.headers,
               'x-async': 'true',
@@ -188,7 +181,7 @@ describe('Testing the Evervault SDK', () => {
 
       context('Cage run receiving 403', () => {
         beforeEach(() => {
-          runNock = nock(sdk.config.http.cageRunUrl, {
+          runNock = nock(sdk.config.http.functionRunUrl, {
             reqheaders: {
               ...sdk.config.http.headers,
             },
@@ -214,7 +207,7 @@ describe('Testing the Evervault SDK', () => {
           testRunResult = {
             status: 'queued',
           };
-          runNock = nock(sdk.config.http.cageRunUrl, {
+          runNock = nock(sdk.config.http.functionRunUrl, {
             reqheaders: {
               ...sdk.config.http.headers,
             },
