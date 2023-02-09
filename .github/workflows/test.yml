@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [12, 14, 16, 18]
         os: [ubuntu-latest]
@@ -32,7 +33,7 @@ jobs:
       - run: npm run lint
       - run: npm run test:coverage
       - run: |
-          apt-get install -y libfaketime
+          sudo apt-get update ; sudo apt-get install -y libfaketime
           LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 npm run test:filter attestCageConnection
         env:
           FAKETIME: '2023-01-18 15:15:00'
