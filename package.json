@@ -71,6 +71,6 @@
     }
   },
   "optionalDependencies": {
-    "evervault-attestation-bindings": "^0.1.0-alpha.2"
+    "evervault-attestation-bindings": "^0.1.0-alpha.3"
   }
 }
