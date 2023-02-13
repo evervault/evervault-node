@@ -8,3 +8,6 @@ declare module "@evervault/sdk" {
         enableCagesBeta: (cageAttestationData: { prc0?: string, prc1?: string, prc2?: string, prc8?: string }) => Promise<void>;
     }
 }
+
+
+export { }

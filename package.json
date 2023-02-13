@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Node.js SDK for Evervault",
   "main": "lib/index.js",
-  "typings": "module.d.ts",
+  "typings": "lib/evervault.d.ts",
   "scripts": {
     "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
