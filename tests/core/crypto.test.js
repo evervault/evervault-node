@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const crypto = require('crypto');
 const Crypto = require('../../lib/core/crypto');
+const { errors } = require('../../lib/utils');
 
 const testApiKey = 'test-api-key';
 const testConfigSecP256k1 =
@@ -96,6 +97,55 @@ describe('Crypto Module', () => {
           publicKey,
           derivedSecret,
           testData
+        )
+        .then((encryptedFile) => {
+          expect(encryptedFile).instanceOf(Buffer);
+
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(0, 6),
+              Buffer.from('%EVENC', 'utf-8')
+            ) == 0
+          ).to.be.true;
+
+          // Test that the debug flag is not set
+          expect(
+            Buffer.compare(
+              encryptedFile.subarray(54, 55),
+              Buffer.from([0x00])
+            ) == 0
+          ).to.be.true;
+        });
+    });
+
+    it('throws error on file size too large', async () => {
+      const largeTestData = Buffer.alloc(26 * 1024 * 1024);
+      return testCryptoClient
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          largeTestData
+        )
+        .catch((err) => {
+          expect(err).to.be.instanceOf(errors.ExceededMaxFileSizeError);
+        });
+    });
+
+    it('encrypts a large file when max file size overwritten', async () => {
+      const testCryptoClientWithXLFileSize = Crypto({
+        ...testConfigSecP256k1,
+        maxFileSizeInMB: 30,
+      });
+      const largeTestData = Buffer.alloc(26 * 1024 * 1024);
+      return testCryptoClientWithXLFileSize
+        .encrypt(
+          curveSecp256k1,
+          testEcdhCageKey,
+          publicKey,
+          derivedSecret,
+          largeTestData
         )
         .then((encryptedFile) => {
           expect(encryptedFile).instanceOf(Buffer);
