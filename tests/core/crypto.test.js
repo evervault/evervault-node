@@ -117,7 +117,7 @@ describe('Crypto Module', () => {
             ) == 0
           ).to.be.true;
 
-          // Test that the CRC32 checksum is correct
+          // Test that the CRC32 checksum is correct compared to library implementation
           const crc32Checksum = crc32.buf(encryptedFile.subarray(0, -4));
           const storedCrc32Checksum = encryptedFile.readInt32LE(
             encryptedFile.length - 4
