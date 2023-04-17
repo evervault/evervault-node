@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const crypto = require('crypto');
 const Crypto = require('../../lib/core/crypto');
 const { errors } = require('../../lib/utils');
+const crc32 = require('crc-32');
 
 const testApiKey = 'test-api-key';
 const testConfigSecP256k1 =
@@ -115,6 +116,14 @@ describe('Crypto Module', () => {
               Buffer.from([0x00])
             ) == 0
           ).to.be.true;
+
+          // Test that the CRC32 checksum is correct compared to library implementation
+          const crc32Checksum = crc32.buf(encryptedFile.subarray(0, -4));
+          const storedCrc32Checksum = encryptedFile.readInt32LE(
+            encryptedFile.length - 4
+          );
+
+          expect(crc32Checksum).to.equal(storedCrc32Checksum);
         });
     });
 
