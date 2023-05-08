@@ -126,9 +126,9 @@ async evervault.enableOutboundRelay([options: Object])
 async evervault.enableCagesBeta([cageAttestationData: Object])
 ```
 
-| Key          | Type     | Default     | Description                                                                                                                                               |
-| ------------ | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<CageName>` | `Object` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. |
+| Key          | Type             | Default     | Description                                                                                                                                               |
+| ------------ | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<CageName>` | `Object` `Array` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. The provided data can be either a single Object, or an Array of Objects to allow roll-over between different sets of PCRs. |
 
 #### Cages Beta Example
 
