@@ -32,7 +32,7 @@ To make Evervault available for use in your app:
 const Evervault = require('@evervault/sdk');
 
 // Initialize the client with your team's api key
-const evervaultClient = new Evervault('<API-KEY>');
+const evervaultClient = new Evervault('<APP_ID>', '<API-KEY>');
 
 // Encrypt your sensitive data
 const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
@@ -51,6 +51,9 @@ const response = await axios.post(
   'https://my-cage.my-app.cages.evervault.com',
   encrypted
 );
+
+// Decrypt data
+const decrypted = await evervaultClient.decrypt(encrypted);
 ```
 
 ## Reference
@@ -62,12 +65,24 @@ The Evervault Node.js SDK exposes four functions.
 `evervault.encrypt()`encrypts data for use in your [Functions](https://docs.evervault.com/tutorial). To encrypt data at the server, simply pass an object or string into the evervault.encrypt() function. Store the encrypted data in your database as normal.
 
 ```javascript
-async evervault.encrypt(data: Object | String);
+async evervault.encrypt(data: Object | String | Buffer);
 ```
 
 | Parameter | Type             | Description           |
 | --------- | ---------------- | --------------------- |
 | data      | Object or String | Data to be encrypted. |
+
+### evervault.decrypt()
+
+`evervault.decrypt()` decrypts the data previously encrypted with the `encrypt()` function or through Relay.
+
+```javascript
+async evervault.decrypt(encrypted: Object | String | Buffer);
+```
+
+| Parameter      | Type                     | Description           |
+| -------------- | -------------------------| --------------------- |
+| encrypted      | Object, String or Buffer | Data to be decrypted. |
 
 ### evervault.run()
 
