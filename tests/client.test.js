@@ -342,6 +342,71 @@ describe('Testing the Evervault SDK', () => {
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
+      it('Proxies when outbound relay is enabled and a wildcard domain is included in the config with different case', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay();
+
+        nockrandom = nock('https://DeStinAtiOn1.EvERvAuLt.IO', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://dEstinAtioN1.everVauLt.Io');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Proxies to subdomain when subdomain pattern is given', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay();
+
+        nockrandom = nock('https://app.evervault.net', {
+          reqheaders: {
+            'Proxy-Authorization': testApiKey,
+          },
+        })
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://app.evervault.net');
+        expect(wasProxied(response, testApiKey)).to.be.true;
+      });
+
+      it('Doesnt proxy to non-subdomain when subdomain pattern is provided', async () => {
+        const client = new EvervaultClient(testApiKey);
+        relayOutboundConfigNock = nock(client.config.http.baseUrl, {
+          reqheaders: {
+            'API-KEY': testApiKey,
+          },
+        })
+          .get('/v2/relay-outbound')
+          .reply(200, fixtures.relayOutboundResponse.data);
+        await client.enableOutboundRelay();
+
+        nockrandom = nock('https://nevervault.net', {})
+          .get('/')
+          .reply(200, { success: true });
+
+        const response = await phin('https://nevervault.net');
+        expect(wasProxied(response, testApiKey)).to.be.false;
+      });
+
       it("Doesn't proxy when intercept is false", async () => {
         const client = new EvervaultClient(testApiKey, { intercept: false });
 
