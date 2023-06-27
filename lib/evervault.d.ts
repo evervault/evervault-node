@@ -1,6 +1,6 @@
 declare module "@evervault/sdk" {
     export default class Evervault {
-        constructor(appUuid: string, apiKey: string)
+        constructor(apiKey: string, appUuid: string)
         encrypt: (data: any) => Promise<any>;
         decrypt: (encryptedData: any) => Promise<any>;
         run: <T>(functionName: string, data: object, options?: { async?: boolean, version?: string }) => Promise<{ result: T, runId: string, appUuid: string }>;
