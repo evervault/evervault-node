@@ -15,7 +15,9 @@ const cageName = 'test-cage',
   testData = { a: 1 };
 const testCageKey = 'im-the-cage-key';
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
-const testApiKey = 'test-api-key';
+const testApiKey =
+  'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
+const testAppId = 'app_8022cc5a3073';
 
 let EvervaultClient;
 const encryptStub = sinon.stub();
@@ -52,9 +54,25 @@ describe('Testing the Evervault SDK', () => {
       });
     });
 
-    context('An api key is provided', () => {
+    context('No app ID provided', () => {
+      it('throws an error', () => {
+        expect(prepareSdkImport('api-key')).to.throw(
+          errors.InitializationError
+        );
+      });
+    });
+
+    context('An API key is provided but does not belong to the app', () => {
+      it('throws an error', () => {
+        expect(prepareSdkImport(testApiKey, 'app_098765432121')).to.throw(
+          errors.InitializationError
+        );
+      });
+    });
+
+    context('An api key and an app id is provided', () => {
       it('returns an sdk object', () => {
-        const sdk = new EvervaultClient('my-api-key');
+        const sdk = new EvervaultClient(testApiKey, testAppId);
         expect(sdk.encrypt).to.be.a('function');
         expect(sdk.run).to.be.a('function');
         expect(sdk.encryptAndRun).to.be.a('function');
@@ -64,7 +82,7 @@ describe('Testing the Evervault SDK', () => {
     context('Invoking returned encrypt', () => {
       let sdk;
       beforeEach(() => {
-        sdk = new EvervaultClient(testApiKey);
+        sdk = new EvervaultClient(testApiKey, testAppId);
       });
 
       afterEach(() => {
@@ -130,7 +148,7 @@ describe('Testing the Evervault SDK', () => {
       let runNock, sdk, testRunResult;
 
       beforeEach(() => {
-        sdk = new EvervaultClient(testApiKey);
+        sdk = new EvervaultClient(testApiKey, testAppId);
       });
 
       context('Cage run with no options', () => {
@@ -274,7 +292,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies when outbound relay is enabled', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         relayOutboundConfigNock = nock(client.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,
@@ -297,7 +315,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies when outbound relay is enabled and debugRequests option is present', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         relayOutboundConfigNock = nock(client.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,
@@ -320,7 +338,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies when outbound relay is enabled and a wildcard domain is included in the config', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         relayOutboundConfigNock = nock(client.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,
@@ -343,7 +361,9 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it("Doesn't proxy when intercept is false", async () => {
-        const client = new EvervaultClient(testApiKey, { intercept: false });
+        const client = new EvervaultClient(testApiKey, testAppId, {
+          intercept: false,
+        });
 
         nockrandom = nock('https://destination1.evervault.test', {})
           .get('/')
@@ -354,7 +374,9 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies all when intercept is true', async () => {
-        const client = new EvervaultClient(testApiKey, { intercept: true });
+        const client = new EvervaultClient(testApiKey, testAppId, {
+          intercept: true,
+        });
 
         nockrandom = nock('https://destination1.evervault.test', {})
           .get('/')
@@ -365,7 +387,9 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies all when ignoreDomains is present', async () => {
-        const client = new EvervaultClient(testApiKey, { ignoreDomains: [''] });
+        const client = new EvervaultClient(testApiKey, testAppId, {
+          ignoreDomains: [''],
+        });
 
         nockrandom = nock('https://destination1.evervault.test', {})
           .get('/')
@@ -376,7 +400,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies domain included in decryptionDomains (constructor)', async () => {
-        const client = new EvervaultClient(testApiKey, {
+        const client = new EvervaultClient(testApiKey, testAppId, {
           decryptionDomains: ['destination1.evervault.test'],
         });
 
@@ -389,7 +413,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies a wildcard domain included in decryptionDomains (constructor)', async () => {
-        const client = new EvervaultClient(testApiKey, {
+        const client = new EvervaultClient(testApiKey, testAppId, {
           decryptionDomains: ['*.evervault.test'],
         });
 
@@ -402,7 +426,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies domain included in decryptionDomains', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         await client.enableOutboundRelay({
           decryptionDomains: ['destination1.evervault.test'],
         });
@@ -416,7 +440,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies domain included in decryptionDomains and debugRequests option is present', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         await client.enableOutboundRelay({
           decryptionDomains: ['destination1.evervault.test'],
           debugRequests: true,
@@ -431,7 +455,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Proxies a wildcard domain included in decryptionDomains', async () => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         await client.enableOutboundRelay({
           decryptionDomains: ['*.evervault.test'],
         });
@@ -445,7 +469,7 @@ describe('Testing the Evervault SDK', () => {
       });
 
       it('Should throw an exception if outbound relay failed to be enabled', (done) => {
-        const client = new EvervaultClient(testApiKey);
+        const client = new EvervaultClient(testApiKey, testAppId);
         relayOutboundConfigNock = nock(client.config.http.baseUrl, {
           reqheaders: {
             'API-KEY': testApiKey,

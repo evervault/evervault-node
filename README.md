@@ -32,7 +32,7 @@ To make Evervault available for use in your app:
 const Evervault = require('@evervault/sdk');
 
 // Initialize the client with your team's api key
-const evervaultClient = new Evervault('<APP_ID>', '<API-KEY>');
+const evervaultClient = new Evervault('<API-KEY>', '<APP_ID>');
 
 // Encrypt your sensitive data
 const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
