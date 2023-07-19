@@ -73,7 +73,8 @@ async evervault.encrypt(data: string | boolean | number | Array | Object | Buffe
 
 ### evervault.decrypt()
 
-`evervault.decrypt()` decrypts the data previously encrypted with the `encrypt()` function or through Relay.
+`evervault.decrypt()` decrypts data previously encrypted with the `encrypt()` function or through Evervault's Relay (Evervault's encryption proxy).
+An API Key with the `decrypt` permission must be used to perform this operation.
 
 ```javascript
 async evervault.decrypt(encrypted: string | Array | Object | Buffer);
@@ -86,6 +87,7 @@ async evervault.decrypt(encrypted: string | Array | Object | Buffer);
 ### evervault.run()
 
 `evervault.run()` invokes a Function with a given payload.
+An API Key with the `run function` permission must be used to perform this operation.
 
 ```javascript
 async evervault.run(functionName: String, payload: Object[, options: Object]);
@@ -109,6 +111,7 @@ Options to control how your Function is run
 ### evervault.createRunToken()
 
 `evervault.createRunToken()` creates a single use, time bound token for invoking a Function.
+An API Key with the `create a run token` permission must be used to perform this operation.
 
 ```javascript
 async evervault.createRunToken(functionName: String, payload: Object);
