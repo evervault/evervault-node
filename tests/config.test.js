@@ -39,7 +39,7 @@ describe('Testing the Evervault SDK Config', () => {
 
     context('No endpoint overrides exists', () => {
       it('uses the default endpoints', () => {
-        const sdk = new EvervaultClient(testApiKey, testAppId);
+        const sdk = new EvervaultClient(testAppId, testApiKey);
         expect(sdk.config.http.baseUrl).to.equal('https://api.evervault.com');
         expect(sdk.config.http.functionRunUrl).to.equal(
           'https://run.evervault.com'
@@ -65,7 +65,7 @@ describe('Testing the Evervault SDK Config', () => {
         process.env.EV_TUNNEL_HOSTNAME = tunnel_hostname;
         process.env.EV_CERT_HOSTNAME = ca_hostname;
 
-        const sdk = new EvervaultClient(testApiKey, testAppId);
+        const sdk = new EvervaultClient(testAppId, testApiKey);
         expect(sdk.config.http.baseUrl).to.equal(relay_url);
         expect(sdk.config.http.functionRunUrl).to.equal(run_url);
         expect(sdk.config.http.tunnelHostname).to.equal(tunnel_hostname);
