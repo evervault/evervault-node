@@ -6,6 +6,10 @@ const sinon = require('sinon');
 const rewire = require('rewire');
 const { errors } = require('../lib/utils');
 
+const testApiKey =
+  'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
+const testAppId = 'app_8022cc5a3073';
+
 let EvervaultClient;
 const encryptStub = sinon.stub();
 describe('Testing the Evervault SDK Config', () => {
@@ -35,7 +39,7 @@ describe('Testing the Evervault SDK Config', () => {
 
     context('No endpoint overrides exists', () => {
       it('uses the default endpoints', () => {
-        const sdk = new EvervaultClient('my-api-key');
+        const sdk = new EvervaultClient(testAppId, testApiKey);
         expect(sdk.config.http.baseUrl).to.equal('https://api.evervault.com');
         expect(sdk.config.http.functionRunUrl).to.equal(
           'https://run.evervault.com'
@@ -61,7 +65,7 @@ describe('Testing the Evervault SDK Config', () => {
         process.env.EV_TUNNEL_HOSTNAME = tunnel_hostname;
         process.env.EV_CERT_HOSTNAME = ca_hostname;
 
-        const sdk = new EvervaultClient('my-api-key');
+        const sdk = new EvervaultClient(testAppId, testApiKey);
         expect(sdk.config.http.baseUrl).to.equal(relay_url);
         expect(sdk.config.http.functionRunUrl).to.equal(run_url);
         expect(sdk.config.http.tunnelHostname).to.equal(tunnel_hostname);
