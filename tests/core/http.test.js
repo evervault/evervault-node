@@ -52,7 +52,7 @@ describe('Http Module', () => {
               .reply(401, testResponse);
           });
 
-          it('It gets the cage key with the api key', () => {
+          it('It does not get the cage key with the api key', () => {
             return testHttpClient.getCageKey().catch((err) => {
               expect(getCageKeyNock.isDone()).to.be.true;
               expect(err).to.be.instanceOf(errors.ApiKeyError);
@@ -66,6 +66,35 @@ describe('Http Module', () => {
           getCageKeyNock = setupNock()
             .get('/cages/key')
             .replyWithError('An error occurred');
+        });
+        it('Throws a CageKeyError', () => {
+          return testHttpClient.getCageKey().catch((err) => {
+            expect(getCageKeyNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.CageKeyError);
+          });
+        });
+      });
+      context('should retry on 503', () => {
+        let getCageKeyNock;
+        const testResponse = { test: 'response' };
+        before(() => {
+          getCageKeyNock = setupNock()
+            .get('/cages/key')
+            .reply(502)
+            .get('/cages/key')
+            .reply(200, testResponse);
+        });
+        it('returns the cage key after retry', () => {
+          return testHttpClient.getCageKey().then((res) => {
+            expect(getCageKeyNock.isDone()).to.be.true;
+            expect(res).to.deep.equal(testResponse);
+          });
+        });
+      });
+      context('should error after exhausting retries', () => {
+        let getCageKeyNock;
+        before(() => {
+          getCageKeyNock = setupNock().get('/cages/key').reply(503);
         });
         it('Throws a CageKeyError', () => {
           return testHttpClient.getCageKey().catch((err) => {
