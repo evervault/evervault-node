@@ -3,17 +3,11 @@ const { errors } = require('../../lib/utils');
 const nock = require('nock');
 
 describe('Http Module', () => {
-  const testApiKey =
-    'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
-  const testAppId = 'app_8022cc5a3073';
-  const testValidConfig = require('../../lib/config')().http;
-  const testHttpClient = require('../../lib/core/http')(
-    testAppId,
-    testApiKey,
-    testValidConfig
-  );
+  const testApikey = 'api-key';
+  const testValidConfig = require('../../lib/config')(testApikey).http;
+  const testHttpClient = require('../../lib/core/http')(testValidConfig);
 
-  const setupNock = (url = testValidConfig.baseUrl, apiKey = testApiKey) =>
+  const setupNock = (url = testValidConfig.baseUrl, apiKey = testApikey) =>
     nock(url, {
       reqheaders: {
         'API-KEY': apiKey,
