@@ -13,12 +13,27 @@ describe('Http Module', () => {
     testValidConfig
   );
 
-  const setupNock = (url = testValidConfig.baseUrl, apiKey = testApiKey) =>
-    nock(url, {
-      reqheaders: {
-        'API-KEY': apiKey,
-      },
-    });
+  const setupNock = (
+    url = testValidConfig.baseUrl,
+    apiKey = testApiKey,
+    basic = false
+  ) => {
+    if (basic) {
+      return nock(url, {
+        reqheaders: {
+          Authorization: `Basic ${Buffer.from(
+            `${testAppId}:${apiKey}`
+          ).toString('base64')}`,
+        },
+      });
+    } else {
+      return nock(url, {
+        reqheaders: {
+          'API-KEY': apiKey,
+        },
+      });
+    }
+  };
 
   after(() => {
     nock.restore();
@@ -185,6 +200,54 @@ describe('Http Module', () => {
               expect(res.statusCode).to.equal(404);
               expect(res.body).to.deep.equal(testResponse);
             });
+        });
+      });
+    });
+  });
+
+  describe('createClientSideDecryptToken', () => {
+    context('Given an api key', () => {
+      context('Request is successful', () => {
+        const testResponse = { token: 'token', expiry: 1234, createdAt: 123 };
+        let createRunTokenNock;
+        before(() => {
+          createRunTokenNock = setupNock(
+            'https://api.evervault.com',
+            testApiKey,
+            true
+          )
+            .post(`/client-side-tokens`)
+            .reply(200, testResponse);
+        });
+        it('It creates a token', () => {
+          return testHttpClient.createToken({ test: 'data' }).then((res) => {
+            expect(createRunTokenNock.isDone()).to.be.true;
+            expect(res).to.deep.equal({
+              ...testResponse,
+              expiry: new Date(testResponse.expiry),
+              createdAt: new Date(testResponse.createdAt),
+            });
+          });
+        });
+      });
+
+      context('Request fails', () => {
+        let createRunTokenNock;
+        const testResponse = { errorType: 'NotFound' };
+        before(() => {
+          createRunTokenNock = setupNock(
+            'https://api.evervault.com',
+            testApiKey,
+            true
+          )
+            .post(`/client-side-tokens`)
+            .reply(400, '{"error": "Request is not valid"}');
+        });
+        it('It throws an error', () => {
+          return testHttpClient.createToken({ test: 'data' }).catch((err) => {
+            expect(createRunTokenNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.RequestError);
+          });
         });
       });
     });
