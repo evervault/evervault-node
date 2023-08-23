@@ -84,6 +84,21 @@ async evervault.decrypt(encrypted: string | Array | Object | Buffer);
 | -------------- | --------------------------------| --------------------- |
 | encrypted      | String, Array, Object or Buffer | Data to be decrypted. |
 
+### evervault.createClientSideDecryptToken()
+
+`evervault.createClientSideDecryptToken()` creates a token that can be used to authenticate a `decrypt()` request
+from a frontend/client application.
+An API Key with the `Create Token` permission must be used to perform this operation.
+
+```javascript
+async evervault.createClientSideDecryptToken(payload: string | Array | Object, expiry: Date);
+```
+
+| Parameter      | Type                            | Description                                                           |
+| -------------- | --------------------------------| --------------------------------------------------------------------- |
+| payload        | String, Array, or Object        | Data that the token can decrypt.                                      |
+| expiry         | Date                            | The expiry of the token, must be < 10 mins from now. (Default 5 mins) |
+
 ### evervault.run()
 
 `evervault.run()` invokes a Function with a given payload.
