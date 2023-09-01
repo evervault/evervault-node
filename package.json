@@ -8,6 +8,7 @@
     "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'",
+    "test:e2e": "mocha 'e2e/**/*.test.js' --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test"
   },
@@ -32,6 +33,7 @@
   "dependencies": {
     "agent-base": "^6.0.2",
     "async-retry": "^1.3.3",
+    "axios": "^1.5.0",
     "crc-32": "^1.2.2",
     "phin": "^3.5.0",
     "uasn1": "^0.7.1",

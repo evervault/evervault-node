@@ -1,0 +1,39 @@
+name: Run Node.js SDK E2E Tests
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!master'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [12, 14, 16, 18]
+        os: [ubuntu-latest]
+        include:
+          - perform-attestation: false
+          - perform-attestation: true
+            node-version: 18
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm run lint
+      - run: npm run test:e2e
+        env:
+          EV_APP_UUID: ${{ secrets.EV_APP_UUID }}
+          EV_API_KEY: ${{ secrets.EV_API_KEY }}
+          EV_FUNCTION_NAME: ${{ secrets.EV_FUNCTION_NAME }}
