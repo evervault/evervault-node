@@ -37,3 +37,4 @@ jobs:
           EV_APP_UUID: ${{ secrets.EV_APP_UUID }}
           EV_API_KEY: ${{ secrets.EV_API_KEY }}
           EV_FUNCTION_NAME: ${{ secrets.EV_FUNCTION_NAME }}
+          EV_SYNTHETIC_ENDPOINT_URL: ${{ secrets.EV_SYNTHETIC_ENDPOINT_URL }}
