@@ -5,6 +5,8 @@ const https = require('https');
 const assert = require('assert');
 const Proxy = require('proxy');
 const HttpsProxyAgent = require('../lib/utils/proxyAgent');
+const { httpsRelayAgent } = require('../lib/utils/httpsHelper');
+const { Http } = require('../lib/core');
 
 describe('HttpsProxyAgent', function () {
   let server;
@@ -12,6 +14,9 @@ describe('HttpsProxyAgent', function () {
 
   let sslServer;
   let sslServerPort;
+
+  let caServer;
+  let caServerPort;
 
   let proxy;
   let proxyPort;
@@ -34,6 +39,27 @@ describe('HttpsProxyAgent', function () {
     proxy.listen(function () {
       proxyPort = proxy.address().port;
       done();
+    });
+  });
+
+  before(function (done) {
+    // setup HTTP ca server
+    caServer = http.createServer();
+
+    caServer.listen(function () {
+      caServerPort = caServer.address().port;
+      done();
+    });
+
+    caServer.once('request', function (_, res) {
+      let cert = fs.readFileSync(
+        `${__dirname}/utilities/ssl-cert-snakeoil.pem`
+      );
+      res.writeHead(200, {
+        'Content-Type': 'application/x-x509-ca-cert',
+        'Content-Length': cert.length,
+      });
+      res.end(Buffer.from(cert));
     });
   });
 
@@ -69,6 +95,13 @@ describe('HttpsProxyAgent', function () {
       done();
     });
     server.close();
+  });
+
+  after(function (done) {
+    caServer.once('close', function () {
+      done();
+    });
+    caServer.close();
   });
 
   after(function (done) {
@@ -398,6 +431,49 @@ describe('HttpsProxyAgent', function () {
         res.on('end', function () {
           data = JSON.parse(data);
           assert.equal('localhost', data.host);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('relay https agent', function () {
+    it('should connect to the proxy and send a request', (done) => {
+      sslServer.once('request', function (req, res) {
+        res.end(JSON.stringify(req.headers));
+      });
+      const hostname = `https://localhost:${sslProxyPort}`;
+      const agent = httpsRelayAgent(
+        {
+          hostname,
+          rejectUnauthorized: false,
+        },
+        Http('app_test', 'test-api-key', {
+          baseUrl: 'https://test.localhost',
+          userAgent: 'test',
+          certHostname: `http://localhost:${caServerPort}`,
+        }),
+        'test-api-key'
+      );
+
+      const options = {
+        hostname: `localhost`,
+        port: sslServerPort,
+        path: '/',
+        method: 'GET',
+        agent: agent,
+        rejectUnauthorized: false,
+      };
+
+      https.get(options, function (res) {
+        let data = '';
+        res.setEncoding('utf8');
+        res.on('data', function (b) {
+          data += b;
+        });
+        res.on('end', function () {
+          data = JSON.parse(data);
+          assert.equal(`localhost:${sslServerPort}`, data.host);
           done();
         });
       });
