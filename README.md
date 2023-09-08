@@ -46,7 +46,7 @@ const response = await axios.post('https://example.com', encrypted);
 
 // Use HTTPSProxyAgent to send data to a third-party
 const httpsAgent = evervault.createRelayHttpsAgent();
-const response = await axios.get('https://example.com', { 
+const response = await axios.get('https://example.com', {
   httpsAgent
 });
 
@@ -158,16 +158,16 @@ async evervault.enableOutboundRelay([options: Object])
 
 ### evervault.createRelayHttpsAgent()
 
-`evervault.createRelayHttpsAgent()` will return a `HttpsProxyAgent` configred to proxy traffic through Relay. 
+`evervault.createRelayHttpsAgent()` will return a `HttpsProxyAgent` configred to proxy traffic through Relay.
 
 ```javascript
-async evervault.createRelayHttpsAgent([options: Object])
+evervault.createRelayHttpsAgent()
 ```
 #### createRelayHttpsAgent axios example
 
 ```javascript
 const httpsAgent = evervault.createRelayHttpsAgent();
-const response = await axios.get('https://example.com', { 
+const response = await axios.get('https://example.com', {
   httpsAgent
 });
 ```
