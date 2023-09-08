@@ -32,7 +32,7 @@ To make Evervault available for use in your app:
 const Evervault = require('@evervault/sdk');
 
 // Initialize the client with your App ID and API Key
-const evervaultClient = new Evervault('<API-KEY>', '<APP_ID>');
+const evervaultClient = new Evervault('<APP_ID>', '<API_KEY>');
 
 // Encrypt your sensitive data
 const encrypted = await evervaultClient.encrypt({ ssn: '012-34-5678' });
@@ -43,6 +43,12 @@ const result = await evervaultClient.run('<FUNCTION_NAME>', encrypted);
 // Send the decrypted data to a third-party API
 await evervaultClient.enableOutboundRelay();
 const response = await axios.post('https://example.com', encrypted);
+
+// Use HTTPSProxyAgent to send data to a third-party
+const httpsAgent = evervault.createRelayHttpsAgent();
+const response = await axios.get('https://example.com', {
+  httpsAgent
+});
 
 // Decrypt the data
 const decrypted = await evervaultClient.decrypt(encrypted);
@@ -149,6 +155,22 @@ async evervault.enableOutboundRelay([options: Object])
 | ------------------- | --------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `decryptionDomains` | `Array`   | `undefined` | Requests sent to any of the domains listed will be proxied through Outbound Relay. This will override the configuration created in the Evervault dashboard. |
 | `debugRequests`     | `Boolean` | `False`     | Output request domains and whether they were sent through Outbound Relay.                                                                                   |
+
+### evervault.createRelayHttpsAgent()
+
+`evervault.createRelayHttpsAgent()` will return a `HttpsProxyAgent` configred to proxy traffic through Relay.
+
+```javascript
+evervault.createRelayHttpsAgent()
+```
+#### createRelayHttpsAgent axios example
+
+```javascript
+const httpsAgent = evervault.createRelayHttpsAgent();
+const response = await axios.get('https://example.com', {
+  httpsAgent
+});
+```
 
 ### evervault.enableCagesBeta()
 
