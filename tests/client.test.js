@@ -190,14 +190,14 @@ describe('Testing the Evervault SDK', () => {
             },
           })
             .post(`/${cageName}`)
-            .reply(200, { result: testRunResult });
+            .reply(200, Buffer.alloc(0));
         });
 
         it('Calls the cage run api', () => {
           return sdk
             .run(cageName, testData, { async: true, version: 3 })
             .then((result) => {
-              expect(result).to.deep.equal({ result: testRunResult });
+              expect(result).to.deep.equal(Buffer.alloc(0));
               expect(runNock.isDone()).to.be.true;
             });
         });
