@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 const { cageAttest, errors } = require('../../lib/utils');
+const config = require('../../lib/config');
 
 /**
  * Note: these tests are time sensitive, so are expected to fail when used without libfaketime
@@ -12,7 +13,7 @@ const fakeTimeTests =
     ? describe
     : describe.skip;
 
-describe('cageAttest', () => {
+describe('cageAttestBeta', () => {
   describe('parseCageNameFromHost', () => {
     const testCage = 'my-cage';
     const testApp = 'my-app';

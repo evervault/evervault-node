@@ -86,9 +86,9 @@ An API Key with the `decrypt` permission must be used to perform this operation.
 async evervault.decrypt(encrypted: string | Array | Object | Buffer);
 ```
 
-| Parameter      | Type                            | Description           |
-| -------------- | --------------------------------| --------------------- |
-| encrypted      | String, Array, Object or Buffer | Data to be decrypted. |
+| Parameter | Type                            | Description           |
+| --------- | ------------------------------- | --------------------- |
+| encrypted | String, Array, Object or Buffer | Data to be decrypted. |
 
 ### evervault.createClientSideDecryptToken()
 
@@ -100,10 +100,10 @@ An API Key with the `Create Token` permission must be used to perform this opera
 async evervault.createClientSideDecryptToken(payload: string | Array | Object, expiry: Date);
 ```
 
-| Parameter      | Type                            | Description                                                           |
-| -------------- | --------------------------------| --------------------------------------------------------------------- |
-| payload        | String, Array, or Object        | Data that the token can decrypt.                                      |
-| expiry         | Date                            | The expiry of the token, must be < 10 mins from now. (Default 5 mins) |
+| Parameter | Type                     | Description                                                           |
+| --------- | ------------------------ | --------------------------------------------------------------------- |
+| payload   | String, Array, or Object | Data that the token can decrypt.                                      |
+| expiry    | Date                     | The expiry of the token, must be < 10 mins from now. (Default 5 mins) |
 
 ### evervault.run()
 
@@ -180,8 +180,8 @@ const response = await axios.get('https://example.com', {
 async evervault.enableCagesBeta([cageAttestationData: Object])
 ```
 
-| Key          | Type             | Default     | Description                                                                                                                                               |
-| ------------ | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Key          | Type             | Default     | Description                                                                                                                                                                                                                                                                          |
+| ------------ | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `<CageName>` | `Object` `Array` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. The provided data can be either a single Object, or an Array of Objects to allow roll-over between different sets of PCRs. |
 
 #### Cages Beta Example
