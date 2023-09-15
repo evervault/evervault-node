@@ -111,9 +111,9 @@ describe('cageAttestGA', async () => {
             },
             cache
           );
+          cache.disablePolling();
         } catch (err) {
           expect(err).to.be.instanceOf(errors.CageAttestationError);
-          cache.disablePolling();
         }
       });
     });
