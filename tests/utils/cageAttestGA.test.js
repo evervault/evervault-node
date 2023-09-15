@@ -42,36 +42,40 @@ describe('cageAttestGA', async () => {
 
     context('given a valid cert and PCRs', async () => {
       it('successfully attests the connection', async () => {
-        await AttestationDoc.init(config(), httpStub, [cageName], appUuid);
+        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        await cache.init();
         const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           {
             [cageName]: validPCRs,
           },
-          httpStub,
-          AttestationDoc
+          cache
         );
         expect(result).to.be.undefined;
+        cache.disablePolling();
       });
     });
 
     context('given a valid cert and no PCRs', async () => {
       it('successfully attests the connection', async () => {
-        await AttestationDoc.init(config(), httpStub, [cageName], appUuid);
+        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        await cache.init();
         const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           {},
-          httpStub,
-          AttestationDoc
+          cache
         );
         expect(result).to.be.undefined;
+        cache.disablePolling();
       });
     });
 
     context('given a valid cert and some PCRs', () => {
-      it('successfully attests the connection', () => {
+      it('successfully attests the connection', async () => {
+        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        await cache.init();
         const result = cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
@@ -80,16 +84,23 @@ describe('cageAttestGA', async () => {
               pcr8: validPCRs.pcr8,
             },
           },
-          httpStub,
-          AttestationDoc
+          cache
         );
         expect(result).to.be.undefined;
+        cache.disablePolling();
       });
     });
 
     context('given a valid cert with incorrect PCRs', () => {
-      it('rejects the connection with an attestation error', () => {
+      it('rejects the connection with an attestation error', async () => {
         try {
+          let cache = new AttestationDoc(
+            config(),
+            httpStub,
+            [cageName],
+            appUuid
+          );
+          await cache.init();
           const invalidPCRs = { ...validPCRs };
           invalidPCRs.pcr8 = validPCRs.pcr0;
           cageAttest.attestCageConnection(
@@ -98,11 +109,11 @@ describe('cageAttestGA', async () => {
             {
               [cageName]: invalidPCRs,
             },
-            httpStub,
-            AttestationDoc
+            cache
           );
         } catch (err) {
           expect(err).to.be.instanceOf(errors.CageAttestationError);
+          cache.disablePolling();
         }
       });
     });

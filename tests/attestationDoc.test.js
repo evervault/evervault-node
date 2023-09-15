@@ -3,13 +3,9 @@ const sinon = require('sinon');
 
 const attestationDoc = require('../lib/core/cageAttestationDoc');
 const config = require('../lib/config');
+const { AttestationDoc } = require('../lib/core');
 
 describe('cageAttestationDoc', () => {
-  afterEach(() => {
-    attestationDoc.clearCache();
-    attestationDoc.disablePolling();
-  });
-
   context('constructor', () => {
     it('retrieves the attestation docs from relevant cages and starts polling', async () => {
       let httpStub = {
@@ -19,9 +15,11 @@ describe('cageAttestationDoc', () => {
       };
 
       let cages = ['cage_123', 'cage_246'];
-      await attestationDoc.init(config(), httpStub, cages, 'app_123');
-      expect(attestationDoc.get('cage_123')).to.deep.equal('doc');
-      expect(attestationDoc.get('cage_246')).to.deep.equal('doc');
+      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
+      await cache.init();
+      expect(cache.get('cage_123')).to.deep.equal('doc');
+      expect(cache.get('cage_246')).to.deep.equal('doc');
+      cache.disablePolling();
     });
   });
 
@@ -37,10 +35,12 @@ describe('cageAttestationDoc', () => {
       stub.onCall(2).returns({ attestation_doc: 'doc3' });
 
       let cages = ['cage_1', 'cage_2'];
-      await attestationDoc.init(config(), httpStub, cages, 'app_123');
-      expect(attestationDoc.get('cage_1')).to.deep.equal('doc1');
-      await attestationDoc.reloadCageDoc('cage_1', 'app_123', httpStub);
-      expect(attestationDoc.get('cage_1')).to.deep.equal('doc3');
+      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
+      await cache.init();
+      expect(cache.get('cage_1')).to.deep.equal('doc1');
+      await cache.reloadCageDoc('cage_1', 'app_123');
+      expect(cache.get('cage_1')).to.deep.equal('doc3');
+      cache.disablePolling();
     });
   });
 
@@ -65,10 +65,12 @@ describe('cageAttestationDoc', () => {
       stub.onCall(1).returns({ attestation_doc: 'doc2' });
 
       let cages = ['cage_1'];
-      await attestationDoc.init(mockConfig, httpStub, cages, 'app_123');
-      expect(attestationDoc.get('cage_1')).to.deep.equal('doc1');
+      let cache = new AttestationDoc(mockConfig, httpStub, cages, 'app_123');
+      await cache.init();
+      expect(cache.get('cage_1')).to.deep.equal('doc1');
       await sleep(1000);
-      expect(attestationDoc.get('cage_1')).to.deep.equal('doc2');
+      expect(cache.get('cage_1')).to.deep.equal('doc2');
+      cache.disablePolling();
     });
   });
 });
