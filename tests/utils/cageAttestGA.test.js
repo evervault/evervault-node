@@ -44,7 +44,7 @@ describe('cageAttestGA', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
-        const result = cageAttest.attestCageConnection(
+        const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           {
@@ -57,11 +57,26 @@ describe('cageAttestGA', async () => {
       });
     });
 
+    context('given a key that doesnt exist in the cache', async () => {
+      it('reloads doc for given cage and tries again', async () => {
+        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        await cache.init();
+        const result = await cageAttest.attestCageConnection(
+          `otherCageName.${appUuid}.${hostname}`,
+          derCert,
+          {},
+          cache
+        );
+        expect(result).to.be.undefined;
+        cache.disablePolling();
+      });
+    });
+
     context('given a valid cert and no PCRs', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
-        const result = cageAttest.attestCageConnection(
+        const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           {},
@@ -76,7 +91,7 @@ describe('cageAttestGA', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
-        const result = cageAttest.attestCageConnection(
+        const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           {
@@ -103,7 +118,7 @@ describe('cageAttestGA', async () => {
           await cache.init();
           const invalidPCRs = { ...validPCRs };
           invalidPCRs.pcr8 = validPCRs.pcr0;
-          cageAttest.attestCageConnection(
+          await cageAttest.attestCageConnection(
             `${cageName}.${appUuid}.${hostname}`,
             derCert,
             {

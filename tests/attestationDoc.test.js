@@ -1,7 +1,5 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-
-const attestationDoc = require('../lib/core/cageAttestationDoc');
 const config = require('../lib/config');
 const { AttestationDoc } = require('../lib/core');
 
@@ -17,8 +15,22 @@ describe('cageAttestationDoc', () => {
       let cages = ['cage_123', 'cage_246'];
       let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
       await cache.init();
-      expect(cache.get('cage_123')).to.deep.equal('doc');
-      expect(cache.get('cage_246')).to.deep.equal('doc');
+      expect(await cache.get('cage_123')).to.deep.equal('doc');
+      expect(await cache.get('cage_246')).to.deep.equal('doc');
+      cache.disablePolling();
+    });
+
+    it('retrieves missing', async () => {
+      let httpStub = {
+        getCageAttestationDoc: sinon.stub().resolves({
+          attestation_doc: 'doc',
+        }),
+      };
+
+      let cages = ['cage_123'];
+      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
+      await cache.init();
+      expect(await cache.get('cage')).to.deep.equal('doc');
       cache.disablePolling();
     });
   });
@@ -37,9 +49,9 @@ describe('cageAttestationDoc', () => {
       let cages = ['cage_1', 'cage_2'];
       let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
       await cache.init();
-      expect(cache.get('cage_1')).to.deep.equal('doc1');
-      await cache.reloadCageDoc('cage_1', 'app_123');
-      expect(cache.get('cage_1')).to.deep.equal('doc3');
+      expect(await cache.get('cage_1')).to.deep.equal('doc1');
+      await cache.loadCageDoc('cage_1', 'app_123');
+      expect(await cache.get('cage_1')).to.deep.equal('doc3');
       cache.disablePolling();
     });
   });
@@ -67,9 +79,9 @@ describe('cageAttestationDoc', () => {
       let cages = ['cage_1'];
       let cache = new AttestationDoc(mockConfig, httpStub, cages, 'app_123');
       await cache.init();
-      expect(cache.get('cage_1')).to.deep.equal('doc1');
+      expect(await cache.get('cage_1')).to.deep.equal('doc1');
       await sleep(1000);
-      expect(cache.get('cage_1')).to.deep.equal('doc2');
+      expect(await cache.get('cage_1')).to.deep.equal('doc2');
       cache.disablePolling();
     });
   });

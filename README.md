@@ -47,18 +47,18 @@ const response = await axios.post('https://example.com', encrypted);
 // Use HTTPSProxyAgent to send data to a third-party
 const httpsAgent = evervault.createRelayHttpsAgent();
 const response = await axios.get('https://example.com', {
-  httpsAgent
+  httpsAgent,
 });
 
 // Decrypt the data
 const decrypted = await evervaultClient.decrypt(encrypted);
 
-// Enable the Cages beta client
-await evervaultClient.enableCagesBeta({ 'my-cage': { pcr8: '...' } });
+// Enable the Cages client
+await evervaultClient.enableCages({ 'my-cage': { pcr8: '...' } });
 const response = await axios.post(
   'https://my-cage.my-app.cages.evervault.com',
   encrypted
-); // This connection will be attested by the Cages beta client
+); // This connection will be attested by the Cages client
 ```
 
 ## Reference
@@ -161,23 +161,24 @@ async evervault.enableOutboundRelay([options: Object])
 `evervault.createRelayHttpsAgent()` will return a `HttpsProxyAgent` configred to proxy traffic through Relay.
 
 ```javascript
-evervault.createRelayHttpsAgent()
+evervault.createRelayHttpsAgent();
 ```
+
 #### createRelayHttpsAgent axios example
 
 ```javascript
 const httpsAgent = evervault.createRelayHttpsAgent();
 const response = await axios.get('https://example.com', {
-  httpsAgent
+  httpsAgent,
 });
 ```
 
-### evervault.enableCagesBeta()
+### evervault.enableCages()
 
-`evervault.enableCagesBeta()` configures your client to automatically attest any requests to Cages. See the [Cage attestation docs](https://docs.evervault.com/products/cages#how-does-attestation-work-with-cages) to learn more.
+`evervault.enableCages()` configures your client to automatically attest any requests to Cages. See the [Cage attestation docs](https://docs.evervault.com/products/cages#how-does-attestation-work-with-cages) to learn more.
 
 ```javascript
-async evervault.enableCagesBeta([cageAttestationData: Object])
+async evervault.enableCages([cageAttestationData: Object])
 ```
 
 | Key          | Type             | Default     | Description                                                                                                                                                                                                                                                                          |
@@ -187,7 +188,7 @@ async evervault.enableCagesBeta([cageAttestationData: Object])
 #### Cages Beta Example
 
 ```javascript
-await evervault.enableCagesBeta({
+await evervault.enableCages({
   'hello-cage': {
     pcr8: '97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca',
   },

@@ -14,13 +14,13 @@ const fakeTimeTests =
     : describe.skip;
 
 describe('cageAttestBeta', () => {
-  describe('parseCageNameFromHost', () => {
+  describe('parseCageNameAndAppFromHost', () => {
     const testCage = 'my-cage';
     const testApp = 'my-app';
     const hostname = 'cages.evervault.com';
     context('Request to base cage host name', () => {
       it('returns expected cage name', () => {
-        const cageName = cageAttest.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameAndAppFromHost(
           `${testCage}.${testApp}.${hostname}`
         );
         expect(cageName).to.deep.equal({
@@ -31,7 +31,7 @@ describe('cageAttestBeta', () => {
     });
     context('Request to cage nonce subdomain', () => {
       it('returns expected cage name', () => {
-        const cageName = cageAttest.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameAndAppFromHost(
           `noncey.attest.${testCage}.${testApp}.${hostname}`
         );
         expect(cageName).to.deep.equal({
