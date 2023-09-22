@@ -47,18 +47,18 @@ const response = await axios.post('https://example.com', encrypted);
 // Use HTTPSProxyAgent to send data to a third-party
 const httpsAgent = evervault.createRelayHttpsAgent();
 const response = await axios.get('https://example.com', {
-  httpsAgent
+  httpsAgent,
 });
 
 // Decrypt the data
 const decrypted = await evervaultClient.decrypt(encrypted);
 
-// Enable the Cages beta client
-await evervaultClient.enableCagesBeta({ 'my-cage': { pcr8: '...' } });
+// Enable the Cages client
+await evervaultClient.enableCages({ 'my-cage': { pcr8: '...' } });
 const response = await axios.post(
   'https://my-cage.my-app.cages.evervault.com',
   encrypted
-); // This connection will be attested by the Cages beta client
+); // This connection will be attested by the Cages client
 ```
 
 ## Reference
@@ -86,9 +86,9 @@ An API Key with the `decrypt` permission must be used to perform this operation.
 async evervault.decrypt(encrypted: string | Array | Object | Buffer);
 ```
 
-| Parameter      | Type                            | Description           |
-| -------------- | --------------------------------| --------------------- |
-| encrypted      | String, Array, Object or Buffer | Data to be decrypted. |
+| Parameter | Type                            | Description           |
+| --------- | ------------------------------- | --------------------- |
+| encrypted | String, Array, Object or Buffer | Data to be decrypted. |
 
 ### evervault.createClientSideDecryptToken()
 
@@ -100,10 +100,10 @@ An API Key with the `Create Token` permission must be used to perform this opera
 async evervault.createClientSideDecryptToken(payload: string | Array | Object, expiry: Date);
 ```
 
-| Parameter      | Type                            | Description                                                           |
-| -------------- | --------------------------------| --------------------------------------------------------------------- |
-| payload        | String, Array, or Object        | Data that the token can decrypt.                                      |
-| expiry         | Date                            | The expiry of the token, must be < 10 mins from now. (Default 5 mins) |
+| Parameter | Type                     | Description                                                           |
+| --------- | ------------------------ | --------------------------------------------------------------------- |
+| payload   | String, Array, or Object | Data that the token can decrypt.                                      |
+| expiry    | Date                     | The expiry of the token, must be < 10 mins from now. (Default 5 mins) |
 
 ### evervault.run()
 
@@ -161,33 +161,34 @@ async evervault.enableOutboundRelay([options: Object])
 `evervault.createRelayHttpsAgent()` will return a `HttpsProxyAgent` configred to proxy traffic through Relay.
 
 ```javascript
-evervault.createRelayHttpsAgent()
+evervault.createRelayHttpsAgent();
 ```
+
 #### createRelayHttpsAgent axios example
 
 ```javascript
 const httpsAgent = evervault.createRelayHttpsAgent();
 const response = await axios.get('https://example.com', {
-  httpsAgent
+  httpsAgent,
 });
 ```
 
-### evervault.enableCagesBeta()
+### evervault.enableCages()
 
-`evervault.enableCagesBeta()` configures your client to automatically attest any requests to Cages. See the [Cage attestation docs](https://docs.evervault.com/products/cages#how-does-attestation-work-with-cages) to learn more.
+`evervault.enableCages()` configures your client to automatically attest any requests to Cages. See the [Cage attestation docs](https://docs.evervault.com/products/cages#how-does-attestation-work-with-cages) to learn more.
 
 ```javascript
-async evervault.enableCagesBeta([cageAttestationData: Object])
+async evervault.enableCages([cageAttestationData: Object])
 ```
 
-| Key          | Type             | Default     | Description                                                                                                                                               |
-| ------------ | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Key          | Type             | Default     | Description                                                                                                                                                                                                                                                                          |
+| ------------ | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `<CageName>` | `Object` `Array` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. The provided data can be either a single Object, or an Array of Objects to allow roll-over between different sets of PCRs. |
 
 #### Cages Beta Example
 
 ```javascript
-await evervault.enableCagesBeta({
+await evervault.enableCages({
   'hello-cage': {
     pcr8: '97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca',
   },

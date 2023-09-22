@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 const { cageAttest, errors } = require('../../lib/utils');
+const config = require('../../lib/config');
 
 /**
  * Note: these tests are time sensitive, so are expected to fail when used without libfaketime
@@ -12,30 +13,36 @@ const fakeTimeTests =
     ? describe
     : describe.skip;
 
-describe('cageAttest', () => {
-  describe('parseCageNameFromHost', () => {
+describe('cageAttestBeta', () => {
+  describe('parseCageNameAndAppFromHost', () => {
     const testCage = 'my-cage';
     const testApp = 'my-app';
     const hostname = 'cages.evervault.com';
     context('Request to base cage host name', () => {
       it('returns expected cage name', () => {
-        const cageName = cageAttest.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameAndAppFromHost(
           `${testCage}.${testApp}.${hostname}`
         );
-        expect(cageName).to.deep.equal(testCage);
+        expect(cageName).to.deep.equal({
+          cageName: testCage,
+          appUuid: testApp,
+        });
       });
     });
     context('Request to cage nonce subdomain', () => {
       it('returns expected cage name', () => {
-        const cageName = cageAttest.parseCageNameFromHost(
+        const cageName = cageAttest.parseCageNameAndAppFromHost(
           `noncey.attest.${testCage}.${testApp}.${hostname}`
         );
-        expect(cageName).to.deep.equal(testCage);
+        expect(cageName).to.deep.equal({
+          cageName: testCage,
+          appUuid: testApp,
+        });
       });
     });
   });
 
-  fakeTimeTests('attestCageConnection', () => {
+  fakeTimeTests('attestCageConnectionBeta', () => {
     const cageName = 'a-test-of-attest';
     const appUuid = 'app_452e33b20b42';
     const hostname = 'cages.evervault.com';
@@ -54,7 +61,7 @@ describe('cageAttest', () => {
 
     context('given a valid cert and PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = cageAttest.attestCageConnection(
+        const result = cageAttest.attestCageConnectionBeta(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -69,7 +76,7 @@ describe('cageAttest', () => {
 
     context('given a valid cert and no PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = cageAttest.attestCageConnection(
+        const result = cageAttest.attestCageConnectionBeta(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -81,7 +88,7 @@ describe('cageAttest', () => {
 
     context('given a valid cert and some PCRs', () => {
       it('successfully attests the connection', () => {
-        const result = cageAttest.attestCageConnection(
+        const result = cageAttest.attestCageConnectionBeta(
           `${cageName}.${appUuid}.${hostname}`,
           {
             raw: derCert,
@@ -101,7 +108,7 @@ describe('cageAttest', () => {
         try {
           const invalidPCRs = { ...validPCRs };
           invalidPCRs.pcr8 = validPCRs.pcr0;
-          cageAttest.attestCageConnection(
+          cageAttest.attestCageConnectionBeta(
             `${cageName}.${appUuid}.${hostname}`,
             {
               raw: derCert,

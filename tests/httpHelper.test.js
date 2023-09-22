@@ -17,11 +17,11 @@ describe('overload https requests', () => {
       .stub()
       .returns(fs.readFileSync(`${__dirname}/utilities/ssl-cert-snakeoil.pem`)),
   };
-  origionalRequest = https.request;
+  originalRequest = https.request;
   const testUrl = 'https://evervault.com';
 
   afterEach(() => {
-    https.request = origionalRequest;
+    https.request = originalRequest;
   });
 
   const wasProxied = (result) => {
@@ -38,7 +38,7 @@ describe('overload https requests', () => {
         shouldNotFilter,
         debugRequests,
         evClient,
-        origionalRequest
+        originalRequest
       );
 
       return await phin(testUrl).then((result) => {
