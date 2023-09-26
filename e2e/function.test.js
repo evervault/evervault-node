@@ -49,7 +49,7 @@ describe('Functions', () => {
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const functionResponse = await axios.post(
-        `https://api.evervault.io/functions/${functionName}/runs`,
+        `https://api.evervault.com/functions/${functionName}/runs`,
         { payload: encrypted },
         {
           headers: {
