@@ -6,8 +6,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/everva
 
 ## Getting Started
 
-To make life easier, this module features a code formatter/linter and also a commit formatter/linter, so that our
-releases will be compatible with [semantic release](https://semantic-release.gitbook.io/semantic-release/).
+To make life easier, this module features a code formatter/linter.
 
 You will first need to install all of the dependencies with
 
@@ -21,7 +20,7 @@ after that is done, there are git hooks which need to be installed using [husky]
 npm run prepare
 ```
 
-We use three different hooks: `commit-msg`, `pre-commit` and `prepare-commit-msg`.
+We use one hook: `pre-commit`.
 
 ## Code Formatting
 
@@ -33,8 +32,10 @@ There is a test that is run whenever a pull request is made (`npm run lint`), so
 
 ## Commit Formatting & Releases
 
-To maintain compatibility with [semantic versioning](https://semver.org/), we use a combination of commit formatting and [semantic release](https://github.com/semantic-release/semantic-release).
+We use [changesets](https://github.com/changesets/changesets) to version manage in this repo.
 
-When you run `git commit`, you will be presented with [commitizen](https://github.com/commitizen/cz-cli), which will interactively run through the generation of a standardized commit message. Please follow this format because it ensures that changes will be well reflected in versioning. There is also a lint run on commits to ensure they are the correct style.
+When creating a pr that needs to be rolled into a version release, do `npx changeset`, select the level of the version bump required and describe the changes for the change logs. DO NOT select major for releasing breaking changes without team approval.
 
-We use the commit style specified in [conventional commits](https://www.conventionalcommits.org/).
+To release:
+
+Merge the version PR that the changeset bot created to bump the version numbers. This will bump the versions of the packages, create a git tag for the release, and release the new version to npm.

@@ -40,11 +40,7 @@
   },
   "devDependencies": {
     "axios": "^1.5.0",
-    "@commitlint/cli": "^13.1.0",
-    "@commitlint/config-conventional": "^13.1.0",
     "chai": "^4.2.0",
-    "commitizen": "^4.2.4",
-    "cz-conventional-changelog": "^3.2.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "mocha": "^10.0.0",
@@ -64,11 +60,6 @@
   },
   "lint-staged": {
     "**/*.js": "prettier --write --ignore-unknown \"./**/*.js\""
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "optionalDependencies": {
     "evervault-attestation-bindings": "^0.3.2"
