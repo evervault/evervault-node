@@ -121,62 +121,427 @@ describe('Http Module', () => {
     });
   });
 
-  describe('runCage', () => {
-    context('Given an api key', () => {
-      const testCage = 'my-magic-cage';
-      context('Request is successful', () => {
-        const testResponse = { test: 'data' };
-        let runCageNock;
-        before(() => {
-          runCageNock = setupNock('https://run.evervault.com')
-            .post(`/${testCage}`)
-            .reply(200, testResponse);
-        });
-        it('It posts to the cage name with the api key', () => {
-          return testHttpClient
-            .runCage(testCage, { test: 'data' })
-            .then((res) => {
-              expect(runCageNock.isDone()).to.be.true;
-              expect(res.body).to.deep.equal(testResponse);
-            });
-        });
+  describe('runFunction', () => {
+    const testFunction = 'my-magic-function';
+    context('Function run succeeds', () => {
+      const testResponse = {
+        id: 'func_run_b470a269a369',
+        result: { test: 'data' },
+        status: 'success',
+      };
+      let runFunctionNock;
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(200, testResponse);
       });
+      it('It receives the expected response', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((res) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(res.body).to.deep.equal(testResponse);
+          });
+      });
+    });
 
-      context('Request fails', () => {
-        let runCageNock;
-        const testResponse = { errorType: 'NotFound' };
-        before(() => {
-          runCageNock = setupNock('https://run.evervault.com')
-            .post(`/${testCage}`)
-            .reply(404, testResponse);
-        });
-        it('It throws an error', () => {
-          return testHttpClient
-            .runCage(testCage, { test: 'data' })
-            .then((res) => {
-              expect(runCageNock.isDone()).to.be.true;
-              expect(res.statusCode).to.equal(404);
-              expect(res.body).to.deep.equal(testResponse);
-            });
-        });
+    context('Function run fails', () => {
+      let runFunctionNock;
+      const testResponse = {
+        error: { message: 'Uh oh!', stack: 'Error: Uh oh!...' },
+        id: 'func_run_e4f1d8d83ec0',
+        status: 'failure',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(200, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.FunctionRuntimeError);
+            expect(err.message).to.equal(testResponse.error.message);
+          });
+      });
+    });
+
+    context('Function initialization fails', () => {
+      let runFunctionNock;
+      const testResponse = {
+        error: {
+          message: 'The function failed to initialize...',
+          stack: 'JavaScript Error',
+        },
+        id: 'func_run_8c70a47efcb4',
+        status: 'failure',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(200, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.FunctionInitializationError);
+            expect(err.message).to.equal(testResponse.error.message);
+          });
+      });
+    });
+
+    context('Invalid Request', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 400,
+        code: 'invalid-request',
+        title: 'InvalidRequest',
+        detail: 'The provided action was invalid',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(400, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.RequestError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('Unauthorized', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 401,
+        code: 'unauthorized',
+        title: 'Unauthorized',
+        detail:
+          'The request cannot be authenticated. The request does not contain valid credentials. Please retry with a valid API key.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(401, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.UnauthorizedError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('Forbidden', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 403,
+        code: 'forbidden',
+        title: 'Forbidden',
+        detail:
+          'The API key does not have the required permissions. API key permissions can be updated in the Evervault Dashboard.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(403, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.ForbiddenError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('Forbidden', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 403,
+        code: 'forbidden',
+        title: 'Forbidden',
+        detail: 'Run requested by an IP address which is not whitelisted',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(403, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.ForbiddenIPError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('ResourceNotFound', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 404,
+        code: 'resource-not-found',
+        title: 'Resource Not Found',
+        detail: 'The resource /functions/world-hello was not found.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(404, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.FunctionNotFoundError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('MethodNotAllowed', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 405,
+        code: 'method-not-allowed',
+        title: 'Method Not Allowed',
+        detail: 'The requested method is not allowed on this endpoint.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(405, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.RequestError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('RequestTimeout', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 408,
+        code: 'request-timeout',
+        title: 'Request Timeout',
+        detail:
+          'Function execution exceeded the allotted time and has timed out. Please review your code to ensure it finishes within the time limit set in function.toml.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(408, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.FunctionTimeoutError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('FunctionNotReady', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 409,
+        code: 'function-not-ready',
+        title: 'Function Not Ready',
+        detail:
+          "The Function is not ready to be invoked yet. This can occur when it hasn't been executed in a while. Retrying to run the Function after a short time should resolve this.",
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(409, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.FunctionNotReadyError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('UnprocessableContent', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 422,
+        code: 'unprocessable-content',
+        title: 'Unprocessable Content',
+        detail: 'Unable to decrypt data.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(422, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.DecryptError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
+      });
+    });
+
+    context('InternalServerError', () => {
+      let runFunctionNock;
+      const testResponse = {
+        status: 500,
+        code: 'internal-server-error',
+        title: 'Internal Server Error',
+        detail:
+          'An internal error occurred. For additional assistance, please contact support@evervault.com.',
+      };
+      before(() => {
+        runFunctionNock = setupNock(
+          'https://api.evervault.com',
+          testApiKey,
+          true
+        )
+          .post(`/functions/${testFunction}/runs`)
+          .reply(500, testResponse);
+      });
+      it('It throws an error', () => {
+        return testHttpClient
+          .runFunction(testFunction, { test: 'data' })
+          .then((_) => {
+            expect('Should not be hit').to.be.true;
+          })
+          .catch((err) => {
+            expect(runFunctionNock.isDone()).to.be.true;
+            expect(err).to.be.instanceOf(errors.EvervaultError);
+            expect(err.message).to.equal(testResponse.detail);
+          });
       });
     });
   });
 
   describe('createRunToken', () => {
     context('Given an api key', () => {
-      const testCage = 'my-magic-cage';
+      const testFunction = 'my-magic-function';
       context('Request is successful', () => {
         const testResponse = { test: 'data' };
         let createRunTokenNock;
         before(() => {
           createRunTokenNock = setupNock('https://api.evervault.com')
-            .post(`/v2/functions/${testCage}/run-token`)
+            .post(`/v2/functions/${testFunction}/run-token`)
             .reply(200, testResponse);
         });
-        it('It posts to the cage name with the api key', () => {
+        it('It posts to the function name with the api key', () => {
           return testHttpClient
-            .createRunToken(testCage, { test: 'data' })
+            .createRunToken(testFunction, { test: 'data' })
             .then((res) => {
               expect(createRunTokenNock.isDone()).to.be.true;
               expect(res.body).to.deep.equal(testResponse);
@@ -189,12 +554,12 @@ describe('Http Module', () => {
         const testResponse = { errorType: 'NotFound' };
         before(() => {
           createRunTokenNock = setupNock('https://api.evervault.com')
-            .post(`/v2/functions/${testCage}/run-token`)
+            .post(`/v2/functions/${testFunction}/run-token`)
             .reply(404, testResponse);
         });
         it('It throws an error', () => {
           return testHttpClient
-            .createRunToken(testCage, { test: 'data' })
+            .createRunToken(testFunction, { test: 'data' })
             .then((res) => {
               expect(createRunTokenNock.isDone()).to.be.true;
               expect(res.statusCode).to.equal(404);

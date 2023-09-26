@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const axios = require('axios');
 const Evervault = require('../lib');
 
-describe('Encrypt and Decrypt', () => {
+describe('Functions', () => {
   const appUuid = process.env.EV_APP_UUID;
   const apiKey = process.env.EV_API_KEY;
   const functionName = process.env.EV_FUNCTION_NAME;
@@ -17,8 +17,6 @@ describe('Encrypt and Decrypt', () => {
     it('runs the function', async () => {
       const payload = {
         name: 'John Doe',
-        age: 42,
-        isAlive: true,
       };
       const encrypted = await evervaultClient.encrypt(payload);
 
@@ -26,47 +24,42 @@ describe('Encrypt and Decrypt', () => {
         functionName,
         encrypted
       );
-      expect(functionResponse.result.message).to.equal('OK');
+      expect(functionResponse.status).to.equal('success');
+      expect(functionResponse.result.name).to.equal('John Doe');
     });
 
-    it('runs the function async', async () => {
+    it('runs the function and returns the error object', async () => {
       const payload = {
-        name: 'John Doe',
-        age: 42,
-        isAlive: true,
+        shouldError: true,
       };
-      const encrypted = await evervaultClient.encrypt(payload);
 
-      const functionResponse = await evervaultClient.run(
-        functionName,
-        encrypted,
-        { async: true }
-      );
-      expect(functionResponse.length).to.equal(0);
+      const functionResponse = await evervaultClient.run(functionName, payload);
+      expect(functionResponse.status).to.equal('failure');
+      expect(functionResponse.error.message).to.equal('Uh oh!');
     });
 
-    it('runs the function witih a run token', async () => {
+    it('runs the function with a run token', async () => {
       const payload = {
         name: 'John Doe',
-        age: 42,
-        isAlive: true,
       };
       const encrypted = await evervaultClient.encrypt(payload);
       const tokenResponse = await evervaultClient.createRunToken(
         functionName,
         encrypted
       );
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       const functionResponse = await axios.post(
-        `https://run.evervault.com/${functionName}`,
-        { ...encrypted },
+        `https://api.evervault.io/functions/${functionName}/runs`,
+        { payload: encrypted },
         {
           headers: {
-            Authorization: `Bearer ${tokenResponse.token}`,
+            Authorization: `RunToken ${tokenResponse.token}`,
             'Content-Type': 'application/json',
           },
         }
       );
-      expect(functionResponse.data.result.message).to.equal('OK');
+      expect(functionResponse.status).to.equal('success');
+      expect(functionResponse.data.result.name).to.equal('John Doe');
     });
   });
 });
