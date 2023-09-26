@@ -313,7 +313,7 @@ describe('Http Module', () => {
         status: 403,
         code: 'forbidden',
         title: 'Forbidden',
-        detail: 'Run requested by an IP address which is not whitelisted',
+        detail: 'Run requested by an IP address which is not whitelisted.',
       };
       before(() => {
         runFunctionNock = setupNock(
