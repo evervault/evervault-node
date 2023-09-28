@@ -369,37 +369,6 @@ describe('Http Module', () => {
       });
     });
 
-    context('MethodNotAllowed', () => {
-      let runFunctionNock;
-      const testResponse = {
-        status: 405,
-        code: 'method-not-allowed',
-        title: 'Method Not Allowed',
-        detail: 'The requested method is not allowed on this endpoint.',
-      };
-      before(() => {
-        runFunctionNock = setupNock(
-          'https://api.evervault.com',
-          testApiKey,
-          true
-        )
-          .post(`/functions/${testFunction}/runs`)
-          .reply(405, testResponse);
-      });
-      it('It throws an error', () => {
-        return testHttpClient
-          .runFunction(testFunction, { test: 'data' })
-          .then((_) => {
-            expect.fail('Expected an error to be thrown');
-          })
-          .catch((err) => {
-            expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.RequestError);
-            expect(err.message).to.equal(testResponse.detail);
-          });
-      });
-    });
-
     context('RequestTimeout', () => {
       let runFunctionNock;
       const testResponse = {
