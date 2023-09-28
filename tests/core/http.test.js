@@ -169,7 +169,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -202,7 +202,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -233,7 +233,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -265,7 +265,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -297,7 +297,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -328,7 +328,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -359,7 +359,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -390,7 +390,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -422,7 +422,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -454,7 +454,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -485,7 +485,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
@@ -517,7 +517,7 @@ describe('Http Module', () => {
         return testHttpClient
           .runFunction(testFunction, { test: 'data' })
           .then((_) => {
-            expect('Should not be hit').to.be.true;
+            expect.fail('Expected an error to be thrown');
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;

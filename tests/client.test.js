@@ -195,7 +195,7 @@ describe('Testing the Evervault SDK', () => {
           return sdk
             .run(functionName, testData)
             .then((_) => {
-              expect('Should not be hit').to.be.true;
+              expect.fail('Expected an error to be thrown');
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
@@ -226,7 +226,7 @@ describe('Testing the Evervault SDK', () => {
           return sdk
             .run(functionName, testData)
             .then((_) => {
-              expect('Should not be hit').to.be.true;
+              expect.fail('Expected an error to be thrown');
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
@@ -256,7 +256,7 @@ describe('Testing the Evervault SDK', () => {
           return sdk
             .run(functionName, testData)
             .then((_) => {
-              expect('Should not be hit').to.be.true;
+              expect.fail('Expected an error to be thrown');
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
