@@ -311,8 +311,8 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 403,
-        code: 'forbidden',
-        title: 'Forbidden',
+        code: 'function/forbidden-ip',
+        title: 'Forbidden IP',
         detail: 'Run requested by an IP address which is not whitelisted.',
       };
       before(() => {
