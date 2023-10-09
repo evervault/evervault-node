@@ -50,6 +50,7 @@ jobs:
               }
             ' CHANGELOG.md)
             gh release create $COMMIT_TAG -t "$COMMIT_TAG" -n "$CHANGELOG"
+            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
             npm publish
           else
             echo "No tag attached to HEAD. No new release needed."
