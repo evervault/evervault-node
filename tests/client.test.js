@@ -236,7 +236,7 @@ describe('Testing the Evervault SDK', () => {
         });
       });
 
-      context('abc123Error thrown by API', () => {
+      context('Error thrown by API', () => {
         beforeEach(() => {
           testResponse = {
             status: 401,
