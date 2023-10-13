@@ -219,7 +219,8 @@ describe('Crypto Module with P256 Curve', () => {
   const derivedSecret = testCryptoClient.getSharedSecret(
     ecdh,
     Buffer.from(testEcdhCageKey, 'base64'),
-    publicKey
+    publicKey,
+    'prime256v1'
   );
 
   context('Encrypting object', () => {
