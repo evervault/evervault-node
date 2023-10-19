@@ -230,7 +230,7 @@ describe('Testing the Evervault SDK', () => {
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(errors.FunctionInitializationError);
+              expect(err).to.be.instanceOf(errors.FunctionRuntimeError);
               expect(err.message).to.equal(testResponse.error.message);
             });
         });

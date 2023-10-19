@@ -206,7 +206,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.FunctionInitializationError);
+            expect(err).to.be.instanceOf(errors.FunctionRuntimeError);
             expect(err.message).to.equal(testResponse.error.message);
           });
       });
@@ -237,7 +237,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.RequestError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -363,7 +363,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.FunctionNotFoundError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -373,7 +373,7 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 408,
-        code: 'request-timeout',
+        code: 'function/request-timeout',
         title: 'Request Timeout',
         detail:
           'Function execution exceeded the allotted time and has timed out. Please review your code to ensure it finishes within the time limit set in function.toml.',
@@ -405,7 +405,7 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 409,
-        code: 'function-not-ready',
+        code: 'function/function-not-ready',
         title: 'Function Not Ready',
         detail:
           "The Function is not ready to be invoked yet. This can occur when it hasn't been executed in a while. Retrying to run the Function after a short time should resolve this.",
