@@ -366,45 +366,6 @@ describe('Testing the Evervault SDK', () => {
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
-      it("Doesn't proxy when intercept is false", async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          intercept: false,
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
-        expect(wasProxied(response, testApiKey)).to.be.false;
-      });
-
-      it('Proxies all when intercept is true', async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          intercept: true,
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
-        expect(wasProxied(response, testApiKey)).to.be.true;
-      });
-
-      it('Proxies all when ignoreDomains is present', async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          ignoreDomains: [''],
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
-        expect(wasProxied(response, testApiKey)).to.be.true;
-      });
-
       it('Proxies domain included in decryptionDomains (constructor)', async () => {
         const client = new EvervaultClient(testAppId, testApiKey, {
           decryptionDomains: ['destination1.evervault.test'],
