@@ -311,7 +311,7 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 403,
-        code: 'function/forbidden-ip',
+        code: 'functions/forbidden-ip',
         title: 'Forbidden IP',
         detail: 'Run requested by an IP address which is not whitelisted.',
       };
@@ -373,7 +373,7 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 408,
-        code: 'function/request-timeout',
+        code: 'functions/request-timeout',
         title: 'Request Timeout',
         detail:
           'Function execution exceeded the allotted time and has timed out. Please review your code to ensure it finishes within the time limit set in function.toml.',
@@ -405,7 +405,7 @@ describe('Http Module', () => {
       let runFunctionNock;
       const testResponse = {
         status: 409,
-        code: 'function/function-not-ready',
+        code: 'functions/function-not-ready',
         title: 'Function Not Ready',
         detail:
           "The Function is not ready to be invoked yet. This can occur when it hasn't been executed in a while. Retrying to run the Function after a short time should resolve this.",
