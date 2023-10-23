@@ -567,7 +567,12 @@ describe('Http Module', () => {
 
       context('Request fails', () => {
         let createRunTokenNock;
-        const testResponse = { errorType: 'NotFound' };
+        const testResponse = {
+          status: 400,
+          code: 'invalid-request',
+          title: 'InvalidRequest',
+          detail: 'The provided action was invalid',
+        };
         before(() => {
           createRunTokenNock = setupNock(
             'https://api.evervault.com',
@@ -575,12 +580,13 @@ describe('Http Module', () => {
             true
           )
             .post(`/client-side-tokens`)
-            .reply(400, '{"error": "Request is not valid"}');
+            .reply(400, testResponse);
         });
         it('It throws an error', () => {
           return testHttpClient.createToken({ test: 'data' }).catch((err) => {
             expect(createRunTokenNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.RequestError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
+            expect(err.message).to.equal(testResponse.detail);
           });
         });
       });
