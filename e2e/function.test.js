@@ -6,6 +6,9 @@ describe('Functions', () => {
   const appUuid = process.env.EV_APP_UUID;
   const apiKey = process.env.EV_API_KEY;
   const functionName = process.env.EV_FUNCTION_NAME;
+  const initializationErrorFunctionName =
+    process.env.EV_INITIALIZATION_ERROR_FUNCTION_NAME;
+
   const payload = {
     string: 'hello',
     integer: 1,
@@ -64,6 +67,20 @@ describe('Functions', () => {
         .catch((error) => {
           expect(error.type).to.equal('FunctionRuntimeError');
           expect(error.message).to.equal('User threw an error');
+        });
+    });
+
+    it('runs the function and returns an initialization error', async () => {
+      await evervaultClient
+        .run(initializationErrorFunctionName, {})
+        .then(() => {
+          expect.fail('Expected an error to be thrown');
+        })
+        .catch((error) => {
+          expect(error.type).to.equal('FunctionRuntimeError');
+          expect(error.message).to.equal(
+            'The function failed to initialize. This error is commonly encountered when there are problems with the function code (e.g. a syntax error) or when a required import is missing.'
+          );
         });
     });
 
