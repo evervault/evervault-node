@@ -73,29 +73,34 @@ describe('Crypto Module', () => {
   });
 
   context('Building ciphertext buffer', () => {
-    it ('Correctly constructs the buffer without metadata', () => {
-      let result = testCryptoClient.buildCipherBuffer("hello world", undefined);
-      expect(result.equals(Buffer.from("hello world"))).to.be.true;
+    it('Correctly constructs the buffer without metadata', () => {
+      let result = testCryptoClient.buildCipherBuffer('hello world', undefined);
+      expect(result.equals(Buffer.from('hello world'))).to.be.true;
     });
 
-    it ('correctly constructs the buffer with metadata', () => {
-      const dataToEncrypt = "hello world";
+    it('correctly constructs the buffer with metadata', () => {
+      const dataToEncrypt = 'hello world';
 
-      const result = testCryptoClient.buildCipherBuffer(dataToEncrypt, { role: 'test-role' });
+      const result = testCryptoClient.buildCipherBuffer(dataToEncrypt, {
+        role: 'test-role',
+      });
       const dataSlice = result.slice(result.length - dataToEncrypt.length);
 
-      const metadataSlice = result.slice(0, result.length - dataToEncrypt.length);
+      const metadataSlice = result.slice(
+        0,
+        result.length - dataToEncrypt.length
+      );
       const metadataLength = metadataSlice.slice(0, 2).readInt16LE();
       const metadataBytes = metadataSlice.slice(2);
 
       const unpackedMetadata = unpack(metadataBytes);
 
-      expect(dataSlice.equals(Buffer.from("hello world"))).to.be.true;
+      expect(dataSlice.equals(Buffer.from('hello world'))).to.be.true;
       expect(metadataLength).to.equal(metadataBytes.length);
-      expect(unpackedMetadata.dr).to.equal("test-role");
+      expect(unpackedMetadata.dr).to.equal('test-role');
       expect(unpackedMetadata.eo).to.equal(5);
-    })
-  })
+    });
+  });
 
   context('Data is undefined', () => {
     it('Throws an error', () => {
