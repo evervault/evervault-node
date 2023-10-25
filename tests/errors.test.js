@@ -2,15 +2,12 @@ const { expect } = require('chai');
 const { errors } = require('../lib/utils');
 const { ApiKeyError, RequestError, AccountError } = errors;
 
-const createErrorMapFn = (status, body) => () =>
-  errors.mapApiResponseToError({ statusCode: status, body });
-
 describe('Errors', () => {
-  describe('mapApiResponseToError', () => {
+  describe('mapResponseCodeToError', () => {
     context('Received a 401', () => {
       it('Returns an ApiKeyError', () => {
         expect(
-          errors.mapApiResponseToError({ statusCode: 401 })
+          errors.mapResponseCodeToError({ statusCode: 401 })
         ).to.be.instanceOf(ApiKeyError);
       });
     });
@@ -18,7 +15,7 @@ describe('Errors', () => {
     context('Received a 404', () => {
       it('Returns a RequestError', () => {
         expect(
-          errors.mapApiResponseToError({ statusCode: 404 })
+          errors.mapResponseCodeToError({ statusCode: 404 })
         ).to.be.instanceOf(RequestError);
       });
     });
@@ -26,7 +23,7 @@ describe('Errors', () => {
     context('Received a 423', () => {
       it('Returns an AccountError', () => {
         expect(
-          errors.mapApiResponseToError({ statusCode: 423, body: {} })
+          errors.mapResponseCodeToError({ statusCode: 423, body: {} })
         ).to.be.instanceOf(AccountError);
       });
     });
@@ -34,7 +31,7 @@ describe('Errors', () => {
     context('Received a 424', () => {
       it('Returns an AccountError', () => {
         expect(
-          errors.mapApiResponseToError({ statusCode: 424, body: {} })
+          errors.mapResponseCodeToError({ statusCode: 424, body: {} })
         ).to.be.instanceOf(AccountError);
       });
     });

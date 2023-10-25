@@ -34,7 +34,8 @@ jobs:
       - run: npm run lint
       - run: npm run test:e2e
         env:
-          EV_APP_UUID: ${{ secrets.EV_APP_UUID }}
-          EV_API_KEY: ${{ secrets.EV_API_KEY }}
-          EV_FUNCTION_NAME: ${{ secrets.EV_FUNCTION_NAME }}
+          EV_APP_UUID: ${{ secrets.EV_APP_UUID_V5 }}
+          EV_API_KEY: ${{ secrets.EV_API_KEY_V5 }}
+          EV_FUNCTION_NAME: ${{ secrets.EV_FUNCTION_NAME_V5 }}
+          EV_INITIALIZATION_ERROR_FUNCTION_NAME: ${{ secrets.EV_INITIALIZATION_ERROR_FUNCTION_NAME }}
           EV_SYNTHETIC_ENDPOINT_URL: ${{ secrets.EV_SYNTHETIC_ENDPOINT_URL }}
