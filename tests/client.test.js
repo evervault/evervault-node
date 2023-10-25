@@ -108,7 +108,7 @@ describe('Testing the Evervault SDK', () => {
         it('Throws an error', () => {
           return sdk.encrypt(testData).catch((err) => {
             expect(cageKeyNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ApiKeyError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(encryptStub).to.not.have.been.called;
           });
         });
@@ -260,7 +260,7 @@ describe('Testing the Evervault SDK', () => {
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(errors.UnauthorizedError);
+              expect(err).to.be.instanceOf(errors.EvervaultError);
               expect(err.message).to.equal(testResponse.detail);
             });
         });
