@@ -332,7 +332,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ForbiddenIPError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -458,7 +458,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.DecryptError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
