@@ -72,6 +72,26 @@ describe('Crypto Module', () => {
     });
   });
 
+  context('Building encoded metadata', () => {
+    it('Correctly constructs the encoded metadata', () => {
+      let result = testCryptoClient.buildEncodedMetadata(
+        'allow-all',
+        1691665064
+      );
+      let expected = Buffer.from(
+        'g6JkcqlhbGxvdy1hbGyiZW8FomV0zmTUwqg=',
+        'base64'
+      );
+      expect(expected).to.deep.equal(result);
+    });
+
+    it('Correctly constructs the encoded metadata with no role', () => {
+      let result = testCryptoClient.buildEncodedMetadata(null, 1691665064);
+      let expected = Buffer.from('gqJlbwWiZXTOZNTCqA==', 'base64');
+      expect(expected).to.deep.equal(result);
+    });
+  });
+
   context('Building ciphertext buffer', () => {
     it('Correctly constructs the buffer without metadata', () => {
       let result = testCryptoClient.buildCipherBuffer('hello world', undefined);
