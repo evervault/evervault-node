@@ -1,12 +1,17 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
-const { ApiKeyError, EvervaultError, DecryptForbiddenError } = require('../lib/utils/errors');
+const {
+  ApiKeyError,
+  EvervaultError,
+  DecryptForbiddenError,
+} = require('../lib/utils/errors');
 
 describe('Encrypt and Decrypt', () => {
   const appUuid = process.env.EV_APP_UUID;
   const apiKey = process.env.EV_API_KEY;
 
-  const metadataStringRegex = /((ev(:|%3A))(debug(:|%3A))?((QlJV|TENZ|)(:|%3A))?((number|boolean|string)(:|%3A))?(([A-z0-9+\/=%]+)(:|%3A)){3}(\$|%24))|(((eyJ[A-z0-9+=.]+){2})([\w]{8}(-[\w]{4}){3}-[\w]{12}))/;
+  const metadataStringRegex =
+    /((ev(:|%3A))(debug(:|%3A))?((QlJV|TENZ|)(:|%3A))?((number|boolean|string)(:|%3A))?(([A-z0-9+\/=%]+)(:|%3A)){3}(\$|%24))|(((eyJ[A-z0-9+=.]+){2})([\w]{8}(-[\w]{4}){3}-[\w]{12}))/;
 
   let evervaultClient;
 
@@ -21,7 +26,7 @@ describe('Encrypt and Decrypt', () => {
       }
     }
     return true;
-  }
+  };
 
   context('Encrypt and Decrypt with K1 curve', () => {
     beforeEach(() => {
@@ -191,10 +196,12 @@ describe('Encrypt and Decrypt', () => {
     });
 
     it('fails if role fails validation', () => {
-      const payload = "test";
-      evervaultClient.encrypt(payload, 'a-really-long-and-invalid-data-role').then((result) => {
-        expect(result).to.be.instanceOf(EvervaultError)
-      })
-    })
+      const payload = 'test';
+      evervaultClient
+        .encrypt(payload, 'a-really-long-and-invalid-data-role')
+        .then((result) => {
+          expect(result).to.be.instanceOf(EvervaultError);
+        });
+    });
   });
 });
