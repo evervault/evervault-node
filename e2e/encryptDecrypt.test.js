@@ -162,7 +162,6 @@ describe('Encrypt and Decrypt', () => {
       };
       const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
       evervaultClient.decrypt(encrypted).then((result) => {
-        console.log(result);
         expect(result).to.be.instanceOf(ApiKeyError);
       });
     });
