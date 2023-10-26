@@ -6,7 +6,22 @@ describe('Encrypt and Decrypt', () => {
   const appUuid = process.env.EV_APP_UUID;
   const apiKey = process.env.EV_API_KEY;
 
+  const metadataStringRegex = /((ev(:|%3A))(debug(:|%3A))?((QlJV|TENZ|)(:|%3A))?((number|boolean|string)(:|%3A))?(([A-z0-9+\/=%]+)(:|%3A)){3}(\$|%24))|(((eyJ[A-z0-9+=.]+){2})([\w]{8}(-[\w]{4}){3}-[\w]{12}))/;
+
   let evervaultClient;
+
+  const checkObjectHasStringsWithCorrectVersions = (obj) => {
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'object') {
+        for (const arrVal of obj[key]) {
+          if (!metadataStringRegex.test(arrVal)) return false;
+        }
+      } else {
+        if (!metadataStringRegex.test(value)) return false;
+      }
+    }
+    return true;
+  }
 
   context('Encrypt and Decrypt with K1 curve', () => {
     beforeEach(() => {
@@ -147,6 +162,7 @@ describe('Encrypt and Decrypt', () => {
         array: ['hello', 1, 1.5, true, false],
       };
       const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
+      expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
       const decrypted = await evervaultClient.decrypt(encrypted);
       expect(payload).to.deep.equal(decrypted);
     });
@@ -161,6 +177,7 @@ describe('Encrypt and Decrypt', () => {
         array: ['hello', 1, 1.5, true, false],
       };
       const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
+      expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
       evervaultClient.decrypt(encrypted).then((result) => {
         expect(result).to.be.instanceOf(ApiKeyError);
       });
