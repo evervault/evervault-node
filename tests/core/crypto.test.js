@@ -101,9 +101,7 @@ describe('Crypto Module', () => {
     it('correctly constructs the buffer with metadata', () => {
       const dataToEncrypt = 'hello world';
 
-      const result = testCryptoClient.buildCipherBuffer(dataToEncrypt, {
-        role: 'test-role',
-      });
+      const result = testCryptoClient.buildCipherBuffer(dataToEncrypt, 'test-role');
       const dataSlice = result.slice(result.length - dataToEncrypt.length);
 
       const metadataSlice = result.slice(
