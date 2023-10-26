@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
-const { ApiKeyError } = require('../lib/utils/errors');
+const { ApiKeyError, EvervaultError, DecryptForbiddenError } = require('../lib/utils/errors');
 
 describe('Encrypt and Decrypt', () => {
   const appUuid = process.env.EV_APP_UUID;
@@ -179,7 +179,7 @@ describe('Encrypt and Decrypt', () => {
       const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
       expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
       evervaultClient.decrypt(encrypted).then((result) => {
-        expect(result).to.be.instanceOf(ApiKeyError);
+        expect(result).to.be.instanceOf(DecryptForbiddenError);
       });
     });
 
@@ -189,5 +189,12 @@ describe('Encrypt and Decrypt', () => {
       const decrypted = await evervaultClient.decrypt(encrypted);
       expect(data.equals(decrypted)).to.be.true;
     });
+
+    it('fails if role fails validation', () => {
+      const payload = "test";
+      evervaultClient.encrypt(payload, 'a-really-long-and-invalid-data-role').then((result) => {
+        expect(result).to.be.instanceOf(EvervaultError)
+      })
+    })
   });
 });
