@@ -161,17 +161,17 @@ describe('Encrypt and Decrypt', () => {
         array: ['hello', 1, 1.5, true, false],
       };
       const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
-      evervaultClient.decrypt(encrypted).then(result => {
+      evervaultClient.decrypt(encrypted).then((result) => {
         console.log(result);
         expect(result).to.be.instanceOf(ApiKeyError);
-      })
-    })
+      });
+    });
 
     it('encrypts a file with metadata but metadata is not embedded and decrypts are permitted', async () => {
       const data = Buffer.from('hello world');
       const encrypted = await evervaultClient.encrypt(data, 'forbid-all');
       const decrypted = await evervaultClient.decrypt(encrypted);
       expect(data.equals(decrypted)).to.be.true;
-    })
-  })
+    });
+  });
 });
