@@ -1,6 +1,9 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
-const { EvervaultError } = require('../lib/utils/errors');
+const {
+  EvervaultError,
+  DecryptForbiddenError,
+} = require('../lib/utils/errors');
 
 describe('Encrypt and Decrypt', () => {
   const appUuid = process.env.EV_APP_UUID;
@@ -180,7 +183,7 @@ describe('Encrypt and Decrypt', () => {
       const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
       expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
       evervaultClient.decrypt(encrypted).then((result) => {
-        expect(result).to.be.instanceOf(EvervaultError);
+        expect(result).to.be.instanceOf(DecryptForbiddenError);
       });
     });
 
