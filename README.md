@@ -12,7 +12,7 @@ For full installation support, [book time here](https://calendly.com/evervault/s
 
 ## Documentation
 
-See the Evervault [Node.js SDK documentation](https://docs.evervault.com/sdk/nodejs) to learn how to install, set up, and use the SDK.
+See the Evervault [Node.js SDK documentation](https://docs.evervault.com/sdks/nodejs) to learn how to install, set up, and use the SDK.
 
 ## Contributing
 
