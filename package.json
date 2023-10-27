@@ -8,7 +8,7 @@
     "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'",
-    "test:e2e": "mocha 'e2e/**/*.test.js' --exit",
+    "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test"
   },

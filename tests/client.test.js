@@ -8,12 +8,11 @@ const https = require('https');
 const rewire = require('rewire');
 const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
-const { ForbiddenIPError, DecryptError } = require('../lib/utils/errors');
 const fixtures = require('./utilities/fixtures');
 
-const cageName = 'test-cage',
+const functionName = 'test-function',
   testData = { a: 1 };
-const testCageKey = 'im-the-cage-key';
+const testCageKey = 'im-the-function-key';
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 const testApiKey =
   'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
@@ -81,7 +80,6 @@ describe('Testing the Evervault SDK', () => {
         const sdk = new EvervaultClient(testAppId, testApiKey);
         expect(sdk.encrypt).to.be.a('function');
         expect(sdk.run).to.be.a('function');
-        expect(sdk.encryptAndRun).to.be.a('function');
       });
     });
 
@@ -150,137 +148,122 @@ describe('Testing the Evervault SDK', () => {
       });
     });
 
-    context('Invoking run', () => {
-      let runNock, sdk, testRunResult;
+    context('Invoking function run', () => {
+      let runNock, sdk, testResponse;
 
       beforeEach(() => {
         sdk = new EvervaultClient(testAppId, testApiKey);
       });
 
-      context('Cage run with no options', () => {
+      context('Function run succeeds', () => {
         beforeEach(() => {
-          testRunResult = {
-            data: 'yes',
+          testResponse = {
+            id: 'func_run_b470a269a369',
+            result: { test: 'data' },
+            status: 'success',
           };
-          runNock = nock(sdk.config.http.functionRunUrl, {
+          runNock = nock(sdk.config.http.baseUrl, {
             reqheaders: sdk.config.http.headers,
           })
-            .post(`/${cageName}`)
-            .reply(200, { result: testRunResult });
+            .post(`/functions/${functionName}/runs`)
+            .reply(200, testResponse);
         });
 
-        it('Calls the cage run api', () => {
-          return sdk.run(cageName, testData).then((result) => {
-            expect(result).to.deep.equal({ result: testRunResult });
+        it('It receives the expected response', () => {
+          return sdk.run(functionName, testData).then((result) => {
+            expect(result).to.deep.equal(testResponse);
             expect(runNock.isDone()).to.be.true;
           });
         });
       });
 
-      context('Cage run with options', () => {
+      context('Function run fails', () => {
         beforeEach(() => {
-          testRunResult = {
-            status: 'queued',
+          testResponse = {
+            error: { message: 'Uh oh!', stack: 'Error: Uh oh!...' },
+            id: 'func_run_e4f1d8d83ec0',
+            status: 'failure',
           };
-          runNock = nock(sdk.config.http.functionRunUrl, {
-            reqheaders: {
-              ...sdk.config.http.headers,
-              'x-async': 'true',
-              'x-version-id': '3',
-            },
+          runNock = nock(sdk.config.http.baseUrl, {
+            reqheaders: sdk.config.http.headers,
           })
-            .post(`/${cageName}`)
-            .reply(200, Buffer.alloc(0));
+            .post(`/functions/${functionName}/runs`)
+            .reply(200, testResponse);
         });
 
-        it('Calls the cage run api', () => {
+        it('It throws an error', () => {
           return sdk
-            .run(cageName, testData, { async: true, version: 3 })
-            .then((result) => {
-              expect(result).to.deep.equal(Buffer.alloc(0));
-              expect(runNock.isDone()).to.be.true;
-            });
-        });
-      });
-
-      context('Cage run receiving 403', () => {
-        beforeEach(() => {
-          runNock = nock(sdk.config.http.functionRunUrl, {
-            reqheaders: {
-              ...sdk.config.http.headers,
-            },
-          })
-            .post(`/${cageName}`)
-            .reply(
-              403,
-              { error: 'forbidden address' },
-              { 'x-evervault-error-code': 'forbidden-ip-error' }
-            );
-        });
-
-        it('Calls the cage run api and throws a forbidden ip error', () => {
-          return sdk.run(cageName, testData).catch((err) => {
-            expect(runNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(ForbiddenIPError);
-          });
-        });
-      });
-
-      context('Cage run receiving 422', () => {
-        beforeEach(() => {
-          testRunResult = {
-            status: 'queued',
-          };
-          runNock = nock(sdk.config.http.functionRunUrl, {
-            reqheaders: {
-              ...sdk.config.http.headers,
-            },
-          })
-            .post(`/${cageName}`)
-            .reply(422, { error: 'decrypt failed' });
-        });
-
-        it('Calls the cage run api and throws a decrypt failed error', () => {
-          return sdk
-            .run(cageName, testData, { async: true, version: 3 })
+            .run(functionName, testData)
+            .then((_) => {
+              expect.fail('Expected an error to be thrown');
+            })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(DecryptError);
+              expect(err).to.be.instanceOf(errors.FunctionRuntimeError);
+              expect(err.message).to.equal(testResponse.error.message);
             });
         });
       });
-    });
 
-    context('Invoking encryptAndRun', () => {
-      const httpStub = sinon.stub();
-      const getCageKeyStub = sinon.stub();
-      const runCageStub = sinon.stub();
-      const getRelayOutboundConfigStub = sinon.stub();
-      const testEncryptResult = {
-        data: 'yes',
-      };
-      let sdk;
+      context('Function initialization fails', () => {
+        beforeEach(() => {
+          testResponse = {
+            error: {
+              message: 'The function failed to initialize...',
+              stack: 'JavaScript Error',
+            },
+            id: 'func_run_8c70a47efcb4',
+            status: 'failure',
+          };
+          runNock = nock(sdk.config.http.baseUrl, {
+            reqheaders: sdk.config.http.headers,
+          })
+            .post(`/functions/${functionName}/runs`)
+            .reply(200, testResponse);
+        });
 
-      beforeEach(() => {
-        getCageKeyStub.resolves({ key: testCageKey });
-        runCageStub.resolves({ result: true });
-        httpStub.returns({
-          getCageKey: getCageKeyStub,
-          runCage: runCageStub,
-          getRelayOutboundConfig: getRelayOutboundConfigStub,
+        it('It throws an error', () => {
+          return sdk
+            .run(functionName, testData)
+            .then((_) => {
+              expect.fail('Expected an error to be thrown');
+            })
+            .catch((err) => {
+              expect(runNock.isDone()).to.be.true;
+              expect(err).to.be.instanceOf(errors.FunctionRuntimeError);
+              expect(err.message).to.equal(testResponse.error.message);
+            });
         });
-        encryptStub.resolves(testEncryptResult);
-        EvervaultClient.__set__({
-          Http: httpStub,
-        });
-        sdk = new EvervaultClient(testAppId, testApiKey);
       });
 
-      afterEach(() => {
-        getCageKeyStub.resetHistory();
-        runCageStub.resetHistory();
-        encryptStub.resetHistory();
-        getRelayOutboundConfigStub.resetHistory();
+      context('Error thrown by API', () => {
+        beforeEach(() => {
+          testResponse = {
+            status: 401,
+            code: 'unauthorized',
+            title: 'Unauthorized',
+            detail:
+              'The request cannot be authenticated. The request does not contain valid credentials. Please retry with a valid API key.',
+          };
+          runNock = nock(sdk.config.http.baseUrl, {
+            reqheaders: sdk.config.http.headers,
+          })
+            .post(`/functions/${functionName}/runs`)
+            .reply(401, testResponse);
+        });
+
+        it('It throws an error', () => {
+          return sdk
+            .run(functionName, testData)
+            .then((_) => {
+              expect.fail('Expected an error to be thrown');
+            })
+            .catch((err) => {
+              expect(runNock.isDone()).to.be.true;
+              expect(err).to.be.instanceOf(errors.UnauthorizedError);
+              expect(err.message).to.equal(testResponse.detail);
+            });
+        });
       });
     });
 
@@ -363,45 +346,6 @@ describe('Testing the Evervault SDK', () => {
           .reply(200, { success: true });
 
         const response = await phin('https://destination1.evervault.io');
-        expect(wasProxied(response, testApiKey)).to.be.true;
-      });
-
-      it("Doesn't proxy when intercept is false", async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          intercept: false,
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
-        expect(wasProxied(response, testApiKey)).to.be.false;
-      });
-
-      it('Proxies all when intercept is true', async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          intercept: true,
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
-        expect(wasProxied(response, testApiKey)).to.be.true;
-      });
-
-      it('Proxies all when ignoreDomains is present', async () => {
-        const client = new EvervaultClient(testAppId, testApiKey, {
-          ignoreDomains: [''],
-        });
-
-        nockrandom = nock('https://destination1.evervault.test', {})
-          .get('/')
-          .reply(200, { success: true });
-
-        const response = await phin('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
