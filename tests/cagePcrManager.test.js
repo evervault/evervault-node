@@ -84,12 +84,12 @@ describe('cagePcrManager', () => {
 
       manager.clearStoredPcrs('cage_123');
 
-      expect(await manager.get('cage')).to.deep.equal(undefined);
+      expect(await manager.get('cage_123')).to.deep.equal(null);
 
       //sleep 1 second
       await new Promise((r) => setTimeout(r, 1000));
 
-      expect(await manager.get('cage')).to.deep.equal([testPcrs1]);
+      expect(await manager.get('cage_123')).to.deep.equal([testPcrs1]);
 
       manager.disablePolling();
     });
