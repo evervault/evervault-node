@@ -43,34 +43,32 @@ describe('Testing the Evervault SDK', () => {
 
     context('No api key provided', () => {
       it('throws an error', () => {
-        expect(prepareSdkImport()).to.throw(errors.InitializationError);
+        expect(prepareSdkImport()).to.throw(errors.EvervaultError);
       });
     });
 
     context('An object is provided instead of an api key', () => {
       it('throws an error', () => {
-        expect(prepareSdkImport({})).to.throw(errors.InitializationError);
+        expect(prepareSdkImport({})).to.throw(errors.EvervaultError);
       });
     });
 
     context('An invalid App ID is provided', () => {
       it('throws an error', () => {
-        expect(prepareSdkImport('ev:key:')).to.throw(
-          errors.InitializationError
-        );
+        expect(prepareSdkImport('ev:key:')).to.throw(errors.EvervaultError);
       });
     });
 
     context('No api key provided', () => {
       it('throws an error', () => {
-        expect(prepareSdkImport('app_id')).to.throw(errors.InitializationError);
+        expect(prepareSdkImport('app_id')).to.throw(errors.EvervaultError);
       });
     });
 
     context('An API key is provided but does not belong to the app', () => {
       it('throws an error', () => {
         expect(prepareSdkImport('app_098765432121', testApiKey)).to.throw(
-          errors.InitializationError
+          errors.EvervaultError
         );
       });
     });
@@ -108,7 +106,7 @@ describe('Testing the Evervault SDK', () => {
         it('Throws an error', () => {
           return sdk.encrypt(testData).catch((err) => {
             expect(cageKeyNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ApiKeyError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(encryptStub).to.not.have.been.called;
           });
         });
@@ -260,7 +258,7 @@ describe('Testing the Evervault SDK', () => {
             })
             .catch((err) => {
               expect(runNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(errors.UnauthorizedError);
+              expect(err).to.be.instanceOf(errors.EvervaultError);
               expect(err.message).to.equal(testResponse.detail);
             });
         });

@@ -70,7 +70,7 @@ describe('Http Module', () => {
           it('It does not get the cage key with the api key', () => {
             return testHttpClient.getCageKey().catch((err) => {
               expect(getCageKeyNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(errors.ApiKeyError);
+              expect(err).to.be.instanceOf(errors.EvervaultError);
             });
           });
         });
@@ -82,10 +82,10 @@ describe('Http Module', () => {
             .get('/cages/key')
             .replyWithError('An error occurred');
         });
-        it('Throws a CageKeyError', () => {
+        it('Throws an error', () => {
           return testHttpClient.getCageKey().catch((err) => {
             expect(getCageKeyNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.CageKeyError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
           });
         });
       });
@@ -111,10 +111,10 @@ describe('Http Module', () => {
         before(() => {
           getCageKeyNock = setupNock().get('/cages/key').reply(503);
         });
-        it('Throws a CageKeyError', () => {
+        it('Throws an EvervaultError', () => {
           return testHttpClient.getCageKey().catch((err) => {
             expect(getCageKeyNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.CageKeyError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
           });
         });
       });
@@ -269,7 +269,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.UnauthorizedError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -301,7 +301,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ForbiddenError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -332,7 +332,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.ForbiddenIPError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -458,7 +458,7 @@ describe('Http Module', () => {
           })
           .catch((err) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(err).to.be.instanceOf(errors.DecryptError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
             expect(err.message).to.equal(testResponse.detail);
           });
       });
@@ -652,7 +652,7 @@ describe('Http Module', () => {
           it('It gets the relay outbound config with the api key', () => {
             return testHttpClient.getRelayOutboundConfig().catch((err) => {
               expect(getRelayOutboundConfigNock.isDone()).to.be.true;
-              expect(err).to.be.instanceOf(errors.ApiKeyError);
+              expect(err).to.be.instanceOf(errors.EvervaultError);
             });
           });
         });
@@ -667,8 +667,7 @@ describe('Http Module', () => {
         it('Throws a RelayOutboundConfig Error', () => {
           return testHttpClient.getRelayOutboundConfig().catch((err) => {
             expect(getRelayOutboundConfigNock.isDone()).to.be.true;
-            console.error(err);
-            expect(err).to.be.instanceOf(errors.RelayOutboundConfigError);
+            expect(err).to.be.instanceOf(errors.EvervaultError);
           });
         });
       });
