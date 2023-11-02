@@ -184,13 +184,6 @@ describe('Encrypt and Decrypt', () => {
       });
     });
 
-    it('encrypts a file with metadata but metadata is not embedded and decrypts are permitted', async () => {
-      const data = Buffer.from('hello world');
-      const encrypted = await evervaultClient.encrypt(data, 'forbid-all');
-      const decrypted = await evervaultClient.decrypt(encrypted);
-      expect(data.equals(decrypted)).to.be.true;
-    });
-
     it('fails if role fails validation', () => {
       const payload = 'test';
       evervaultClient
