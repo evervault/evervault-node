@@ -1,13 +1,15 @@
-const axios = require('axios');
+const fs = require('fs');
 const Evervault = require('./lib');
 const evervault = new Evervault(
-  'app_16688a4022b0',
-  'ev:key:1:4MaKtEOgj0WVYzrGkwvUHCfkw5hozD3mdvA3dFFXVqkWMajijNa7nphCreNYXyy2O:u+IM6J:rtXyfU'
+  'APP_UUID',
+  'KEY',
+  // { curve: 'prime256v1'}
 );
 
 (async () => {
-  const httpsAgent = evervault.createRelayHttpsAgent();
-  const response = await axios.get('https://enx4th0aktbs.x.pipedream.net', {
-    httpsAgent,
+  const data = Buffer.from("hello world!");
+  const enc = await evervault.encrypt(data);
+  fs.writeFile('file.txt', enc, (err) => {
+    console.log(err);
   });
 })();
