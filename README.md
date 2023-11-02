@@ -183,52 +183,16 @@ async evervault.enableCages([cageAttestationData: Object])
 
 | Key          | Type             | Default     | Description                                                                                                                                                                                                                                                                          |
 | ------------ | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `<CageName>` | `Object` `Array` `Function` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. The provided data can be either a single Object, an Array of Objects or a function which returns a promise of an array of Objects. |
+| `<CageName>` | `Object` `Array` | `undefined` | Requests to a Cage specified in this object will include a check to verify that the PCRs provided in the object are included in the attestation document. The provided data can be either a single Object, or an Array of Objects to allow roll-over between different sets of PCRs. |
 
-#### PCR Management
-
-There are two ways to provider PCRs for attestation.
-
-1. *Static PCRs*: Set either a single PCR object or an array of multiple PCR objects.
-2. *PCR Providers*: Instead of statically setting PCRs, you can define a PCR provider. This is a function that returns a Promise resolving to an array of PCR objects. By default, the system will poll this provider every 5 minutes for updates, but this interval can be customized using the EV_PCR_PROVIDER_POLL_INTERVAL environment variable. This method allows you to publish your PCRs from CI to a public endpoint, enabling all clients to fetch updates automatically.
-
-#### Example Workflow for Deployment with PCRs:
-
-When deploying, two sets of PCRs may be returned due to gradual rollouts. Here's a suggested workflow for publishing PCRs in your CI:
-
-1. Execute the ev-cage build command to build the cage.
-2. Retrieve the PCRs from the built cage. Your provider should serve both the existing and new PCRs.
-3. Deploy the EIF from the build.
-4. After a successful deployment, it's safe to remove the older PCRs from the provider.
-
-#### Cages Example
+#### Cages Beta Example
 
 ```javascript
-//With hardcoded PCRs
 await evervault.enableCages({
   'hello-cage': {
     pcr8: '97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca',
   },
 });
-```
-
-```javascript
-  // With PCR provider
-  // Provider Returns: 
-  // [{
-  // "pcr0": "97c5395a83c0d6a04d53ff962663c714c178c24500bf97f78456ed3721d922cf3f940614da4bb90107c439bc4a1443ca",
-  // etc...
-  //}] 
-  pcrProvider = async () => {
-    const {data: pcrs} = await axios.get("https://my-pcr-provider.example.com/hello-cage");
-    return pcrs
-  }
-
-  //PCR provider will be polled every five minutes to attest with the latest PCRS. 
-  await evervault.enableCages({
-    'hello-cage': pcrProvider
-  });
-
 ```
 
 ## Contributing
