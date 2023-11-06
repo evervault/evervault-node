@@ -2,8 +2,6 @@
 
 # Evervault Node.js SDK
 
-The [Evervault](https://evervault.com) Node.js SDK is a toolkit for encrypting data as it enters your server, and working with Functions. By default, initializing the SDK will result in all outbound HTTPS requests being intercepted and decrypted.
-
 ## Getting Started
 
 Before starting with the Evervault Node.js SDK, you will need to [create an account](https://app.evervault.com/register) and a team.
