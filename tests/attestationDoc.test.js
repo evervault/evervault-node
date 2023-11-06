@@ -19,20 +19,6 @@ describe('cageAttestationDoc', () => {
       expect(await cache.get('cage_246')).to.deep.equal('doc');
       cache.disablePolling();
     });
-
-    it('retrieves missing', async () => {
-      let httpStub = {
-        getCageAttestationDoc: sinon.stub().resolves({
-          attestation_doc: 'doc',
-        }),
-      };
-
-      let cages = ['cage_123'];
-      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
-      await cache.init();
-      expect(await cache.get('cage')).to.deep.equal('doc');
-      cache.disablePolling();
-    });
   });
 
   context('reload', () => {

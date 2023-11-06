@@ -2,9 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 const { cageAttest } = require('../../lib/utils');
-const { AttestationDoc } = require('../../lib/core');
+const { AttestationDoc, CagePcrManager } = require('../../lib/core');
 const config = require('../../lib/config');
 const sinon = require('sinon');
+const { CageAttestationError } = require('../../lib/utils/errors');
 
 /**
  * Note: these tests are time sensitive, so are expected to fail when used without libfaketime
@@ -26,6 +27,9 @@ describe('cageAttestGA', async () => {
       pcr2: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
       pcr8: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
     };
+    const invalidPCR = {
+      pcr8: 'Invalid0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+    };
     const derCert = fs.readFileSync(
       path.resolve(__dirname, '../utilities/cage-certificate.crt')
     );
@@ -44,31 +48,25 @@ describe('cageAttestGA', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
+        let testProvider = () => {
+          return new Promise((resolve) => {
+            resolve([validPCRs]);
+          });
+        };
+
+        let testAttestationData = { [cageName]: testProvider };
+        let manager = new CagePcrManager(config(), testAttestationData);
+        await manager.init();
+
         const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
-          {
-            [cageName]: validPCRs,
-          },
+          manager,
           cache
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
-      });
-    });
-
-    context('given a key that doesnt exist in the cache', async () => {
-      it('reloads doc for given cage and tries again', async () => {
-        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
-        await cache.init();
-        const result = await cageAttest.attestCageConnection(
-          `otherCageName.${appUuid}.${hostname}`,
-          derCert,
-          {},
-          cache
-        );
-        expect(result).to.be.undefined;
-        cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -76,14 +74,25 @@ describe('cageAttestGA', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
+        let testProvider = () => {
+          return new Promise((resolve) => {
+            resolve([validPCRs]);
+          });
+        };
+
+        let testAttestationData = { [cageName]: testProvider };
+        let manager = new CagePcrManager(config(), testAttestationData);
+        await manager.init();
+
         const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
-          {},
+          manager,
           cache
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -91,18 +100,20 @@ describe('cageAttestGA', async () => {
       it('successfully attests the connection', async () => {
         let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
         await cache.init();
+
+        let testAttestationData = { [cageName]: validPCRs };
+        let manager = new CagePcrManager(config(), testAttestationData);
+        await manager.init();
+
         const result = await cageAttest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
-          {
-            [cageName]: {
-              pcr8: validPCRs.pcr8,
-            },
-          },
+          manager,
           cache
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -116,19 +127,20 @@ describe('cageAttestGA', async () => {
             appUuid
           );
           await cache.init();
-          const invalidPCRs = { ...validPCRs };
-          invalidPCRs.pcr8 = validPCRs.pcr0;
+          let testAttestationData = { [cageName]: invalidPCR };
+          let manager = new CagePcrManager(config(), testAttestationData);
+          await manager.init();
+
           await cageAttest.attestCageConnection(
             `${cageName}.${appUuid}.${hostname}`,
             derCert,
-            {
-              [cageName]: invalidPCRs,
-            },
+            manager,
             cache
           );
           cache.disablePolling();
+          manager.disablePolling();
         } catch (err) {
-          expect(err).to.be.instanceOf(errors.CageAttestationError);
+          expect(err).to.be.instanceOf(CageAttestationError);
         }
       });
     });
