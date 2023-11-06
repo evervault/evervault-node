@@ -1,6 +1,10 @@
-const { expect } = require('chai');
+const chai = require('chai');
+const { expect } = chai;
+const chaiAsPromised = require('chai-as-promised');
 const Evervault = require('../lib');
 const { EvervaultError } = require('../lib/utils/errors');
+
+chai.use(chaiAsPromised);
 
 describe('Encrypt and Decrypt', () => {
   const appUuid = process.env.EV_APP_UUID;
@@ -184,13 +188,6 @@ describe('Encrypt and Decrypt', () => {
       });
     });
 
-    it('encrypts a file with metadata but metadata is not embedded and decrypts are permitted', async () => {
-      const data = Buffer.from('hello world');
-      const encrypted = await evervaultClient.encrypt(data, 'forbid-all');
-      const decrypted = await evervaultClient.decrypt(encrypted);
-      expect(data.equals(decrypted)).to.be.true;
-    });
-
     it('fails if role fails validation', () => {
       const payload = 'test';
       evervaultClient
@@ -198,6 +195,20 @@ describe('Encrypt and Decrypt', () => {
         .then((result) => {
           expect(result).to.be.instanceOf(EvervaultError);
         });
+    });
+
+    it('encrypts file with metadata and decryption is permitted', async () => {
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
+      const decrypted = evervaultClient.decrypt(encrypted);
+      expect(decrypted).to.eventually.equal(payload);
+    });
+
+    it('encrypts file with metadata and decryption is not permitted', async () => {
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
+      const decrypted = evervaultClient.decrypt(encrypted);
+      expect(decrypted).to.be.rejectedWith(EvervaultError);
     });
   });
 });
