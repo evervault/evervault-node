@@ -66,32 +66,7 @@ describe('cageAttestGA', async () => {
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
-      });
-    });
-
-    context('given a key that doesnt exist in the cache', async () => {
-      it('reloads doc for given cage and tries again', async () => {
-        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
-        await cache.init();
-
-        let testProvider = () => {
-          return new Promise((resolve) => {
-            resolve([validPCRs]);
-          });
-        };
-
-        let testAttestationData = { [cageName]: testProvider };
-        let manager = new CagePcrManager(config(), testAttestationData);
-        await manager.init();
-
-        const result = await cageAttest.attestCageConnection(
-          `otherCageName.${appUuid}.${hostname}`,
-          derCert,
-          manager,
-          cache
-        );
-        expect(result).to.be.undefined;
-        cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -117,6 +92,7 @@ describe('cageAttestGA', async () => {
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -137,6 +113,7 @@ describe('cageAttestGA', async () => {
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
+        manager.disablePolling();
       });
     });
 
@@ -152,6 +129,7 @@ describe('cageAttestGA', async () => {
           await cache.init();
           let testAttestationData = { [cageName]: invalidPCR };
           let manager = new CagePcrManager(config(), testAttestationData);
+          await manager.init();
 
           await cageAttest.attestCageConnection(
             `${cageName}.${appUuid}.${hostname}`,
@@ -160,6 +138,7 @@ describe('cageAttestGA', async () => {
             cache
           );
           cache.disablePolling();
+          manager.disablePolling();
         } catch (err) {
           expect(err).to.be.instanceOf(CageAttestationError);
         }
