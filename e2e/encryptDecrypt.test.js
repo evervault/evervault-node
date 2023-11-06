@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { expect } = chai;
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromised = require('chai-as-promised');
 const Evervault = require('../lib');
 const { EvervaultError } = require('../lib/utils/errors');
 
@@ -198,15 +198,15 @@ describe('Encrypt and Decrypt', () => {
     });
 
     it('encrypts file with metadata and decryption is permitted', async () => {
-      const payload = Buffer.from("Hello, world!");
-      const encrypted = await evervaultClient.encrypt(payload, "permit-all");
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
       const decrypted = evervaultClient.decrypt(encrypted);
       expect(decrypted).to.eventually.equal(payload);
     });
 
     it('encrypts file with metadata and decryption is not permitted', async () => {
-      const payload = Buffer.from("Hello, world!");
-      const encrypted = await evervaultClient.encrypt(payload, "forbid-all");
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
       const decrypted = evervaultClient.decrypt(encrypted);
       expect(decrypted).to.be.rejectedWith(EvervaultError);
     });
