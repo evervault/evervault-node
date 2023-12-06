@@ -6,7 +6,7 @@ describe('Http Module', () => {
   const testApiKey =
     'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
   const testAppId = 'app_8022cc5a3073';
-  const testValidConfig = require('../../lib/config')().http;
+  const testValidConfig = require('../../lib/config').http;
   const testHttpClient = require('../../lib/core/http')(
     testAppId,
     testApiKey,
