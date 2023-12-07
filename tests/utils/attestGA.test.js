@@ -105,7 +105,7 @@ describe('attestGA', async () => {
       async () => {
         it('calls the cage at the alternative hostname, and  successfully attests the connection', async () => {
           let cache = new AttestationDoc(
-            config,
+            config(),
             httpStub,
             [cageName],
             appUuid,
@@ -119,7 +119,7 @@ describe('attestGA', async () => {
           };
 
           let testAttestationData = { [cageName]: testProvider };
-          let manager = new PcrManager(config.http, testAttestationData);
+          let manager = new PcrManager(config(), testAttestationData);
           await manager.init();
 
           const result = await attest.attestCageConnection(
