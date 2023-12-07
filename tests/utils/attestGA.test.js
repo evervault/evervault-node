@@ -5,7 +5,10 @@ const { attest } = require('../../lib/utils');
 const { AttestationDoc, PcrManager } = require('../../lib/core');
 const config = require('../../lib/config');
 const sinon = require('sinon');
-const { CageAttestationError } = require('../../lib/utils/errors');
+const {
+  CageAttestationError,
+  MalformedAttestationData,
+} = require('../../lib/utils/errors');
 
 /**
  * Note: these tests are time sensitive, so are expected to fail when used without libfaketime
@@ -85,7 +88,7 @@ describe('attestGA', async () => {
         let manager = new PcrManager(config(), testAttestationData);
         await manager.init();
 
-        const result = await cageAttest.attestCageConnection(
+        const result = await attest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           manager,
@@ -102,7 +105,7 @@ describe('attestGA', async () => {
       async () => {
         it('calls the cage at the alternative hostname, and  successfully attests the connection', async () => {
           let cache = new AttestationDoc(
-            config.http,
+            config,
             httpStub,
             [cageName],
             appUuid,
@@ -151,7 +154,7 @@ describe('attestGA', async () => {
         let manager = new PcrManager(config(), testAttestationData);
         await manager.init();
 
-        const result = await cageAttest.attestCageConnection(
+        const result = await attest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           manager,
@@ -172,7 +175,7 @@ describe('attestGA', async () => {
         let manager = new PcrManager(config(), testAttestationData);
         await manager.init();
 
-        const result = await cageAttest.attestCageConnection(
+        const result = await attest.attestCageConnection(
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           manager,
@@ -198,7 +201,7 @@ describe('attestGA', async () => {
           let manager = new PcrManager(config(), testAttestationData);
           await manager.init();
 
-          await cageAttest.attestCageConnection(
+          await attest.attestCageConnection(
             `${cageName}.${appUuid}.${hostname}`,
             derCert,
             manager,
