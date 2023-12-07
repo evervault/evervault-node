@@ -1,9 +1,9 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const config = require('../lib/config');
-const { CagePcrManager } = require('../lib/core');
+const { PcrManager } = require('../lib/core');
 
-describe('cagePcrManager', () => {
+describe('PcrManager', () => {
   context('constructor', () => {
     let testPcrs1, testPcrs2;
 
@@ -32,7 +32,7 @@ describe('cagePcrManager', () => {
 
       let testAttestationData = { cage_123: testProvider };
 
-      let manager = new CagePcrManager(config(), testAttestationData);
+      let manager = new PcrManager(config(), testAttestationData);
 
       await manager.init();
 
@@ -46,7 +46,7 @@ describe('cagePcrManager', () => {
 
       let testAttestationData = { cage_123: hardcodedArrayProvider };
 
-      let manager = new CagePcrManager(config(), testAttestationData);
+      let manager = new PcrManager(config(), testAttestationData);
 
       await manager.init();
 
@@ -61,7 +61,7 @@ describe('cagePcrManager', () => {
     it('retrieves the attestation docs from a hardcoded object and starts polling', async () => {
       let testAttestationData = { cage_123: testPcrs2 };
 
-      let manager = new CagePcrManager(config(), testAttestationData);
+      let manager = new PcrManager(config(), testAttestationData);
 
       await manager.init();
 
@@ -79,7 +79,7 @@ describe('cagePcrManager', () => {
 
       let testAttestationData = { cage_123: testProvider };
 
-      let manager = new CagePcrManager(config(), testAttestationData);
+      let manager = new PcrManager(config(), testAttestationData);
       await manager.init();
 
       manager.clearStoredPcrs('cage_123');
