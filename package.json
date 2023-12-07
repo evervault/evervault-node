@@ -3,14 +3,15 @@
   "version": "5.1.5",
   "description": "Node.js SDK for Evervault",
   "main": "lib/index.js",
-  "typings": "lib/evervault.d.ts",
+  "typings": "types/index.d.ts",
   "scripts": {
     "prepare": "husky install",
     "lint": "prettier --check \"./**/*.js\"",
     "test": "mocha 'tests/**/*.test.js'  --timeout 30000",
     "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
-    "test:coverage": "nyc --reporter=text npm run test"
+    "test:coverage": "nyc --reporter=text npm run test",
+    "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,8 @@
     "url": "https://github.com/evervault/evervault-node/issues"
   },
   "files": [
-    "lib"
+    "lib",
+    "types"
   ],
   "homepage": "https://github.com/evervault/evervault-node#readme",
   "dependencies": {
@@ -53,7 +55,8 @@
     "proxy": "^1.0.2",
     "rewire": "^5.0.0",
     "sinon": "^9.0.2",
-    "sinon-chai": "^3.5.0"
+    "sinon-chai": "^3.5.0",
+    "typescript": "^5.3.3"
   },
   "release": {
     "branches": [
