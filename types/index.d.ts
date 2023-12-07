@@ -26,80 +26,14 @@ declare class EvervaultClient {
         decryptionDomains?: string[];
         debugRequests?: boolean;
     });
-    /** @type {string} */ apiKey: string;
-    /** @type {string} */ appId: string;
-    /** @type {import('./config')} */ config: {
-        http: {
-            baseUrl: string;
-            userAgent: string;
-            tunnelHostname: string;
-            certHostname: string;
-            cagesCertHostname: string;
-            cagesHostname: string;
-            pollInterval: string | number;
-            attestationDocPollInterval: string | number;
-            pcrProviderPollInterval: string | number;
-        };
-        encryption: {
-            secp256k1: {
-                ecdhCurve: string;
-                keyCycleMinutes: number;
-                cipherAlgorithm: string;
-                keyLength: number;
-                ivLength: number;
-                authTagLength: number;
-                evVersion: string;
-                evVersionWithMetadata: string;
-                header: {
-                    iss: string;
-                    version: number;
-                };
-                maxFileSizeInMB: string | number;
-            };
-            prime256v1: {
-                ecdhCurve: string;
-                keyCycleMinutes: number;
-                cipherAlgorithm: string;
-                keyLength: number;
-                ivLength: number;
-                authTagLength: number;
-                evVersion: string;
-                evVersionWithMetadata: string;
-                header: {
-                    iss: string;
-                    version: number;
-                };
-                maxFileSizeInMB: string | number;
-            };
-        };
-    };
-    /** @type {import('./config').SupportedCurve} */ curve: import('./config').SupportedCurve;
-    /** @type {ReturnType<import('./core/http')>} */ http: ReturnType<(appUuid: string, apiKey: string, config: config.HttpConfig) => {
-        getCageKey: () => Promise<any>;
-        runFunction: (functionName: any, payload: any) => Promise<import("phin").IJSONResponse<any>>;
-        getCert: () => Promise<any>;
-        getCagesCert: () => Promise<any>;
-        createRunToken: (functionName: any, payload: any) => Promise<import("phin").IJSONResponse<any>>;
-        getRelayOutboundConfig: () => Promise<{
-            pollInterval: number;
-            data: any;
-        }>;
-        decrypt: (encryptedData: any) => Promise<any>;
-        createToken: (action: any, payload: any, expiry: any) => Promise<any>;
-        getCageAttestationDoc: (cageName: any, appUuid: any) => Promise<any>;
-    }>;
-    /** @type {import('./utils/httpsHelper')} */ httpsHelper: typeof import("./utils/httpsHelper");
-    /** @type {boolean | undefined} */ retry: boolean | undefined;
-    crypto: {
-        encrypt: (curve: any, ecdhTeamKey: any, ecdhPublicKey: any, derivedSecret: any, data: any, role?: any, options?: {
-            preserveObjectShape: boolean;
-            fieldsToEncrypt: any;
-        }) => Promise<any>;
-        getSharedSecret: (ecdh: any, publicKey: any, ephemeralPublicKey: any, curveName: any) => Buffer;
-        generateBytes: (byteLength: any) => Promise<any>;
-        buildCipherBuffer: (data: any, role: any) => Buffer;
-        buildEncodedMetadata: (role: any, encryptionTimestamp: any) => Buffer;
-    };
+    /** @private @type {string} */ private apiKey;
+    /** @private @type {string} */ private appId;
+    /** @private @type {import('./config')} */ private config;
+    /** @private @type {import('./config').SupportedCurve} */ private curve;
+    /** @private @type {ReturnType<import('./core/http')>} */ private http;
+    /** @private @type {import('./utils/httpsHelper')} */ private httpsHelper;
+    /** @private @type {boolean | undefined} */ private retry;
+    /** @private @type {ReturnType<import('./core/crypto')>} */ private crypto;
     /**
      * @deprecated use enableCages instead
      */
@@ -139,46 +73,42 @@ declare class EvervaultClient {
     /** @returns {Promise<string>} */
     generateNonce(): Promise<string>;
     /**
+     * @private
      * @param {SdkOptions & OutboundRelayOptions} options
      * @param {string} apiKey
      * @returns {Promise<void>}
      */
-    _shouldOverloadHttpModule(options: {
-        curve?: import('./config').SupportedCurve;
-        retry?: boolean;
-        enableOutboundRelay?: boolean;
-    } & {
-        decryptionDomains?: string[];
-        debugRequests?: boolean;
-    }, apiKey: string): Promise<void>;
-    /** @returns {string[]} */
-    _alwaysIgnoreDomains(): string[];
+    private _shouldOverloadHttpModule;
+    /** @private @returns {string[]} */
+    private _alwaysIgnoreDomains;
     /**
+     * @private
      * @param {string[]} decryptionDomains
      * @returns {(domain: string) => boolean}
      */
-    _decryptionDomainsFilter(decryptionDomains: string[]): (domain: string) => boolean;
+    private _decryptionDomainsFilter;
     /**
+     * @private
      * @param {string} domain
      * @param {string[]} decryptionDomains
      * @param {string[]} alwaysIgnore
      */
-    _isDecryptionDomain(domain: string, decryptionDomains: string[], alwaysIgnore: string[]): boolean;
+    private _isDecryptionDomain;
+    /** @private @returns {(domain: string) => boolean} */
+    private _relayOutboundConfigDomainFilter;
     /**
-     * @returns {(domain: string) => boolean}
-     */
-    _relayOutboundConfigDomainFilter(): (domain: string) => boolean;
-    /**
+     * @private
      * @param {string} domain
      * @param {string[]} exactDomains
      * @param {string[]} endsWithDomains
      * @returns {boolean}
      */
-    _exactOrEndsWith(domain: string, exactDomains: string[], endsWithDomains: string[]): boolean;
+    private _exactOrEndsWith;
     /**
+     * @private
      * @param {string | undefined} role
      */
-    _refreshKeys(role: string | undefined): void;
+    private _refreshKeys;
     /**
      * @param {Object || String} data
      * @param {String || undefined} role
@@ -214,11 +144,12 @@ declare class EvervaultClient {
      */
     createRelayHttpsAgent(): HttpsProxyAgent;
     /**
+     * @private
      * @param {string | number | symbol} property
      * @param {*} value
      */
-    defineHiddenProperty(property: string | number | symbol, value: any): void;
+    private defineHiddenProperty;
     createClientSideDecryptToken(payload: any, expiry?: any): Promise<any>;
 }
-import config = require("./config");
 import HttpsProxyAgent = require("./utils/proxyAgent");
+import config = require("./config");
