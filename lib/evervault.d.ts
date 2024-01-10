@@ -1,4 +1,8 @@
 declare module '@evervault/sdk' {
+  type PCRs = { pcr0?: string; pcr1?: string; pcr2?: string; pcr8?: string };
+  type AttestationData = Record<string, PCRs | PCRs[]>;
+  type AttestationCallback = () => Promise<PCRs | PCRs[]>;
+
   export default class Evervault {
     constructor(appId: string, apiKey: string);
     encrypt: (data: any) => Promise<any>;
@@ -40,6 +44,9 @@ declare module '@evervault/sdk' {
         | { pcr0?: string; pcr1?: string; pcr2?: string; pcr8?: string }
         | { pcr0?: string; pcr1?: string; pcr2?: string; pcr8?: string }[]
       >
+    ) => Promise<void>;
+    enableEnclaves: (
+      attestationData: Record<string, AttestationData | AttestationCallback>
     ) => Promise<void>;
   }
 }
