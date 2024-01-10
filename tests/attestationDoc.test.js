@@ -3,11 +3,11 @@ const sinon = require('sinon');
 const config = require('../lib/config');
 const { AttestationDoc } = require('../lib/core');
 
-describe('cageAttestationDoc', () => {
+describe('attestationDoc', () => {
   context('constructor', () => {
     it('retrieves the attestation docs from relevant cages and starts polling', async () => {
       let httpStub = {
-        getCageAttestationDoc: sinon.stub().resolves({
+        getAttestationDoc: sinon.stub().resolves({
           attestation_doc: 'doc',
         }),
       };
@@ -24,10 +24,10 @@ describe('cageAttestationDoc', () => {
   context('reload', () => {
     it('the cache is updated for a single Cage', async () => {
       const httpStub = {
-        getCageAttestationDoc: () => {},
+        getAttestationDoc: () => {},
       };
 
-      let stub = sinon.stub(httpStub, 'getCageAttestationDoc');
+      let stub = sinon.stub(httpStub, 'getAttestationDoc');
       stub.onCall(0).returns({ attestation_doc: 'doc1' });
       stub.onCall(1).returns({ attestation_doc: 'doc2' });
       stub.onCall(2).returns({ attestation_doc: 'doc3' });
@@ -36,7 +36,7 @@ describe('cageAttestationDoc', () => {
       let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
       await cache.init();
       expect(await cache.get('cage_1')).to.deep.equal('doc1');
-      await cache.loadCageDoc('cage_1', 'app_123');
+      await cache.loadAttestationDoc('cage_1', 'app_123');
       expect(await cache.get('cage_1')).to.deep.equal('doc3');
       cache.disablePolling();
     });
@@ -55,10 +55,10 @@ describe('cageAttestationDoc', () => {
       };
 
       const httpStub = {
-        getCageAttestationDoc: () => {},
+        getAttestationDoc: () => {},
       };
 
-      let stub = sinon.stub(httpStub, 'getCageAttestationDoc');
+      let stub = sinon.stub(httpStub, 'getAttestationDoc');
       stub.onCall(0).returns({ attestation_doc: 'doc1' });
       stub.onCall(1).returns({ attestation_doc: 'doc2' });
 
