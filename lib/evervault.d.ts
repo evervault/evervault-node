@@ -32,7 +32,7 @@ declare module '@evervault/sdk' {
     ) => Promise<void>;
     createRelayHttpsAgent: () => HttpsProxyAgent;
     /**
-     * @deprecated use enableCages instead
+     * @deprecated use enableEnclaves instead
      */
     enableCages: (
       cageAttestationData: Record<
