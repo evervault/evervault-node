@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 5.1.0
+
+### Minor Changes
+
+- 6baff50: Add new enableEnclaves function and deprecate enableCages
+
 ## 5.0.0
 
 ### Major Changes
