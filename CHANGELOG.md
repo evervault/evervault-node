@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 5.1.1
+
+### Patch Changes
+
+- 942f0e6: Update typings to include new enableEnclaves function.
+
 ## 5.1.0
 
 ### Minor Changes
