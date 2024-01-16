@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 5.1.3
+
+### Patch Changes
+
+- c3208ff: Fix bug with incorrect config being passed to PcrManager constructor
+
 ## 5.1.2
 
 ### Patch Changes
