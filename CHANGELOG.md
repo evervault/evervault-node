@@ -1,5 +1,17 @@
 # @evervault/sdk
 
+## 5.1.3
+
+### Patch Changes
+
+- c3208ff: Fix bug with incorrect config being passed to PcrManager constructor
+
+## 5.1.2
+
+### Patch Changes
+
+- 3cb052a: Fix bug resulting in undefined reference within the AttestationDoc Cache when using the enableEnclaves entrypoint.
+
 ## 5.1.1
 
 ### Patch Changes
