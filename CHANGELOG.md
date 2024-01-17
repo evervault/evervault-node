@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 5.1.4
+
+### Patch Changes
+
+- e1624e0: Add enclaves hostname to attestationListener
+
 ## 5.1.3
 
 ### Patch Changes
