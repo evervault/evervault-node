@@ -197,7 +197,7 @@ describe('attestGA', async () => {
           cache,
           {
             attestCage: (_, pcrs) => {
-              expect(pcrs).to.deep.equal(validPCRs);
+              expect(pcrs).to.deep.equal([validPCRs]);
               return true;
             },
           }
@@ -210,16 +210,12 @@ describe('attestGA', async () => {
 
     context('given a valid cert with incorrect PCRs', () => {
       it('rejects the connection with an attestation error', async () => {
+        let cache, manager;
         try {
-          let cache = new AttestationDoc(
-            config(),
-            httpStub,
-            [cageName],
-            appUuid
-          );
+          cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
           await cache.init();
           let testAttestationData = { [cageName]: invalidPCR };
-          let manager = new PcrManager(config(), testAttestationData);
+          manager = new PcrManager(config(), testAttestationData);
           await manager.init();
 
           await attest.attestConnection(
@@ -229,7 +225,7 @@ describe('attestGA', async () => {
             cache,
             {
               attestCage: (_, pcrs) => {
-                expect(pcrs).to.deep.equal(invalidPCR);
+                expect(pcrs).to.deep.equal([invalidPCR]);
                 return false;
               },
             }
