@@ -48,6 +48,7 @@
     "axios": "^1.5.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "evervault-attestation-bindings": "^0.3.2",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "mocha": "^10.0.0",
@@ -68,8 +69,5 @@
   },
   "lint-staged": {
     "**/*.js": "prettier --write --ignore-unknown \"./**/*.js\""
-  },
-  "optionalDependencies": {
-    "evervault-attestation-bindings": "^0.3.2"
   }
 }
