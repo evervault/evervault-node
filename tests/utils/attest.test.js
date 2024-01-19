@@ -91,7 +91,7 @@ describe('attestGA', async () => {
           manager,
           cache,
           {
-            attestConnection: (_, pcrs) => {
+            attestCage: (_, pcrs) => {
               expect(pcrs).to.deep.equal([validPCRs]);
               return true;
             },
@@ -129,7 +129,13 @@ describe('attestGA', async () => {
             `${cageName}.${appUuid}.${hostname}`,
             derCert,
             manager,
-            cache
+            cache,
+            {
+              attestCage: (_, pcrs) => {
+                expect(pcrs).to.deep.equal([validPCRs]);
+                return true;
+              },
+            }
           );
           expect(result).to.be.undefined;
           expect(httpStub.getAttestationDoc).to.have.been.calledWith(
@@ -161,7 +167,13 @@ describe('attestGA', async () => {
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           manager,
-          cache
+          cache,
+          {
+            attestCage: (_, pcrs) => {
+              expect(pcrs).to.deep.equal([validPCRs]);
+              return true;
+            },
+          }
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
@@ -182,7 +194,13 @@ describe('attestGA', async () => {
           `${cageName}.${appUuid}.${hostname}`,
           derCert,
           manager,
-          cache
+          cache,
+          {
+            attestCage: (_, pcrs) => {
+              expect(pcrs).to.deep.equal(validPCRs);
+              return true;
+            },
+          }
         );
         expect(result).to.be.undefined;
         cache.disablePolling();
@@ -208,12 +226,19 @@ describe('attestGA', async () => {
             `${cageName}.${appUuid}.${hostname}`,
             derCert,
             manager,
-            cache
+            cache,
+            {
+              attestCage: (_, pcrs) => {
+                expect(pcrs).to.deep.equal(invalidPCR);
+                return false;
+              },
+            }
           );
-          cache.disablePolling();
-          manager.disablePolling();
         } catch (err) {
           expect(err).to.be.instanceOf(AttestationError);
+        } finally {
+          cache.disablePolling();
+          manager.disablePolling();
         }
       });
     });
