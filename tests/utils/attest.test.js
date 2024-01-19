@@ -20,7 +20,7 @@ describe('attestGA', async () => {
   fakeTimeTests('attestConnection', async () => {
     const cageName = 'a-test-of-attest';
     const appUuid = 'app_452e33b20b42';
-    const hostname = 'cages.evervault.com';
+    const hostname = 'enclave.evervault.com';
     const validPCRs = {
       pcr0: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
       pcr1: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',

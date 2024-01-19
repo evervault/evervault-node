@@ -21,7 +21,9 @@
   "keywords": [
     "node",
     "evervault",
-    "cages"
+    "enclaves",
+    "encryption",
+    "cryptography"
   ],
   "author": "Evervault (https://evervault.com)",
   "license": "MIT",
