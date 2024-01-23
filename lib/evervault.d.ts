@@ -1,7 +1,7 @@
 declare module '@evervault/sdk' {
   type PCRs = { pcr0?: string; pcr1?: string; pcr2?: string; pcr8?: string };
-  type AttestationData = Record<string, PCRs | PCRs[]>;
-  type AttestationCallback = () => Promise<PCRs | PCRs[]>;
+  type AttestationData = PCRs | PCRs[];
+  type AttestationCallback = () => Promise<AttestationData>;
 
   export default class Evervault {
     constructor(appId: string, apiKey: string);
