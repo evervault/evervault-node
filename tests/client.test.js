@@ -431,5 +431,34 @@ describe('Testing the Evervault SDK', () => {
         });
       });
     });
+
+    context(
+      'Disabling background jobs stops them from sending network requests',
+      () => {
+        it('Should begin a background task for outbound relay which is stopped when disableOutboundRelay is called', async () => {
+          let callCount = 0;
+          nock('https://api.evervault.com')
+            .get('/v2/relay-outbound')
+            .reply(200, () => {
+              callCount++;
+              return { outboundDestinations: [] };
+            })
+            .persist();
+          const client = new EvervaultClient(testAppId, testApiKey);
+          await client.enableOutboundRelay();
+          await new Promise((resolve) =>
+            setTimeout(resolve, client.config.http.pollInterval * 2 * 1000)
+          );
+          const currentCallCount = callCount;
+          client.disableOutboundRelay();
+          await new Promise((resolve) =>
+            setTimeout(resolve, client.config.http.pollInterval * 2 * 1000)
+          );
+          nock.cleanAll();
+          // no more requests sent after disabling OutboundRelay background job
+          return expect(currentCallCount).to.equal(callCount);
+        });
+      }
+    );
   });
 });
