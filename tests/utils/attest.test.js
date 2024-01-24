@@ -91,7 +91,7 @@ describe('attestGA', async () => {
           manager,
           cache,
           {
-            attestCage: (_, pcrs) => {
+            attestEnclave: (_, pcrs) => {
               expect(pcrs).to.deep.equal([validPCRs]);
               return true;
             },
@@ -131,7 +131,7 @@ describe('attestGA', async () => {
             manager,
             cache,
             {
-              attestCage: (_, pcrs) => {
+              attestEnclave: (_, pcrs) => {
                 expect(pcrs).to.deep.equal([validPCRs]);
                 return true;
               },
@@ -169,7 +169,7 @@ describe('attestGA', async () => {
           manager,
           cache,
           {
-            attestCage: (_, pcrs) => {
+            attestEnclave: (_, pcrs) => {
               expect(pcrs).to.deep.equal([validPCRs]);
               return true;
             },
@@ -196,7 +196,7 @@ describe('attestGA', async () => {
           manager,
           cache,
           {
-            attestCage: (_, pcrs) => {
+            attestEnclave: (_, pcrs) => {
               expect(pcrs).to.deep.equal([validPCRs]);
               return true;
             },
@@ -224,7 +224,7 @@ describe('attestGA', async () => {
             manager,
             cache,
             {
-              attestCage: (_, pcrs) => {
+              attestEnclave: (_, pcrs) => {
                 expect(pcrs).to.deep.equal([invalidPCR]);
                 return false;
               },
