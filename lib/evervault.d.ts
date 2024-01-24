@@ -24,6 +24,7 @@ declare module '@evervault/sdk' {
       decryptionDomains: string[];
       debugRequests: boolean;
     }) => Promise<void>;
+    disableOutboundRelay: () => void;
     /**
      * @deprecated use enableCages instead
      */
@@ -48,5 +49,6 @@ declare module '@evervault/sdk' {
     enableEnclaves: (
       attestationData: Record<string, AttestationData | AttestationCallback>
     ) => Promise<void>;
+    disableEnclaves: () => void;
   }
 }

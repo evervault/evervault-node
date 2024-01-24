@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
 const axios = require('axios');
+const { v4 } = require('uuid');
 
 describe('Outbound Relay Test', () => {
   const appUuid = process.env.EV_APP_UUID;
@@ -23,7 +24,10 @@ describe('Outbound Relay Test', () => {
       const encrypted = await evervaultClient.encrypt(payload);
 
       await evervaultClient.enableOutboundRelay();
-      const response = await axios.post(syntheticEndpointUrl, encrypted);
+      const response = await axios.post(
+        `${syntheticEndpointUrl}?syntheticUuid=${v4()}&mode=outbound`,
+        encrypted
+      );
       const body = response.data;
       expect(body.request.string).to.equal(false);
       expect(body.request.number).to.equal(false);
