@@ -85,7 +85,7 @@ describe('attestGA', async () => {
         };
 
         let testAttestationData = { [cageName]: testProvider };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -105,7 +105,7 @@ describe('attestGA', async () => {
       async () => {
         it('calls the cage at the alternative hostname, and  successfully attests the connection', async () => {
           let cache = new AttestationDoc(
-            config(),
+            config,
             httpStub,
             [cageName],
             appUuid,
@@ -119,7 +119,7 @@ describe('attestGA', async () => {
           };
 
           let testAttestationData = { [cageName]: testProvider };
-          let manager = new PcrManager(config(), testAttestationData);
+          let manager = new PcrManager(config, testAttestationData);
           await manager.init();
 
           const result = await attest.attestCageConnection(
@@ -151,7 +151,7 @@ describe('attestGA', async () => {
         };
 
         let testAttestationData = { [cageName]: testProvider };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -172,7 +172,7 @@ describe('attestGA', async () => {
         await cache.init();
 
         let testAttestationData = { [cageName]: validPCRs };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -193,7 +193,7 @@ describe('attestGA', async () => {
           let cache = new AttestationDoc(config, httpStub, [cageName], appUuid);
           await cache.init();
           let testAttestationData = { [cageName]: invalidPCR };
-          let manager = new PcrManager(config(), testAttestationData);
+          let manager = new PcrManager(config, testAttestationData);
           await manager.init();
 
           await attest.attestCageConnection(
