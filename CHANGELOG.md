@@ -1,5 +1,12 @@
 # @evervault/sdk
 
+## 5.1.5
+
+### Patch Changes
+
+- d0c277c: Correct validation of PCR data given to enableEnclaves - allow for functions to be passed as values in the map.
+- 73464ab: Make polling jobs scheduled by the SDK headless to allow processes to exit cleanly.
+
 ## 5.1.4
 
 ### Patch Changes
