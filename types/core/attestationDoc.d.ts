@@ -1,6 +1,6 @@
 export = AttestationDoc;
 declare class AttestationDoc {
-    constructor(config: any, http: any, cages: any, appUuid: any);
+    constructor(config: any, http: any, cages: any, appUuid: any, hostname: any);
     appUuid: any;
     http: any;
     cages: any;
@@ -13,11 +13,18 @@ declare class AttestationDoc {
         updateInterval: (newInterval: any) => void;
     };
     attestationDocCache: {};
+    hostname: any;
     disablePolling: () => void;
     getPollingInterval: () => any;
-    loadCageDoc: (cageName: any) => Promise<void>;
+    loadAttestationDoc: (cageName: any) => Promise<void>;
     get: (cageName: any) => any;
-    init: () => Promise<void>;
+    init: () => Promise<{
+        start: () => void;
+        stop: () => void;
+        isRunning: () => boolean;
+        getInterval: () => any;
+        updateInterval: (newInterval: any) => void;
+    }>;
     clearCache: () => void;
     _getAttestationDocs: () => Promise<void>;
 }

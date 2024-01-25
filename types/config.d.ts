@@ -39,7 +39,9 @@ declare namespace http {
     let tunnelHostname: string;
     let certHostname: string;
     let cagesCertHostname: string;
+    let cagesBetaHostname: string;
     let cagesHostname: string;
+    let enclavesHostname: string;
     let pollInterval: string | number;
     let attestationDocPollInterval: string | number;
     let pcrProviderPollInterval: string | number;

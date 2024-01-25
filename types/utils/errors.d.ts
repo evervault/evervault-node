@@ -33,5 +33,7 @@ export class FunctionRuntimeError extends EvervaultError {
     stack: any;
     id: any;
 }
+export class MalformedAttestationData extends EvervaultError {
+}
 export class InvalidInterval extends EvervaultError {
 }

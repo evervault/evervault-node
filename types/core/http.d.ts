@@ -10,7 +10,7 @@ declare function _exports(appUuid: string, apiKey: string, config: import('../co
     }>;
     decrypt: (encryptedData: any) => Promise<any>;
     createToken: (action: any, payload: any, expiry: any) => Promise<any>;
-    getCageAttestationDoc: (cageName: any, appUuid: any) => Promise<any>;
+    getAttestationDoc: (cageName: any, appUuid: any, hostname: any) => Promise<any>;
 };
 export = _exports;
 import phin = require("phin");

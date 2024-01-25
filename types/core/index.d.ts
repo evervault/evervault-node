@@ -20,7 +20,7 @@ export let Http: (appUuid: string, apiKey: string, config: import("../config").H
     }>;
     decrypt: (encryptedData: any) => Promise<any>;
     createToken: (action: any, payload: any, expiry: any) => Promise<any>;
-    getCageAttestationDoc: (cageName: any, appUuid: any) => Promise<any>;
+    getAttestationDoc: (cageName: any, appUuid: any, hostname: any) => Promise<any>;
 };
 export let Labs: ({ http, crypto, run }: {
     http: any;
@@ -30,5 +30,5 @@ export let Labs: ({ http, crypto, run }: {
     fetch: (url: any, options: any) => Promise<any>;
 };
 export let RelayOutboundConfig: typeof import("./relayOutboundConfig");
-export let AttestationDoc: typeof import("./cageAttestationDoc");
-export let CagePcrManager: typeof import("./cagePcrManager");
+export let AttestationDoc: typeof import("./attestationDoc");
+export let PcrManager: typeof import("./pcrManager");

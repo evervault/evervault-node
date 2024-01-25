@@ -7,4 +7,4 @@ export let environment: {
 export let certHelper: typeof import("./certHelper");
 export let validationHelper: typeof import("./validationHelper");
 export let httpsHelper: typeof import("./httpsHelper");
-export let cageAttest: typeof import("./cageAttest");
+export let attest: typeof import("./attest");

@@ -1,4 +1,11 @@
 export = EvervaultClient;
+/**
+ * @typedef PCRs
+ * @property {string | undefined} pcr0
+ * @property {string | undefined} pcr1
+ * @property {string | undefined} pcr2
+ * @property {string | undefined} pcr8
+ */
 declare class EvervaultClient {
     /** @type {{ [curveName: string]: import('./config').SupportedCurve }} */
     static CURVES: {
@@ -26,6 +33,8 @@ declare class EvervaultClient {
         decryptionDomains?: string[];
         debugRequests?: boolean;
     });
+    /** @typedef {ReturnType<import('./core/repeatedTimer')>} Timer */
+    /** @private @type {{ enclaves: Timer[] | null, relayOutbound: Timer | null}} */ private _backgroundJobs;
     /** @private @type {string} */ private apiKey;
     /** @private @type {string} */ private appId;
     /** @private @type {import('./config')} */ private config;
@@ -35,41 +44,25 @@ declare class EvervaultClient {
     /** @private @type {boolean | undefined} */ private retry;
     /** @private @type {ReturnType<import('./core/crypto')>} */ private crypto;
     /**
-     * @deprecated use enableCages instead
+     * @deprecated use enableEnclaves instead
      */
     enableCagesBeta(cagesAttestationData: any): Promise<void>;
     /**
-     * @typedef PCRs
-     * @property {string} [pcr0]
-     * @property {string} [pcr1]
-     * @property {string} [pcr2]
-     * @property {string} [pcr8]
+     * @deprecated use enableEnclaves instead
      *
      * @param {{ [cageName: string]: PCRs | PCRs[] | (() => Promise<PCRs | PCRs[]>) }} cagesAttestationData
      */
     enableCages(cagesAttestationData: {
-        [cageName: string]: {
-            pcr0?: string;
-            pcr1?: string;
-            pcr2?: string;
-            pcr8?: string;
-        } | {
-            pcr0?: string;
-            pcr1?: string;
-            pcr2?: string;
-            pcr8?: string;
-        }[] | (() => Promise<{
-            pcr0?: string;
-            pcr1?: string;
-            pcr2?: string;
-            pcr8?: string;
-        } | {
-            pcr0?: string;
-            pcr1?: string;
-            pcr2?: string;
-            pcr8?: string;
-        }[]>);
+        [cageName: string]: PCRs | PCRs[] | (() => Promise<PCRs | PCRs[]>);
     }): Promise<void>;
+    /**
+     * @param {{ [key: string]: PCRs | PCRs[] | (() => Promise<PCRs | PCRs[]>) }} attestationData
+     * @throws {import('./utils/errors').MalformedAttestationData}
+     */
+    enableEnclaves(attestationData: {
+        [key: string]: PCRs | PCRs[] | (() => Promise<PCRs | PCRs[]>);
+    }): Promise<void>;
+    disableEnclaves(): void;
     /** @returns {Promise<string>} */
     generateNonce(): Promise<string>;
     /**
@@ -139,6 +132,7 @@ declare class EvervaultClient {
         decryptionDomains?: string[];
         debugRequests?: boolean;
     }): Promise<void>;
+    disableOutboundRelay(): void;
     /**
      * @returns {HttpsProxyAgent}
      */
@@ -151,5 +145,14 @@ declare class EvervaultClient {
     private defineHiddenProperty;
     createClientSideDecryptToken(payload: any, expiry?: any): Promise<any>;
 }
+declare namespace EvervaultClient {
+    export { PCRs };
+}
 import HttpsProxyAgent = require("./utils/proxyAgent");
 import config = require("./config");
+type PCRs = {
+    pcr0: string | undefined;
+    pcr1: string | undefined;
+    pcr2: string | undefined;
+    pcr8: string | undefined;
+};
