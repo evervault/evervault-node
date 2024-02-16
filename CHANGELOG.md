@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 5.1.6
+
+### Patch Changes
+
+- 5ffb2ba: Declare helper functions in pcrManager as consts.
+
 ## 5.1.5
 
 ### Patch Changes
