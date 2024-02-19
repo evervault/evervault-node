@@ -38,13 +38,7 @@ jobs:
       - run: npm run test:coverage
       - run: |
           sudo apt-get update ; sudo apt-get install -y libfaketime
-          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 npm run test:filter attestCageConnectionBeta
-        env:
-          FAKETIME: '2023-01-18 15:15:00'
-        if: ${{ matrix.perform-attestation }}
-      - run: |
-          sudo apt-get update ; sudo apt-get install -y libfaketime
-          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 npm run test:filter attestCageConnectionGA
+          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 npm run test:filter attestGA
         env:
           FAKETIME: '2023-09-22 11:24:32'
         if: ${{ matrix.perform-attestation }}

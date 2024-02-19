@@ -21,7 +21,9 @@
   "keywords": [
     "node",
     "evervault",
-    "cages"
+    "enclaves",
+    "encryption",
+    "cryptography"
   ],
   "author": "Evervault (https://evervault.com)",
   "license": "MIT",
@@ -66,8 +68,5 @@
   },
   "lint-staged": {
     "**/*.js": "prettier --write --ignore-unknown \"./**/*.js\""
-  },
-  "optionalDependencies": {
-    "evervault-attestation-bindings": "^0.3.2"
   }
 }
