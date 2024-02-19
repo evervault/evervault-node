@@ -82,7 +82,7 @@ describe('attestGA', async () => {
         };
 
         let testAttestationData = { [cageName]: testProvider };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestConnection(
