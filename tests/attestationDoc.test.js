@@ -13,7 +13,7 @@ describe('attestationDoc', () => {
       };
 
       let enclaves = ['enclave_123', 'enclave_246'];
-      let cache = new AttestationDoc(config(), httpStub, enclaves, 'app_123');
+      let cache = new AttestationDoc(config, httpStub, enclaves, 'app_123');
       await cache.init();
       expect(await cache.get('enclave_123')).to.deep.equal('doc');
       expect(await cache.get('enclave_246')).to.deep.equal('doc');
@@ -33,7 +33,7 @@ describe('attestationDoc', () => {
       stub.onCall(2).returns({ attestation_doc: 'doc3' });
 
       let enclaves = ['enclave_1', 'enclave_2'];
-      let cache = new AttestationDoc(config(), httpStub, enclaves, 'app_123');
+      let cache = new AttestationDoc(config, httpStub, enclaves, 'app_123');
       await cache.init();
       expect(await cache.get('enclave_1')).to.deep.equal('doc1');
       await cache.loadAttestationDoc('enclave_1', 'app_123');

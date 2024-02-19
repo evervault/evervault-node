@@ -1,4 +1,4 @@
-export type HttpConfig = {
+export interface HttpConfig {
   baseUrl: string;
   userAgent: string;
   tunnelHostname: string;
@@ -7,9 +7,9 @@ export type HttpConfig = {
   pollInterval: string | number;
   attestationDocPollInterval: string | number;
   pcrProviderPollInterval: string | number;
-};
+}
 
-export type CurveConfig = {
+export interface CurveConfig {
   ecdhCurve: string;
   keyCycleMinutes: number;
   cipherAlgorithm: string;
@@ -20,37 +20,38 @@ export type CurveConfig = {
   evVersionWithMetadata: string;
   header: { iss: string; version: number };
   maxFileSizeInMB: string | number;
-};
+}
 
 export type SupportedCurve = 'secp256k1' | 'prime256v1';
 
-export type CryptoConfig = {
+export interface CryptoConfig {
   secp256k1: CurveConfig;
   prime256v1: CurveConfig;
-};
+}
 
-export type MasterConfig = {
+export interface MasterConfig {
   http: HttpConfig;
   encryption: CryptoConfig;
-};
+}
 
-export type OutboundRelayOptions = {
+export interface OutboundRelayOptions {
   decryptionDomains?: string[];
   debugRequests?: boolean;
-};
+}
 
-export type SdkOptions = {
+export interface SdkOptions {
   curve?: SupportedCurve;
   retry?: boolean;
   enableOutboundRelay?: boolean;
-};
+}
 
-export type PCRs = {
+export interface PCRs {
   pcr0?: string;
   pcr1?: string;
   pcr2?: string;
   pcr8?: string;
-};
+}
+
 export type AttestationData = PCRs | PCRs[];
 export type AttestationCallback = () => Promise<AttestationData>;
 
