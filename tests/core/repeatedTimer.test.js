@@ -1,8 +1,20 @@
 const { expect } = require('chai');
+const Sinon = require('sinon');
 
+const { InvalidInterval } = require('../../lib/utils/errors');
 const RepeatedTimer = require('../../lib/core/repeatedTimer');
 
 describe('RepeatedTimer Module', () => {
+  it('Rejects when given a non-numeric value', () => {
+    const stub = Sinon.stub();
+    try {
+      RepeatedTimer(undefined, stub);
+    } catch (err) {
+      expect(err).to.be.instanceOf(InvalidInterval);
+      expect(stub).to.not.have.been.called;
+    }
+  });
+
   it('It polls at regular interval', (done) => {
     let counter = 0;
     const interval = 0.05;

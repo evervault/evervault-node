@@ -6,10 +6,8 @@ const { errors } = require('../../lib/utils');
 const crc32 = require('crc-32');
 
 const testApiKey = 'test-api-key';
-const testConfigSecP256k1 =
-  require('../../lib/config')(testApiKey).encryption.secp256k1;
-const testConfigSecP256r1 =
-  require('../../lib/config')(testApiKey).encryption.prime256v1;
+const testConfigSecP256k1 = require('../../lib/config').encryption.secp256k1;
+const testConfigSecP256r1 = require('../../lib/config').encryption.prime256v1;
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
 const curveSecp256k1 = 'SECP256K1';

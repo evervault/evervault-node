@@ -76,7 +76,7 @@ describe('attestGA', async () => {
 
     context('given a valid cert and PCRs', async () => {
       it('successfully attests the connection', async () => {
-        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        let cache = new AttestationDoc(config, httpStub, [cageName], appUuid);
         await cache.init();
         let testProvider = () => {
           return new Promise((resolve) => {
@@ -85,7 +85,7 @@ describe('attestGA', async () => {
         };
 
         let testAttestationData = { [cageName]: testProvider };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -105,7 +105,7 @@ describe('attestGA', async () => {
       async () => {
         it('calls the cage at the alternative hostname, and  successfully attests the connection', async () => {
           let cache = new AttestationDoc(
-            config(),
+            config,
             httpStub,
             [cageName],
             appUuid,
@@ -119,7 +119,7 @@ describe('attestGA', async () => {
           };
 
           let testAttestationData = { [cageName]: testProvider };
-          let manager = new PcrManager(config(), testAttestationData);
+          let manager = new PcrManager(config, testAttestationData);
           await manager.init();
 
           const result = await attest.attestCageConnection(
@@ -142,7 +142,7 @@ describe('attestGA', async () => {
 
     context('given a valid cert and no PCRs', async () => {
       it('successfully attests the connection', async () => {
-        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        let cache = new AttestationDoc(config, httpStub, [cageName], appUuid);
         await cache.init();
         let testProvider = () => {
           return new Promise((resolve) => {
@@ -151,7 +151,7 @@ describe('attestGA', async () => {
         };
 
         let testAttestationData = { [cageName]: testProvider };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -168,11 +168,11 @@ describe('attestGA', async () => {
 
     context('given a valid cert and some PCRs', () => {
       it('successfully attests the connection', async () => {
-        let cache = new AttestationDoc(config(), httpStub, [cageName], appUuid);
+        let cache = new AttestationDoc(config, httpStub, [cageName], appUuid);
         await cache.init();
 
         let testAttestationData = { [cageName]: validPCRs };
-        let manager = new PcrManager(config(), testAttestationData);
+        let manager = new PcrManager(config, testAttestationData);
         await manager.init();
 
         const result = await attest.attestCageConnection(
@@ -190,15 +190,10 @@ describe('attestGA', async () => {
     context('given a valid cert with incorrect PCRs', () => {
       it('rejects the connection with an attestation error', async () => {
         try {
-          let cache = new AttestationDoc(
-            config(),
-            httpStub,
-            [cageName],
-            appUuid
-          );
+          let cache = new AttestationDoc(config, httpStub, [cageName], appUuid);
           await cache.init();
           let testAttestationData = { [cageName]: invalidPCR };
-          let manager = new PcrManager(config(), testAttestationData);
+          let manager = new PcrManager(config, testAttestationData);
           await manager.init();
 
           await attest.attestCageConnection(

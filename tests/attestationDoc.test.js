@@ -13,7 +13,7 @@ describe('attestationDoc', () => {
       };
 
       let cages = ['cage_123', 'cage_246'];
-      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
+      let cache = new AttestationDoc(config, httpStub, cages, 'app_123');
       await cache.init();
       expect(await cache.get('cage_123')).to.deep.equal('doc');
       expect(await cache.get('cage_246')).to.deep.equal('doc');
@@ -33,7 +33,7 @@ describe('attestationDoc', () => {
       stub.onCall(2).returns({ attestation_doc: 'doc3' });
 
       let cages = ['cage_1', 'cage_2'];
-      let cache = new AttestationDoc(config(), httpStub, cages, 'app_123');
+      let cache = new AttestationDoc(config, httpStub, cages, 'app_123');
       await cache.init();
       expect(await cache.get('cage_1')).to.deep.equal('doc1');
       await cache.loadAttestationDoc('cage_1', 'app_123');
