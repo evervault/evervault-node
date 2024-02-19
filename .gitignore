@@ -1,3 +1,5 @@
+types
+
 # Logs
 logs
 *.log
@@ -113,3 +115,4 @@ dist
 
 # MAC
 *.DS_Store
+
