@@ -12,7 +12,7 @@
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test",
     "prepublishOnly": "npm run generate-types",
-    "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
+    "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --allowSyntheticDefaultImports --outDir types"
   },
   "repository": {
     "type": "git",
