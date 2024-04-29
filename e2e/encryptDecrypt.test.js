@@ -229,7 +229,6 @@ describe('Encrypt and Decrypt', () => {
       const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
       expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
       const decrypted = await evervaultClient.decrypt(encrypted);
-      console.log("DECRYPTED", decrypted);
       expect(payload).to.deep.equal(decrypted);
     });
 
@@ -261,8 +260,7 @@ describe('Encrypt and Decrypt', () => {
     it('encrypts file with metadata and decryption is permitted', async () => {
       const payload = Buffer.from('Hello, world!');
       const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
-      const decrypted = await evervaultClient.decrypt(encrypted);
-      console.log("DECRYPTED FILE", decrypted);
+      const decrypted = evervaultClient.decrypt(encrypted);
       expect(decrypted).to.eventually.equal(payload);
     });
 
