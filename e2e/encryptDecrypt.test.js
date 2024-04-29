@@ -152,7 +152,7 @@ describe('Encrypt and Decrypt', () => {
     });
   });
 
-  context('Encrypt and Decrypt with Metadata', () => {
+  context('Encrypt and Decrypt with Metadata R1 curve', () => {
     beforeEach(() => {
       evervaultClient = new Evervault(appUuid, apiKey, { curve: 'prime256v1' });
     });
@@ -201,6 +201,68 @@ describe('Encrypt and Decrypt', () => {
       const payload = Buffer.from('Hello, world!');
       const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
       const decrypted = evervaultClient.decrypt(encrypted);
+      expect(decrypted).to.eventually.equal(payload);
+    });
+
+    it('encrypts file with metadata and decryption is not permitted', async () => {
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
+      const decrypted = evervaultClient.decrypt(encrypted);
+      expect(decrypted).to.be.rejectedWith(EvervaultError);
+    });
+  });
+
+  context('Encrypt and Decrypt with Metadata K1 curve', () => {
+    beforeEach(() => {
+      evervaultClient = new Evervault(appUuid, apiKey);
+    });
+
+    it('encrypts with metadata and decryption is permitted', async () => {
+      const payload = {
+        string: 'hello',
+        integer: 1,
+        float: 1.5,
+        true: true,
+        false: false,
+        array: ['hello', 1, 1.5, true, false],
+      };
+      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
+      expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
+      const decrypted = await evervaultClient.decrypt(encrypted);
+      console.log("DECRYPTED", decrypted);
+      expect(payload).to.deep.equal(decrypted);
+    });
+
+    it('encrypts with metadata and decryption is not permitted', async () => {
+      const payload = {
+        string: 'hello',
+        integer: 1,
+        float: 1.5,
+        true: true,
+        false: false,
+        array: ['hello', 1, 1.5, true, false],
+      };
+      const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
+      expect(checkObjectHasStringsWithCorrectVersions(encrypted)).to.be.true;
+      evervaultClient.decrypt(encrypted).then((result) => {
+        expect(result).to.be.instanceOf(EvervaultError);
+      });
+    });
+
+    it('fails if role fails validation', () => {
+      const payload = 'test';
+      evervaultClient
+        .encrypt(payload, 'a-really-long-and-invalid-data-role')
+        .then((result) => {
+          expect(result).to.be.instanceOf(EvervaultError);
+        });
+    });
+
+    it('encrypts file with metadata and decryption is permitted', async () => {
+      const payload = Buffer.from('Hello, world!');
+      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
+      const decrypted = await evervaultClient.decrypt(encrypted);
+      console.log("DECRYPTED FILE", decrypted);
       expect(decrypted).to.eventually.equal(payload);
     });
 
