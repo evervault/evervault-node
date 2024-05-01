@@ -16,12 +16,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [12, 14, 16, 18]
+        node-version: [18, 20, 22]
         os: [ubuntu-latest]
         include:
-          - perform-attestation: false
           - perform-attestation: true
-            node-version: 18
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v1
