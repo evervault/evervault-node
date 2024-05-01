@@ -2,7 +2,6 @@ const { httpsHelper } = require('../lib/utils');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const https = require('https');
-const phin = require('phin');
 const fs = require('fs');
 
 describe('overload https requests', () => {
@@ -25,14 +24,14 @@ describe('overload https requests', () => {
   });
 
   const wasProxied = (result) => {
-    return result.socket._parent
-      ? result.socket._parent._host === 'relay.evervault.com'
+    return result.socket
+      ? result.socket.servername === 'relay.evervault.com'
       : false;
   };
 
   context('will use filter domain func to ignore domains', () => {
     it('should apply filter to requests', async () => {
-      await httpsHelper.overloadHttpsModule(
+      httpsHelper.overloadHttpsModule(
         apiKey,
         tunnelHostname,
         shouldNotFilter,
@@ -40,6 +39,7 @@ describe('overload https requests', () => {
         evClient,
         originalRequest
       );
+      const phin = require('phin');
 
       return await phin(testUrl).then((result) => {
         expect(wasProxied(result)).to.be.false;
