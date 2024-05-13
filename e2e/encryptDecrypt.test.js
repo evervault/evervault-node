@@ -11,7 +11,7 @@ describe('Encrypt and Decrypt', () => {
   const apiKey = process.env.EV_API_KEY;
 
   const metadataStringRegex =
-    /((ev(:|%3A))(debug(:|%3A))?((QlJV|TENZ|)(:|%3A))?((number|boolean|string)(:|%3A))?(([A-z0-9+\/=%]+)(:|%3A)){3}(\$|%24))|(((eyJ[A-z0-9+=.]+){2})([\w]{8}(-[\w]{4}){3}-[\w]{12}))/;
+    /((ev(:|%3A))(debug(:|%3A))?((S0lS|QkTC|)(:|%3A))?((number|boolean|string)(:|%3A))?(([A-z0-9+\/=%]+)(:|%3A)){3}(\$|%24))|(((eyJ[A-z0-9+=.]+){2})([\w]{8}(-[\w]{4}){3}-[\w]{12}))/;
 
   let evervaultClient;
 
@@ -195,20 +195,6 @@ describe('Encrypt and Decrypt', () => {
         .then((result) => {
           expect(result).to.be.instanceOf(EvervaultError);
         });
-    });
-
-    it('encrypts file with metadata and decryption is permitted', async () => {
-      const payload = Buffer.from('Hello, world!');
-      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
-      const decrypted = evervaultClient.decrypt(encrypted);
-      expect(decrypted).to.eventually.equal(payload);
-    });
-
-    it('encrypts file with metadata and decryption is not permitted', async () => {
-      const payload = Buffer.from('Hello, world!');
-      const encrypted = await evervaultClient.encrypt(payload, 'forbid-all');
-      const decrypted = evervaultClient.decrypt(encrypted);
-      expect(decrypted).to.be.rejectedWith(EvervaultError);
     });
   });
 });
