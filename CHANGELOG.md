@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.0.1
+
+### Patch Changes
+
+- bfd870a: Remove support for data policies when encrypting Files
+
 ## 6.0.0
 
 ### Major Changes
