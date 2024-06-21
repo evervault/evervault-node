@@ -1,5 +1,15 @@
 # @evervault/sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- 14748f9: Replace ASN.1 encoding library
+
+### Patch Changes
+
+- ca97124: remove unused code
+
 ## 6.0.1
 
 ### Patch Changes
