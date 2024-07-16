@@ -7,12 +7,11 @@ const https = require('https');
 const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
 const fixtures = require('./utilities/fixtures');
+const rewire = require('rewire');
 const http = require('http');
-
+const { createServer } = require('./utilities/mockServer');
 const functionName = 'test-function',
   testData = { test: 'Hello World' };
-const testCageKey = 'im-the-function-key';
-const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 const testApiKey =
   'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
 const testAppId = 'app_8022cc5a3073';
@@ -548,39 +547,6 @@ describe('evervault client', () => {
   // });
 
   context('initializing the SDK', () => {
-    let server;
-    let serverPort;
-    let sdk;
-
-    before(() => {
-      server = http.createServer((req, res) => {
-        if (
-          req.method === 'GET' &&
-          (req.url === '/apps/key' || req.url === '/cages/key')
-        ) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          const jsonResponse = {
-            key: testCageKey,
-            ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
-
-      server.listen(8080, () => {
-        console.log('Server is listening on port 8080');
-      });
-      const Evervault = require('../lib');
-      sdk = new Evervault(testAppId, testApiKey);
-    });
-
-    after(() => {
-      server.close();
-    });
-
     it('should throw and error if app uuid is misconfigured', async () => {
       const Evervault = require('../lib');
       const test = () => new Evervault('', testApiKey);
@@ -596,29 +562,18 @@ describe('evervault client', () => {
 
   context('encrypting data', () => {
     let server;
-    let sdk;
+    let Evervault;
 
     before(() => {
-      server = http.createServer((req, res) => {
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
-            key: testCageKey,
-            ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
-
-      server.listen(8080, () => {
-        console.log('Server is listening on port 8080');
-      });
-      const Evervault = require('../lib');
-      sdk = new Evervault(testAppId, testApiKey);
+      server = createServer();
+      // rewiring is needed to set the config environment variables
+      // there isn't a clean way to do this at runtime because of Node.js
+      // module caching system.
+      EvervaultClient = rewire('../lib');
+      const config = require('../lib/config');
+      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient.__set__('config', config);
+      Evervault = EvervaultClient;
     });
 
     after(() => {
@@ -627,7 +582,7 @@ describe('evervault client', () => {
 
     it('should not encrypt data with invalid data role', async () => {
       const Evervault = require('../lib');
-      const sdk = new Evervault(testAppId, testApiKey);
+      sdk = new Evervault(testAppId, testApiKey);
       const test = async () => sdk.encrypt(testData, '00000000000000000000000');
 
       try {
@@ -641,7 +596,8 @@ describe('evervault client', () => {
       }
     });
 
-    it('should encrypt the data', async () => {
+    it('should encrypt data', async () => {
+      const sdk = new Evervault(testAppId, testApiKey);
       const res = await sdk.encrypt(testData);
       expect(res.test.substring(0, 3)).to.equal('ev:');
     });
