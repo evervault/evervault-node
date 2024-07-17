@@ -2,18 +2,7 @@ const http = require('http');
 const net = require('net');
 const url = require('url');
 
-const createServer = (hander, response) => {
-  const server = http.createServer(hander);
-
-  server.listen(0, () => {
-    const port = server.address().port;
-    console.log(`Server is listening on port ${port}`);
-  });
-
-  return server;
-};
-
-const createServerTwo = (handlers = []) => {
+const createServer = (handlers = []) => {
   const server = http.createServer((req, res) => {
     let handled = false;
 
@@ -87,6 +76,5 @@ const createProxyServer = () => {
 
 module.exports = {
   createServer,
-  createServerTwo,
   createProxyServer,
 };
