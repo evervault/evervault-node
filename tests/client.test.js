@@ -9,7 +9,11 @@ const { errors } = require('../lib/utils');
 const fixtures = require('./utilities/fixtures');
 const rewire = require('rewire');
 const http = require('http');
-const { createServer } = require('./utilities/mockServer');
+const {
+  createServer,
+  createProxyServer,
+  createServerTwo,
+} = require('./utilities/mockServer');
 const functionName = 'test-function',
   testData = { test: 'Hello World' };
 const testApiKey =
@@ -565,20 +569,19 @@ describe('evervault client', () => {
     let Evervault;
 
     before(() => {
-      server = createServer((req, res) => {
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+      const handlers = [
+        {
+          url: '/cages/key',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             key: testCageKey,
             ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
+          }),
+        },
+      ];
+      server = createServerTwo(handlers);
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
@@ -621,27 +624,28 @@ describe('evervault client', () => {
     let Evervault;
 
     before(() => {
-      server = createServer((req, res) => {
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+      const handlers = [
+        {
+          url: '/cages/key',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             key: testCageKey,
             ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else if (req.method === 'POST' && req.url === '/decrypt') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+          }),
+        },
+        {
+          url: '/decrypt',
+          method: 'POST',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             data: 'Hello World',
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
+          }),
+        },
+      ];
+      server = createServerTwo(handlers);
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
@@ -673,32 +677,30 @@ describe('evervault client', () => {
     const functionName = 'test-function';
 
     before(() => {
-      server = createServer((req, res) => {
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+      let handlers = [
+        {
+          url: '/cages/key',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             key: testCageKey,
             ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else if (
-          req.method === 'POST' &&
-          req.url === `/functions/${functionName}/runs`
-        ) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+          }),
+        },
+        {
+          url: `/functions/${functionName}/runs`,
+          method: 'POST',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             id: 'func_run_b470a269a369',
             result: { test: 'data' },
             status: 'success',
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
+          }),
+        },
+      ];
+      server = createServerTwo(handlers);
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
@@ -732,30 +734,28 @@ describe('evervault client', () => {
     const functionName = 'test-function';
 
     before(() => {
-      server = createServer((req, res) => {
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+      let handlers = [
+        {
+          url: '/cages/key',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             key: testCageKey,
             ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else if (
-          req.method === 'POST' &&
-          req.url === `/v2/functions/${functionName}/run-token`
-        ) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-
-          const jsonResponse = {
+          }),
+        },
+        {
+          url: `/v2/functions/${functionName}/run-token`,
+          method: 'POST',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
             token: 'token',
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
+          }),
+        },
+      ];
+      server = createServerTwo(handlers);
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
@@ -785,63 +785,88 @@ describe('evervault client', () => {
   });
 
   context('proxies a request', () => {
-    let server;
+    let apiServer;
     let targetServer;
+    let proxyServer;
     let Evervault;
 
     before(() => {
-      server = createServer((req, res) => {
-        console.log('Server Request: ', req.url);
-        if (req.method === 'GET' && req.url === '/cages/key') {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
+      const targetHandlers = [
+        {
+          url: '/',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({ success: true }),
+        },
+      ];
 
-          const jsonResponse = {
-            key: testCageKey,
-            ecdhKey: testEcdhCageKey,
-          };
-          res.end(JSON.stringify(jsonResponse));
-        } else if (req.method === 'GET' && req.url === `/v2/relay-outbound`) {
-          res.writeHead(200, {
+      targetServer = createServerTwo(targetHandlers);
+
+      const apiHandlers = [
+        {
+          url: '/v2/relay-outbound',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: {
             'Content-Type': 'application/json',
             'x-poll-interval': 1,
-          });
-          res.end(JSON.stringify(fixtures.relayOutboundResponse.data));
-        } else {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-      });
+          },
+          responseBody: JSON.stringify({
+            appUuid: 'app_5b849d3d269d',
+            teamUuid: '2ef8d35ce668',
+            strictMode: true,
+            outboundDestinations: {
+              [`localhost:${targetServer.address().port}`]: {
+                id: 153,
+                appUuid: 'app_5b849d3d269d',
+                createdAt: '2022-10-07T10:14:18.597Z',
+                updatedAt: '2022-10-07T10:14:18.597Z',
+                deletedAt: null,
+                routeSpecificFieldsToEncrypt: [],
+                deterministicFieldsToEncrypt: [],
+                encryptEmptyStrings: true,
+                curve: 'secp256k1',
+                uuid: 'outbound_destination_f0d7b61c8d52',
+                destinationDomain: `localhost:${targetServer.address().port}`,
+              },
+            },
+          }),
+        },
+      ];
 
-      targetServer = createServer((req, res) => {
-        console.log('Target Server Request: ', req.url);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true }));
-      });
+      apiServer = createServerTwo(apiHandlers);
+
+      proxyServer = createProxyServer();
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
       EvervaultClient = rewire('../lib');
       const config = require('../lib/config');
-      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      config.http.baseUrl = `http://localhost:${apiServer.address().port}`;
       config.http.tunnelHostname = `http://localhost:${
-        targetServer.address().port
+        proxyServer.address().port
       }`;
       EvervaultClient.__set__('config', config);
       Evervault = EvervaultClient;
     });
 
     after(() => {
-      server.close();
+      apiServer.close();
       targetServer.close();
+      proxyServer.close();
     });
 
-    it('should proxy a request to target server', async () => {
+    it('should proxy a request to the target server', async () => {
       const sdk = new Evervault(testAppId, testApiKey);
       await sdk.enableOutboundRelay();
 
-      const response = await phin(`https://destination1.evervault.test`);
+      const response = await phin(
+        `http://localhost:${targetServer.address().port}`
+      );
 
-      expect(response).to.equal('token');
+      const responseJson = JSON.parse(response.body);
+      expect(responseJson.success).to.be.true;
     });
   });
 });
