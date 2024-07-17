@@ -15,8 +15,8 @@ const functionName = 'test-function',
 const testApiKey =
   'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
 const testAppId = 'app_8022cc5a3073';
-
-let EvervaultClient;
+const testCageKey = 'im-the-function-key';
+const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
 // const encryptStub = sinon.stub();
 describe('evervault client', () => {
@@ -565,7 +565,20 @@ describe('evervault client', () => {
     let Evervault;
 
     before(() => {
-      server = createServer();
+      server = createServer((req, res) => {
+        if (req.method === 'GET' && req.url === '/cages/key') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            key: testCageKey,
+            ecdhKey: testEcdhCageKey,
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Not Found' }));
+        }
+      });
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
@@ -599,7 +612,236 @@ describe('evervault client', () => {
     it('should encrypt data', async () => {
       const sdk = new Evervault(testAppId, testApiKey);
       const res = await sdk.encrypt(testData);
-      expect(res.test.substring(0, 3)).to.equal('ev:');
+      expect(res.test.substring(0, 7)).to.equal('ev:RFVC');
+    });
+  });
+
+  context('decrypting data', () => {
+    let server;
+    let Evervault;
+
+    before(() => {
+      server = createServer((req, res) => {
+        if (req.method === 'GET' && req.url === '/cages/key') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            key: testCageKey,
+            ecdhKey: testEcdhCageKey,
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else if (req.method === 'POST' && req.url === '/decrypt') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            data: 'Hello World',
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Not Found' }));
+        }
+      });
+      // rewiring is needed to set the config environment variables
+      // there isn't a clean way to do this at runtime because of Node.js
+      // module caching system.
+      EvervaultClient = rewire('../lib');
+      const config = require('../lib/config');
+      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient.__set__('config', config);
+      Evervault = EvervaultClient;
+    });
+
+    after(() => {
+      server.close();
+    });
+
+    it('should decrypt data', async () => {
+      const sdk = new Evervault(testAppId, testApiKey);
+      const plaintext = 'Hello World';
+      const ciphertext = await sdk.encrypt(plaintext);
+
+      const plaintextResponse = await sdk.decrypt(ciphertext);
+
+      expect(plaintextResponse).to.equal(plaintext);
+    });
+  });
+
+  context('running a function', () => {
+    let server;
+    let Evervault;
+    const functionName = 'test-function';
+
+    before(() => {
+      server = createServer((req, res) => {
+        if (req.method === 'GET' && req.url === '/cages/key') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            key: testCageKey,
+            ecdhKey: testEcdhCageKey,
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else if (
+          req.method === 'POST' &&
+          req.url === `/functions/${functionName}/runs`
+        ) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            id: 'func_run_b470a269a369',
+            result: { test: 'data' },
+            status: 'success',
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Not Found' }));
+        }
+      });
+      // rewiring is needed to set the config environment variables
+      // there isn't a clean way to do this at runtime because of Node.js
+      // module caching system.
+      EvervaultClient = rewire('../lib');
+      const config = require('../lib/config');
+      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient.__set__('config', config);
+      Evervault = EvervaultClient;
+    });
+
+    after(() => {
+      server.close();
+    });
+
+    it('should run a function', async () => {
+      const sdk = new Evervault(testAppId, testApiKey);
+      const plaintext = { test: 'Hello World' };
+      const ciphertext = await sdk.encrypt(plaintext);
+
+      const functionResponse = await sdk.run(functionName, ciphertext);
+
+      expect(functionResponse.id).to.not.be.undefined;
+      expect(functionResponse.result).to.not.be.undefined;
+      expect(functionResponse.status).to.equal('success');
+    });
+  });
+
+  context('run token', () => {
+    let server;
+    let Evervault;
+    const functionName = 'test-function';
+
+    before(() => {
+      server = createServer((req, res) => {
+        if (req.method === 'GET' && req.url === '/cages/key') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            key: testCageKey,
+            ecdhKey: testEcdhCageKey,
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else if (
+          req.method === 'POST' &&
+          req.url === `/v2/functions/${functionName}/run-token`
+        ) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            token: 'token',
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Not Found' }));
+        }
+      });
+      // rewiring is needed to set the config environment variables
+      // there isn't a clean way to do this at runtime because of Node.js
+      // module caching system.
+      EvervaultClient = rewire('../lib');
+      const config = require('../lib/config');
+      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient.__set__('config', config);
+      Evervault = EvervaultClient;
+    });
+
+    after(() => {
+      server.close();
+    });
+
+    it('should create a run token', async () => {
+      const sdk = new Evervault(testAppId, testApiKey);
+      let runPayload = {
+        data: { test: 'Hello World' },
+      };
+      const functionResponse = await sdk.createRunToken(
+        functionName,
+        runPayload
+      );
+
+      expect(functionResponse.token).to.equal('token');
+    });
+  });
+
+  context('proxies a request', () => {
+    let server;
+    let targetServer;
+    let Evervault;
+
+    before(() => {
+      server = createServer((req, res) => {
+        console.log('Server Request: ', req.url);
+        if (req.method === 'GET' && req.url === '/cages/key') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+
+          const jsonResponse = {
+            key: testCageKey,
+            ecdhKey: testEcdhCageKey,
+          };
+          res.end(JSON.stringify(jsonResponse));
+        } else if (req.method === 'GET' && req.url === `/v2/relay-outbound`) {
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'x-poll-interval': 1,
+          });
+          res.end(JSON.stringify(fixtures.relayOutboundResponse.data));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Not Found' }));
+        }
+      });
+
+      targetServer = createServer((req, res) => {
+        console.log('Target Server Request: ', req.url);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      });
+      // rewiring is needed to set the config environment variables
+      // there isn't a clean way to do this at runtime because of Node.js
+      // module caching system.
+      EvervaultClient = rewire('../lib');
+      const config = require('../lib/config');
+      config.http.baseUrl = `http://localhost:${server.address().port}`;
+      config.http.tunnelHostname = `http://localhost:${
+        targetServer.address().port
+      }`;
+      EvervaultClient.__set__('config', config);
+      Evervault = EvervaultClient;
+    });
+
+    after(() => {
+      server.close();
+      targetServer.close();
+    });
+
+    it('should proxy a request to target server', async () => {
+      const sdk = new Evervault(testAppId, testApiKey);
+      await sdk.enableOutboundRelay();
+
+      const response = await phin(`https://destination1.evervault.test`);
+
+      expect(response).to.equal('token');
     });
   });
 });
