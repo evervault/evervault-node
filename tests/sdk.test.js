@@ -27,6 +27,92 @@ describe('evervault client', () => {
     });
   });
 
+  context('calling methods that require api keys', () => {
+    it('cannot decrypt without api key', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.decrypt();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot enable relay api key', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.enableOutboundRelay();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot enable enclaves', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.enableEnclaves();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot run a function', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.run();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot create a run token', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.createRunToken();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot create a https Agent', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.createRelayHttpsAgent();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+
+    it('cannot create a client side token', async () => {
+      const Evervault = require('../lib');
+
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
+
+      try {
+        await sdk.createClientSideDecryptToken();
+      } catch (error) {
+        expect(error).to.be.instanceOf(errors.EvervaultError);
+      }
+    });
+  });
+
   context('encrypting data', () => {
     let server;
     let Evervault;
