@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.2.0
+
+### Minor Changes
+
+- 1d40263: Encrypt with just app id
+
 ## 6.1.0
 
 ### Minor Changes
