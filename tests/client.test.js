@@ -111,39 +111,6 @@ describe('Testing the Evervault SDK', () => {
           });
         });
       });
-
-      context('getCageKey succeeds', () => {
-        let cageKeyNock;
-        beforeEach(() => {
-          cageKeyNock = nock(sdk.config.http.baseUrl, {
-            reqheaders: {
-              'API-KEY': testApiKey,
-            },
-          })
-            .get('/cages/key')
-            .reply(200, { key: testCageKey, ecdhKey: testEcdhCageKey });
-          encryptStub.resolves({
-            data: 'yes',
-          });
-        });
-      });
-
-      context('multiple encrypt calls', () => {
-        const httpStub = sinon.stub();
-        const getCageKeyStub = sinon.stub();
-        let sdk;
-        before(() => {
-          getCageKeyStub.resolves({ key: testCageKey });
-          httpStub.returns({ getCageKey: getCageKeyStub });
-          encryptStub.resolves({
-            data: 'yes',
-          });
-          EvervaultClient.__set__({
-            Http: httpStub,
-          });
-          sdk = new EvervaultClient(testAppId, testApiKey);
-        });
-      });
     });
 
     context('Invoking function run', () => {

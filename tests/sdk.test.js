@@ -43,6 +43,16 @@ describe('evervault client', () => {
             ecdhKey: testEcdhCageKey,
           }),
         },
+        {
+          url: '/cages/key',
+          method: 'GET',
+          responseStatusCode: 200,
+          responseHeaders: { 'Content-Type': 'application/json' },
+          responseBody: JSON.stringify({
+            key: testKey,
+            ecdhKey: testEcdhCageKey,
+          }),
+        },
       ];
       server = createServer(handlers);
       // rewiring is needed to set the config environment variables
@@ -85,7 +95,7 @@ describe('evervault client', () => {
     });
 
     it('should encrypt data without and api key', async () => {
-      const sdk = new Evervault(testAppId, null, { encryptionClient: true });
+      const sdk = new Evervault(testAppId, null, { encryptionMode: true });
 
       const res = await sdk.encrypt(testData);
 
