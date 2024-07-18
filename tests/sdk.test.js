@@ -5,6 +5,7 @@ const axios = require('axios');
 const { errors } = require('../lib/utils');
 const rewire = require('rewire');
 const { createProxyServer, createServer } = require('./utilities/mockServer');
+
 const testApiKey =
   'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
 const testAppId = 'app_8022cc5a3073';
