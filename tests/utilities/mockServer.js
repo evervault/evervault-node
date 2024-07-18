@@ -36,8 +36,6 @@ const createProxyServer = () => {
   const server = http.createServer();
 
   server.on('connect', (req, cltSocket, head) => {
-    console.log(`HTTP CONNECT: ${req.url}`);
-
     const { port, hostname } = new url.URL(`http://${req.url}`);
 
     const srvSocket = net.connect(port || 443, hostname, () => {

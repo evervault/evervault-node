@@ -8,7 +8,7 @@ const { createProxyServer, createServer } = require('./utilities/mockServer');
 const testApiKey =
   'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
 const testAppId = 'app_8022cc5a3073';
-const testCageKey = 'im-the-function-key';
+const testKey = 'legacy-key';
 const testEcdhCageKey = 'AjLUS3L3KagQud+/3R1TnGQ2XSF763wFO9cd/6XgaW86';
 
 describe('evervault client', () => {
@@ -34,12 +34,12 @@ describe('evervault client', () => {
     before(() => {
       const handlers = [
         {
-          url: '/cages/key',
+          url: '/keys',
           method: 'GET',
           responseStatusCode: 200,
           responseHeaders: { 'Content-Type': 'application/json' },
           responseBody: JSON.stringify({
-            key: testCageKey,
+            key: testKey,
             ecdhKey: testEcdhCageKey,
           }),
         },
@@ -78,7 +78,17 @@ describe('evervault client', () => {
 
     it('should encrypt data', async () => {
       const sdk = new Evervault(testAppId, testApiKey);
+
       const res = await sdk.encrypt(testData);
+
+      expect(res.test.substring(0, 7)).to.equal('ev:RFVC');
+    });
+
+    it('should encrypt data without and api key', async () => {
+      const sdk = new Evervault(testAppId, null, { encryptionClient: true });
+
+      const res = await sdk.encrypt(testData);
+
       expect(res.test.substring(0, 7)).to.equal('ev:RFVC');
     });
   });
@@ -95,7 +105,7 @@ describe('evervault client', () => {
           responseStatusCode: 200,
           responseHeaders: { 'Content-Type': 'application/json' },
           responseBody: JSON.stringify({
-            key: testCageKey,
+            key: testKey,
             ecdhKey: testEcdhCageKey,
           }),
         },
@@ -148,7 +158,7 @@ describe('evervault client', () => {
           responseStatusCode: 200,
           responseHeaders: { 'Content-Type': 'application/json' },
           responseBody: JSON.stringify({
-            key: testCageKey,
+            key: testKey,
             ecdhKey: testEcdhCageKey,
           }),
         },
@@ -205,7 +215,7 @@ describe('evervault client', () => {
           responseStatusCode: 200,
           responseHeaders: { 'Content-Type': 'application/json' },
           responseBody: JSON.stringify({
-            key: testCageKey,
+            key: testKey,
             ecdhKey: testEcdhCageKey,
           }),
         },
