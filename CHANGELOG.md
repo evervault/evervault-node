@@ -1,5 +1,16 @@
 # @evervault/sdk
 
+## 6.1.0
+
+### Minor Changes
+
+- 14748f9: Replace ASN.1 encoding library
+- f3db4d3: Added `createEnclaveHttpsAgent` to return an `EnclaveAgent` class which extends https.Agent to manage HTTPS connections. This Agent can be passed into HTTP clients like Axios to attest a connection to an Enclave.
+
+### Patch Changes
+
+- ca97124: remove unused code
+
 ## 6.0.1
 
 ### Patch Changes
