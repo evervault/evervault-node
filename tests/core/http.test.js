@@ -144,7 +144,7 @@ describe('Http Module', () => {
           .runFunction(testFunction, { test: 'data' })
           .then((res) => {
             expect(runFunctionNock.isDone()).to.be.true;
-            expect(res.body).to.deep.equal(testResponse);
+            expect(res.data).to.deep.equal(testResponse);
           });
       });
     });
@@ -513,7 +513,7 @@ describe('Http Module', () => {
             .createRunToken(testFunction, { test: 'data' })
             .then((res) => {
               expect(createRunTokenNock.isDone()).to.be.true;
-              expect(res.body).to.deep.equal(testResponse);
+              expect(res.data).to.deep.equal(testResponse);
             });
         });
       });
@@ -531,8 +531,8 @@ describe('Http Module', () => {
             .createRunToken(testFunction, { test: 'data' })
             .then((res) => {
               expect(createRunTokenNock.isDone()).to.be.true;
-              expect(res.statusCode).to.equal(404);
-              expect(res.body).to.deep.equal(testResponse);
+              expect(res.status).to.equal(404);
+              expect(res.data).to.deep.equal(testResponse);
             });
         });
       });

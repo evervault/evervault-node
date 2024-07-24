@@ -3,7 +3,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const nock = require('nock');
 const sinon = require('sinon');
-const phin = require('phin');
+const axios = require('axios');
 const https = require('https');
 const rewire = require('rewire');
 const { RelayOutboundConfig } = require('../lib/core');
@@ -236,7 +236,7 @@ describe('Testing the Evervault SDK', () => {
       const originalRequest = https.request;
 
       const wasProxied = (request, apiKey) => {
-        return request.req.headers['proxy-authorization'] === apiKey;
+        return request.request.headers['proxy-authorization'] === apiKey;
       };
 
       afterEach(() => {
@@ -264,7 +264,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -287,7 +287,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -310,7 +310,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.io');
+        const response = await axios('https://destination1.evervault.io');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -323,7 +323,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -336,7 +336,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -350,7 +350,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -365,7 +365,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
@@ -379,7 +379,7 @@ describe('Testing the Evervault SDK', () => {
           .get('/')
           .reply(200, { success: true });
 
-        const response = await phin('https://destination1.evervault.test');
+        const response = await axios('https://destination1.evervault.test');
         expect(wasProxied(response, testApiKey)).to.be.true;
       });
 
