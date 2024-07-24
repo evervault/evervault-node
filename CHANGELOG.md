@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.2.1
+
+### Patch Changes
+
+- 1538ebe: fix app key header name
+
 ## 6.2.0
 
 ### Minor Changes
