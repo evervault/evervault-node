@@ -39,9 +39,9 @@ describe('overload https requests', () => {
         evClient,
         originalRequest
       );
-      const phin = require('phin');
+      const axios = require('axios');
 
-      return await phin(testUrl).then((result) => {
+      return await axios(testUrl).then((result) => {
         expect(wasProxied(result)).to.be.false;
       });
     });
