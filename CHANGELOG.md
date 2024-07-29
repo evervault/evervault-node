@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.2.2
+
+### Patch Changes
+
+- 945920d: Remvoe phin as a dependency as it is unmaintained
+
 ## 6.2.1
 
 ### Patch Changes
