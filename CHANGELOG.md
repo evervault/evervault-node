@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.2.3
+
+### Patch Changes
+
+- dc32ede: Add axios dependency
+
 ## 6.2.2
 
 ### Patch Changes
