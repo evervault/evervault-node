@@ -2,18 +2,20 @@
   "name": "@evervault/sdk",
   "version": "6.2.3",
   "description": "Node.js SDK for Evervault",
-  "main": "lib/index.js",
-  "typings": "types/index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "prepare": "husky install",
-    "lint": "prettier --check \"./**/*.js\"",
-    "test": "mocha 'tests/**/*.test.js'  --timeout 30000",
-    "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
+    "lint": "prettier --check \"./**/*.{js,ts}\"",
+    "test": "npm run build && mocha 'tests/**/*.test.js' --timeout 30000",
+    "test:e2e": "npm run build && mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run generate-types",
-    "generate-types": "tsc"
+    "generate-types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+    "build": "tsc",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",
@@ -32,8 +34,8 @@
     "url": "https://github.com/evervault/evervault-node/issues"
   },
   "files": [
-    "lib",
-    "types"
+    "dist",
+    "lib"
   ],
   "homepage": "https://github.com/evervault/evervault-node#readme",
   "dependencies": {
