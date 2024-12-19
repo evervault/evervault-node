@@ -11,8 +11,9 @@
     "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:coverage": "nyc --reporter=text npm run test",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run generate-types",
-    "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --allowSyntheticDefaultImports --outDir types"
+    "generate-types": "tsc"
   },
   "repository": {
     "type": "git",

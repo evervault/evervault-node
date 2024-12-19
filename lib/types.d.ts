@@ -43,6 +43,7 @@ export interface SdkOptions {
   curve?: SupportedCurve;
   retry?: boolean;
   enableOutboundRelay?: boolean;
+  encryptionMode?: string;
 }
 
 export interface PCRs {
