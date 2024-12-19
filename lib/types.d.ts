@@ -46,6 +46,11 @@ export interface SdkOptions {
   encryptionMode?: string;
 }
 
+export interface EncryptOptions {
+  role?: string;
+  datatype?: string;
+}
+
 export interface PCRs {
   pcr0?: string;
   pcr1?: string;

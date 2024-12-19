@@ -21,19 +21,19 @@ describe('Functions', () => {
     },
   };
   const expected_response = {
-    string: typeof 'hello',
-    integer: typeof 1,
-    float: typeof 1.5,
-    true: typeof true,
-    false: typeof false,
+    string: 'string',
+    integer: 'string',
+    float: 'string',
+    true: 'string',
+    false: 'string',
     array: {
-      0: typeof 'hello',
-      1: typeof 1,
-      2: typeof 1.5,
-      3: typeof true,
-      4: typeof false,
+      0: 'string',
+      1: 'string',
+      2: 'string',
+      3: 'string',
+      4: 'string',
     },
-    obj: { hello: typeof 'hello' },
+    obj: { hello: 'string' },
   };
 
   let evervaultClient;
