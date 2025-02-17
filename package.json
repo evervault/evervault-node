@@ -10,6 +10,7 @@
     "test": "mocha 'tests/**/*.test.js'  --timeout 30000",
     "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
+    "test:e2e:filter": "mocha 'e2e/**/*.test.js' --timeout 5000 --grep",
     "test:coverage": "nyc --reporter=text npm run test",
     "prepublishOnly": "npm run generate-types",
     "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --allowSyntheticDefaultImports --outDir types"

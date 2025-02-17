@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
 const {
-  http: { proxiedMarker },
+  http: { proxiedMarker, certHostname },
 } = require('../lib/config');
 const axios = require('axios');
 const { v4 } = require('uuid');
@@ -46,19 +46,35 @@ describe('Outbound Relay Test', () => {
         number: 1234567890,
         boolean: true,
       };
-      const encrypted = await evervaultClient.encrypt(payload);
 
       await evervaultClient.enableOutboundRelay({
         decryptionDomains: ['httpbin.org'],
       });
 
       const [httpbinRes, syntheticRes] = await Promise.allSettled([
-        axios.post('https://httpbin.org/post', encrypted),
+        axios.post('https://httpbin.org/post', payload),
         axios.get(syntheticEndpointUrl),
       ]);
 
-      expect(httpbinRes.value.request[proxiedMarker]).to.equal(true);
-      expect(syntheticRes.value.request[proxiedMarker]).to.equal(false);
+      // We don't need these requests to succeed, we just need them to be attempted so we can check if the symbol was set
+      // so we can check the proxy marker on either value or reason.
+      expect(
+        (httpbinRes.value ?? httpbinRes.reason).request[proxiedMarker]
+      ).to.equal(true);
+      expect(
+        (syntheticRes.value ?? syntheticRes.reason).request[proxiedMarker]
+      ).to.equal(false);
+    });
+
+    it('Ignores domains to always ignore even when set in decryption domains', async () => {
+      const caHost = new URL(certHostname).hostname;
+      await evervaultClient.enableOutboundRelay({
+        decryptionDomains: [caHost],
+      });
+
+      const caResponse = await axios.get(certHostname);
+
+      expect(caResponse.request[proxiedMarker]).to.equal(false);
     });
   });
 
@@ -71,19 +87,22 @@ describe('Outbound Relay Test', () => {
           number: 1234567890,
           boolean: true,
         };
-        const encrypted = await evervaultClient.encrypt(payload);
 
         await evervaultClient.enableOutboundRelay({
           decryptionDomains: ['httpbin.org/post'],
         });
 
         const [postRes, getRes] = await Promise.allSettled([
-          axios.post('https://httpbin.org/post', encrypted),
+          axios.post('https://httpbin.org/post', payload),
           axios.get('https://httpbin.org/get'),
         ]);
 
-        expect(postRes.value.request[proxiedMarker]).to.equal(true);
-        expect(getRes.value.request[proxiedMarker]).to.equal(false);
+        expect(
+          (postRes.value ?? postRes.reason).request[proxiedMarker]
+        ).to.equal(true);
+        expect((getRes.value ?? getRes.reason).request[proxiedMarker]).to.equal(
+          false
+        );
       });
     }
   );
@@ -97,19 +116,24 @@ describe('Outbound Relay Test', () => {
           number: 1234567890,
           boolean: true,
         };
-        const encrypted = await evervaultClient.encrypt(payload);
 
         await evervaultClient.enableOutboundRelay({
           decryptionDomains: ['httpbin.org/post/*'],
         });
 
         const [matchingPostRes, failingPostRes] = await Promise.allSettled([
-          axios.post('https://httpbin.org/post/somewhere', encrypted),
+          axios.post('https://httpbin.org/post/somewhere', payload),
           axios.get('https://httpbin.org/post'),
         ]);
 
-        expect(matchingPostRes.value.request[proxiedMarker]).to.equal(true);
-        expect(failingPostRes.value.request[proxiedMarker]).to.equal(false);
+        expect(
+          (matchingPostRes.value ?? matchingPostRes.reason).request[
+            proxiedMarker
+          ]
+        ).to.equal(true);
+        expect(
+          (failingPostRes.value ?? failingPostRes.reason).request[proxiedMarker]
+        ).to.equal(false);
       });
     }
   );
