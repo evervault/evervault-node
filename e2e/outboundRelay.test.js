@@ -1,5 +1,8 @@
 const { expect } = require('chai');
 const Evervault = require('../lib');
+const {
+  http: { proxiedMarker },
+} = require('../lib/config');
 const axios = require('axios');
 const { v4 } = require('uuid');
 
@@ -32,6 +35,7 @@ describe('Outbound Relay Test', () => {
       expect(body.request.string).to.equal(false);
       expect(body.request.number).to.equal(false);
       expect(body.request.boolean).to.equal(false);
+      expect(response.request[proxiedMarker]).to.equal(true);
     });
   });
 });
