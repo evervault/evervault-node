@@ -22,7 +22,7 @@ jobs:
           title: 'New Release'
           commit: 'Release new version'
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SDK_PUBLISH_TOKEN }}
       - name: Create new release
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
@@ -30,7 +30,7 @@ jobs:
           COMMIT_TAG=$(git tag --points-at HEAD)
           if [ -n "$COMMIT_TAG" ]; then
             echo "A tag is attached to HEAD. Creating a new release..."
-            echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+            echo "${{ secrets.SDK_PUBLISH_TOKEN }}" | gh auth login --with-token
             CHANGELOG=$(awk '
               BEGIN { recording=0; }
               /^## / {
