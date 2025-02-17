@@ -7,6 +7,7 @@ export interface HttpConfig {
   pollInterval: string | number;
   attestationDocPollInterval: string | number;
   pcrProviderPollInterval: string | number;
+  proxiedMarker: Symbol;
 }
 
 export interface CurveConfig {
