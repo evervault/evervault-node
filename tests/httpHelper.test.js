@@ -4,6 +4,24 @@ const { expect } = require('chai');
 const https = require('https');
 const fs = require('fs');
 
+describe('getDomainAndPathFromArgs', () => {
+  [
+    [new URL('https://a.com'), 'a.com', '/'],
+    [new URL('https://a.com/b/c'), 'a.com', '/b/c'],
+    ['https://a.com', 'a.com', '/'],
+    ['https://a.com/b/c', 'a.com', '/b/c'],
+    [{ hostname: 'a.com', pathname: '/' }, 'a.com', '/'],
+    [{ host: 'a.com', path: '/' }, 'a.com', '/'],
+    [{ yayForJavascript: 1 }, undefined, undefined],
+  ].forEach(([url, expectedDomain, expectedPath], i) => {
+    it(`works for ${JSON.stringify(url)} (${i})`, () => {
+      const result = httpsHelper.getDomainAndPathFromArgs([url]);
+      expect(result.domain).to.equal(expectedDomain);
+      expect(result.path).to.equal(expectedPath);
+    });
+  });
+});
+
 describe('overload https requests', () => {
   const apiKey = 'test-api-key';
   const tunnelHostname = 'relay.evervault.com';
