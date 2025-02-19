@@ -1,5 +1,13 @@
 # @evervault/sdk
 
+## 6.3.1
+
+### Patch Changes
+
+- 947115b: Correct logic for parsing domains from URLs supplied to the http request function: add fallback support for path alongisde pathname.
+
+  Fix bug in parsing raw strings supplied to request to URLs by correcting object keys.
+
 ## 6.3.0
 
 ### Minor Changes
