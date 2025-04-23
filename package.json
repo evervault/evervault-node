@@ -45,7 +45,7 @@
     "axios": "^1.8.4"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.7",
+    "@changesets/cli": "^2.29.2",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "husky": "^7.0.2",
