@@ -172,9 +172,9 @@ describe('Encrypt and Decrypt', () => {
       expect(payload).to.deep.equal(decrypted);
     });
 
-    it('encrypts file with metadata and decryption is permitted', async () => {
+    it('encrypts file, and decrypts successfully', async () => {
       const payload = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06]);
-      const encrypted = await evervaultClient.encrypt(payload, 'permit-all');
+      const encrypted = await evervaultClient.encrypt(payload);
       const decrypted = await evervaultClient.decrypt(encrypted);
       expect(payload).to.deep.equal(decrypted);
     });
