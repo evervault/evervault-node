@@ -1,5 +1,12 @@
 # @evervault/sdk
 
+## 6.3.2
+
+### Patch Changes
+
+- 3685050: Correct axios response type for file decrypt requests.
+- ffc9036: security patches for axios
+
 ## 6.3.1
 
 ### Patch Changes
