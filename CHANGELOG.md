@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.3.3
+
+### Patch Changes
+
+- ac219ff: upgrade axios dependency to 1.9.0
+
 ## 6.3.2
 
 ### Patch Changes
