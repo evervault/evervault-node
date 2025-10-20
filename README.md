@@ -6,8 +6,6 @@
 
 Before starting with the Evervault Node.js SDK, you will need to [create an account](https://app.evervault.com/register) and a team.
 
-For full installation support, [book time here](https://calendly.com/evervault/support).
-
 ## Documentation
 
 See the Evervault [Node.js SDK documentation](https://docs.evervault.com/sdks/nodejs) to learn how to install, set up, and use the SDK.
