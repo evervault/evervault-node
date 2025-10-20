@@ -1,6 +1,6 @@
 {
   "name": "@evervault/sdk",
-  "version": "6.3.4",
+  "version": "6.3.5",
   "description": "Node.js SDK for Evervault",
   "main": "lib/index.js",
   "typings": "types/index.d.ts",
