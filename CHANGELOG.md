@@ -1,5 +1,11 @@
 # @evervault/sdk
 
+## 6.3.5
+
+### Patch Changes
+
+- 9fb4f47: Bumping axios to fix vulnerability
+
 ## 6.3.3
 
 ### Patch Changes
