@@ -590,6 +590,117 @@ describe('Http Module', () => {
           });
         });
       });
+
+      context('Expiry validation', () => {
+        context('With Date object', () => {
+          it('Accepts expiry within next 10 minutes', () => {
+            const futureExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+            const testResponse = {
+              token: 'token',
+              expiry: futureExpiry.getTime(),
+              createdAt: Date.now(),
+            };
+            const createRunTokenNock = setupNock(
+              'https://api.evervault.com',
+              testApiKey,
+              true
+            )
+              .post(`/client-side-tokens`)
+              .reply(200, testResponse);
+
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, futureExpiry)
+              .then((res) => {
+                expect(createRunTokenNock.isDone()).to.be.true;
+              });
+          });
+
+          it('Throws error when expiry is in the past', () => {
+            const pastExpiry = new Date(Date.now() - 1000); // 1 second ago
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, pastExpiry)
+              .catch((err) => {
+                expect(err).to.be.instanceOf(errors.TokenCreationError);
+                expect(err.message).to.equal(
+                  'Expiry must be in the next 10 minutes'
+                );
+              });
+          });
+
+          it('Throws error when expiry is more than 10 minutes in future', () => {
+            const farFutureExpiry = new Date(Date.now() + 11 * 60 * 1000); // 11 minutes from now
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, farFutureExpiry)
+              .catch((err) => {
+                expect(err).to.be.instanceOf(errors.TokenCreationError);
+                expect(err.message).to.equal(
+                  'Expiry must be in the next 10 minutes'
+                );
+              });
+          });
+        });
+
+        context('With timestamp number', () => {
+          it('Accepts timestamp within next 10 minutes', () => {
+            const futureExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes from now
+            const testResponse = {
+              token: 'token',
+              expiry: futureExpiry,
+              createdAt: Date.now(),
+            };
+            const createRunTokenNock = setupNock(
+              'https://api.evervault.com',
+              testApiKey,
+              true
+            )
+              .post(`/client-side-tokens`)
+              .reply(200, testResponse);
+
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, futureExpiry)
+              .then((res) => {
+                expect(createRunTokenNock.isDone()).to.be.true;
+              });
+          });
+
+          it('Throws error when timestamp is in the past', () => {
+            const pastExpiry = Date.now() - 1000; // 1 second ago
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, pastExpiry)
+              .catch((err) => {
+                expect(err).to.be.instanceOf(errors.TokenCreationError);
+                expect(err.message).to.equal(
+                  'Expiry must be in the next 10 minutes'
+                );
+              });
+          });
+
+          it('Throws error when timestamp is more than 10 minutes in future', () => {
+            const farFutureExpiry = Date.now() + 11 * 60 * 1000; // 11 minutes from now
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, farFutureExpiry)
+              .catch((err) => {
+                expect(err).to.be.instanceOf(errors.TokenCreationError);
+                expect(err.message).to.equal(
+                  'Expiry must be in the next 10 minutes'
+                );
+              });
+          });
+        });
+
+        context('With invalid expiry type', () => {
+          it('Throws error when expiry is a string', () => {
+            return testHttpClient
+              .createToken('decrypt', { test: 'data' }, '2024-01-01')
+              .catch((err) => {
+                expect(err).to.be.instanceOf(errors.TokenCreationError);
+                expect(err.message).to.equal(
+                  'Expiry must be a Date object, got string'
+                );
+              });
+          });
+        });
+      });
     });
   });
 
