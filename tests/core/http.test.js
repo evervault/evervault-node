@@ -1,3 +1,5 @@
+const http = require('http');
+const https = require('https');
 const { expect } = require('chai');
 const { errors } = require('../../lib/utils');
 const nock = require('nock');
@@ -589,6 +591,88 @@ describe('Http Module', () => {
             expect(err.message).to.equal(testResponse.detail);
           });
         });
+      });
+    });
+  });
+
+  describe('agent forwarding', () => {
+    const rewire = require('rewire');
+
+    /**
+     * Creates a rewired http module with a stub axios and optional agents,
+     * returning both the client and a getter for the last captured axios config.
+     */
+    const buildClientWithAxiosStub = (agents = {}) => {
+      const httpModule = rewire('../../lib/core/http');
+      let capturedConfig;
+      const axiosStub = (cfg) => {
+        capturedConfig = cfg;
+        return Promise.resolve({
+          status: 200,
+          data: {},
+          headers: { 'x-poll-interval': '5' },
+        });
+      };
+      httpModule.__set__('axios', axiosStub);
+      const client = httpModule(testAppId, testApiKey, testValidConfig, agents);
+      return {
+        client,
+        getCapturedConfig: () => capturedConfig,
+      };
+    };
+
+    context('when httpAgent is provided', () => {
+      it('sets httpAgent on the axios request config and does not set httpsAgent', async () => {
+        const agent = new http.Agent();
+        const { client, getCapturedConfig } = buildClientWithAxiosStub({
+          httpAgent: agent,
+        });
+
+        await client.getRelayOutboundConfig();
+
+        expect(getCapturedConfig().httpAgent).to.equal(agent);
+        expect(getCapturedConfig().httpsAgent).to.be.undefined;
+      });
+    });
+
+    context('when httpsAgent is provided', () => {
+      it('sets httpsAgent on the axios request config and does not set httpAgent', async () => {
+        const agent = new https.Agent();
+        const { client, getCapturedConfig } = buildClientWithAxiosStub({
+          httpsAgent: agent,
+        });
+
+        await client.getRelayOutboundConfig();
+
+        expect(getCapturedConfig().httpsAgent).to.equal(agent);
+        expect(getCapturedConfig().httpAgent).to.be.undefined;
+      });
+    });
+
+    context('when both agents are provided', () => {
+      it('sets both httpAgent and httpsAgent on the axios request config', async () => {
+        const httpAgentInstance = new http.Agent();
+        const httpsAgentInstance = new https.Agent();
+        const { client, getCapturedConfig } = buildClientWithAxiosStub({
+          httpAgent: httpAgentInstance,
+          httpsAgent: httpsAgentInstance,
+        });
+
+        await client.getRelayOutboundConfig();
+
+        expect(getCapturedConfig().httpAgent).to.equal(httpAgentInstance);
+        expect(getCapturedConfig().httpsAgent).to.equal(httpsAgentInstance);
+      });
+    });
+
+    context('when no agents are provided', () => {
+      it('does not set httpAgent or httpsAgent on the axios request config', async () => {
+        const { client, getCapturedConfig } = buildClientWithAxiosStub();
+
+        await client.getRelayOutboundConfig();
+
+        expect(getCapturedConfig().httpAgent).to.be.undefined;
+        expect(getCapturedConfig().httpsAgent).to.be.undefined;
       });
     });
   });

@@ -44,6 +44,8 @@ export interface SdkOptions {
   curve?: SupportedCurve;
   retry?: boolean;
   enableOutboundRelay?: boolean;
+  httpAgent?: import('http').Agent;
+  httpsAgent?: import('https').Agent;
 }
 
 export interface PCRs {
