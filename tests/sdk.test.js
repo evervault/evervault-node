@@ -1,3 +1,5 @@
+const http = require('http');
+const https = require('https');
 const chai = require('chai');
 chai.use(require('sinon-chai'));
 const { expect } = chai;
@@ -24,6 +26,58 @@ describe('evervault client', () => {
       const Evervault = require('../lib');
       const test = () => new Evervault(testAppId, '');
       expect(test).to.throw(errors.EvervaultError);
+    });
+
+    context('agent validation', () => {
+      it('should throw if httpAgent is not an instance of http.Agent', () => {
+        const Evervault = require('../lib');
+        const test = () =>
+          new Evervault(testAppId, testApiKey, { httpAgent: { fake: true } });
+        expect(test).to.throw(
+          errors.EvervaultError,
+          'options.httpAgent must be an instance of http.Agent'
+        );
+      });
+
+      it('should throw if httpsAgent is not an instance of https.Agent', () => {
+        const Evervault = require('../lib');
+        const test = () =>
+          new Evervault(testAppId, testApiKey, {
+            httpsAgent: { fake: true },
+          });
+        expect(test).to.throw(
+          errors.EvervaultError,
+          'options.httpsAgent must be an instance of https.Agent'
+        );
+      });
+
+      it('should accept a valid http.Agent without throwing', () => {
+        const Evervault = require('../lib');
+        const test = () =>
+          new Evervault(testAppId, testApiKey, {
+            httpAgent: new http.Agent(),
+          });
+        expect(test).to.not.throw();
+      });
+
+      it('should accept a valid https.Agent without throwing', () => {
+        const Evervault = require('../lib');
+        const test = () =>
+          new Evervault(testAppId, testApiKey, {
+            httpsAgent: new https.Agent(),
+          });
+        expect(test).to.not.throw();
+      });
+
+      it('should accept both a valid http.Agent and https.Agent without throwing', () => {
+        const Evervault = require('../lib');
+        const test = () =>
+          new Evervault(testAppId, testApiKey, {
+            httpAgent: new http.Agent(),
+            httpsAgent: new https.Agent(),
+          });
+        expect(test).to.not.throw();
+      });
     });
   });
 
