@@ -1,5 +1,15 @@
 # @evervault/sdk
 
+## 6.4.0
+
+### Minor Changes
+
+- d71783e: Introduce agent parameters to SDK constructor to allow greater networking control from the Node SDK
+
+### Patch Changes
+
+- 9fb4f47: Bumping axios to fix vulnerability
+
 ## 6.3.3
 
 ### Patch Changes
