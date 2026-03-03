@@ -6,15 +6,19 @@ on:
 jobs:
   changesets:
     runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.check_release.outputs.should_publish }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Get tags
         run: git fetch --tags origin
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
@@ -24,6 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SDK_PUBLISH_TOKEN }}
       - name: Create new release
+        id: check_release
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
           npx changeset tag && git push origin --tags
@@ -43,11 +48,29 @@ jobs:
               }
             ' CHANGELOG.md)
             gh release create $COMMIT_TAG -t "$COMMIT_TAG" -n "$CHANGELOG"
-            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-            npm publish
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
           else
             echo "No tag attached to HEAD. No new release needed."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PUBLIC_REPO_NPM_PUBLISH }}
 
+  publish:
+    needs: changesets
+    if: needs.changesets.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: npm ci
+      - name: Publish to npm
+        run: npm publish
