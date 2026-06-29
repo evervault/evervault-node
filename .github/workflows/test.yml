@@ -28,7 +28,9 @@ jobs:
       - run: pnpm run test:coverage
       - run: |
           sudo apt-get update ; sudo apt-get install -y libfaketime
-          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 pnpm run test:filter attestGA
+          # Run mocha directly rather than via `pnpm run`: pnpm hangs when
+          # launched under libfaketime, so only the test process is wrapped.
+          LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 ./node_modules/.bin/mocha 'tests/**/*.test.js' --grep attestGA
         env:
           FAKETIME: '2023-09-22 11:24:32'
         if: ${{ matrix.perform-attestation }}
