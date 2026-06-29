@@ -14,12 +14,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Get tags
         run: git fetch --tags origin
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
@@ -32,7 +35,7 @@ jobs:
         id: check_release
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
-          npx changeset tag && git push origin --tags
+          pnpm exec changeset tag && git push origin --tags
           COMMIT_TAG=$(git tag --points-at HEAD)
           if [ -n "$COMMIT_TAG" ]; then
             echo "A tag is attached to HEAD. Creating a new release..."
@@ -66,12 +69,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Publish to npm
-        run: npm publish
+        run: pnpm publish --no-git-checks
