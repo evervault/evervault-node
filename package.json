@@ -2,6 +2,7 @@
   "name": "@evervault/sdk",
   "version": "6.4.0",
   "description": "Node.js SDK for Evervault",
+  "packageManager": "pnpm@11.9.0",
   "main": "lib/index.js",
   "typings": "types/index.d.ts",
   "scripts": {
@@ -11,8 +12,8 @@
     "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
     "test:filter": "mocha 'tests/**/*.test.js' --grep",
     "test:e2e:filter": "mocha 'e2e/**/*.test.js' --timeout 5000 --grep",
-    "test:coverage": "nyc --reporter=text npm run test",
-    "prepublishOnly": "npm run generate-types",
+    "test:coverage": "nyc --reporter=text pnpm run test",
+    "prepublishOnly": "pnpm run generate-types",
     "generate-types": "tsc lib/*.js lib/**/*.js --declaration --allowJs --emitDeclarationOnly --allowSyntheticDefaultImports --outDir types"
   },
   "repository": {
@@ -68,9 +69,5 @@
   },
   "lint-staged": {
     "**/*.js": "prettier --write --ignore-unknown \"./**/*.js\""
-  },
-  "overrides": {
-    "js-yaml": "4.1.1",
-    "lodash@>=4.0.0 <4.17.23": "^4.17.23"
   }
 }
