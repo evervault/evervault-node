@@ -36,6 +36,9 @@
     "lib",
     "types"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "homepage": "https://github.com/evervault/evervault-node#readme",
   "dependencies": {
     "agent-base": "^6.0.2",
