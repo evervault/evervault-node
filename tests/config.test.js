@@ -25,7 +25,6 @@ describe('Testing the Evervault SDK Config', () => {
   afterEach(() => {
     encryptStub.reset();
     process.env.EV_API_URL = undefined;
-    process.env.EV_CAGE_RUN_URL = undefined;
     process.env.EV_TUNNEL_HOSTNAME = undefined;
     process.env.EV_CERT_HOSTNAME = undefined;
   });
