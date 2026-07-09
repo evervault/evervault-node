@@ -19,9 +19,9 @@
     "build:test": "tsc -p tsconfig.build.json",
     "lint": "prettier --check \"./**/*.{ts,js}\"",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm run build:test && mocha",
+    "test": "pnpm run build:test && mocha 'tests/**/*.test.js'",
     "test:e2e": "pnpm run build:test && mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
-    "test:filter": "pnpm run build:test && mocha --grep",
+    "test:filter": "pnpm run build:test && mocha 'tests/**/*.test.js' --grep",
     "test:e2e:filter": "pnpm run build:test && mocha 'e2e/**/*.test.js' --timeout 5000 --grep",
     "test:coverage": "nyc --reporter=text pnpm run test",
     "prepublishOnly": "pnpm run build"
