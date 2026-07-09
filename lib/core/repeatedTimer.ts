@@ -1,18 +1,21 @@
-const { InvalidInterval } = require('../utils/errors');
+import { InvalidInterval } from '../utils/errors';
 
-module.exports = (defaultInterval, cb) => {
-  const parsedInterval = parseFloat(defaultInterval);
+export default (
+  defaultInterval: number | string,
+  cb: () => Promise<void> | void
+) => {
+  const parsedInterval = parseFloat(defaultInterval as any);
   if (Number.isNaN(parsedInterval)) {
     throw new InvalidInterval(`Expected number, received ${parsedInterval}`);
   }
-  const createInterval = () => {
+  const createInterval = (): NodeJS.Timeout => {
     const initializedInterval = setInterval(async () => {
       try {
         await cb();
       } catch (e) {
         console.error(`EVERVAULT :: An error occurred while polling (${e})`);
       }
-    }, interval * 1000);
+    }, (interval as number) * 1000);
     initializedInterval.unref();
     return initializedInterval;
   };
@@ -23,7 +26,7 @@ module.exports = (defaultInterval, cb) => {
     }
   };
 
-  const updateInterval = (newInterval) => {
+  const updateInterval = (newInterval: number) => {
     if (interval !== newInterval) {
       interval = newInterval;
       stop();
@@ -34,15 +37,15 @@ module.exports = (defaultInterval, cb) => {
   const getInterval = () => interval;
 
   const stop = () => {
-    clearInterval(currentIntervalId);
+    if (currentIntervalId) clearInterval(currentIntervalId);
     currentIntervalId = null;
   };
 
   const isRunning = () => currentIntervalId !== null;
 
   /* Initialization */
-  let interval = defaultInterval;
-  let currentIntervalId = null;
+  let interval: number | string = defaultInterval;
+  let currentIntervalId: NodeJS.Timeout | null = null;
   start();
 
   return {

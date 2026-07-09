@@ -25,6 +25,8 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run build
       - run: pnpm run test:coverage
       - run: |
           sudo apt-get update ; sudo apt-get install -y libfaketime

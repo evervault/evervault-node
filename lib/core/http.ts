@@ -1,23 +1,35 @@
-const { errors, Datatypes } = require('../utils');
+import { errors, Datatypes } from '../utils';
+import axios from 'axios';
+import type {
+  AxiosRequestConfig,
+  AxiosResponse,
+  Method,
+  ResponseType,
+} from 'axios';
+import type { HttpConfig } from '../types';
+import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpsAgent } from 'https';
 
-const axios = require('axios');
+interface HttpAgents {
+  httpAgent?: HttpAgent;
+  httpsAgent?: HttpsAgent;
+}
 
-/**
- * @param {string} appUuid
- * @param {string} apiKey
- * @param {import('../types').HttpConfig} config
- * @param {{ httpAgent?: import('http').Agent, httpsAgent?: import('https').Agent }} [agents]
- */
-module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
+export default (
+  appUuid: string,
+  apiKey: string,
+  config: HttpConfig,
+  { httpAgent, httpsAgent }: HttpAgents = {}
+) => {
   const request = (
-    method,
-    path,
-    additionalHeaders = {},
-    data = undefined,
+    method: Method,
+    path: string,
+    additionalHeaders: Record<string, string> = {},
+    data: any = undefined,
     basicAuth = false,
-    responseType = 'json'
-  ) => {
-    const headers = {
+    responseType: ResponseType = 'json'
+  ): Promise<AxiosResponse> => {
+    const headers: Record<string, string> = {
       'user-agent': config.userAgent,
       ...additionalHeaders,
     };
@@ -29,7 +41,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
       headers['api-key'] = apiKey;
     }
 
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url:
         path.startsWith('https://') || path.startsWith('http://')
           ? path
@@ -37,7 +49,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
       method,
       headers,
       data,
-      validateStatus: (_) => true,
+      validateStatus: (_status: number) => true,
       responseType,
     };
 
@@ -47,19 +59,20 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     return axios(requestConfig);
   };
 
-  const get = (path, headers) => request('GET', path, headers);
+  const get = (path: string, headers?: Record<string, string>) =>
+    request('GET', path, headers);
 
   const post = (
-    path,
-    data,
-    headers = { 'Content-Type': 'application/json' },
+    path: string,
+    data: any,
+    headers: Record<string, string> = { 'Content-Type': 'application/json' },
     basicAuth = false,
-    responseType = 'json'
+    responseType: ResponseType = 'json'
   ) => request('POST', path, headers, data, basicAuth, responseType);
 
   const getCageKey = async () => {
     const getCagesKeyCallback = async () => {
-      return await get('cages/key', {}, true).catch((_e) => {
+      return await get('cages/key', {}).catch((_e) => {
         throw new errors.EvervaultError(
           "An error occurred while retrieving the cage's key"
         );
@@ -99,7 +112,11 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     return response.data;
   };
 
-  const getAttestationDoc = async (enclaveName, appUuid, hostname) => {
+  const getAttestationDoc = async (
+    enclaveName: string,
+    appUuid: string,
+    hostname?: string
+  ) => {
     let url = `https://${enclaveName}.${appUuid}.${
       hostname ? hostname : config.enclavesHostname
     }/.well-known/attestation`;
@@ -120,7 +137,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
       );
     });
     if (response.status >= 200 && response.status < 300) {
-      const pollIntervalHeaderValue = response.headers['x-poll-interval'];
+      const pollIntervalHeaderValue: any = response.headers['x-poll-interval'];
       return {
         pollInterval: isNaN(pollIntervalHeaderValue)
           ? null
@@ -131,7 +148,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     throw errors.mapResponseCodeToError(response);
   };
 
-  const runFunction = async (functionName, payload) => {
+  const runFunction = async (functionName: string, payload: any) => {
     const response = await post(
       `${config.baseUrl}/functions/${functionName}/runs`,
       {
@@ -155,7 +172,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     throw errors.mapApiResponseToError(responseBody);
   };
 
-  const createRunToken = (functionName, payload) => {
+  const createRunToken = (functionName: string, payload: any) => {
     return post(
       `v2/functions/${functionName}/run-token`,
       {
@@ -168,13 +185,13 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
   };
 
   async function makeGetRequestWithRetry(
-    requestCallback,
+    requestCallback: () => Promise<AxiosResponse>,
     maxRetries = 3,
     retryDelay = 250
-  ) {
+  ): Promise<AxiosResponse> {
     let retryCount = 0;
     let retryDelayMs = retryDelay;
-    let error = null;
+    let error: unknown = null;
     while (retryCount < maxRetries) {
       try {
         return await requestCallback().then((response) => {
@@ -195,10 +212,10 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     throw error;
   }
 
-  const decrypt = async (encryptedData) => {
+  const decrypt = async (encryptedData: any) => {
     let contentType;
     let data;
-    let responseType;
+    let responseType: ResponseType;
     if (Buffer.isBuffer(encryptedData)) {
       contentType = 'application/octet-stream';
       data = encryptedData;
@@ -232,7 +249,7 @@ module.exports = (appUuid, apiKey, config, { httpAgent, httpsAgent } = {}) => {
     throw errors.mapApiResponseToError(resBody);
   };
 
-  const createToken = async (action, payload, expiry) => {
+  const createToken = async (action: string, payload: any, expiry?: any) => {
     let wellFormedExpiry;
     if (expiry) {
       if (expiry && expiry instanceof Date) {

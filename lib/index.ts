@@ -1,55 +1,78 @@
-const crypto = require('crypto');
-const http = require('http');
-const https = require('https');
-const retry = require('async-retry');
-const { Buffer } = require('buffer');
+import * as crypto from 'crypto';
+import * as http from 'http';
+import https from 'https';
+import type { AgentOptions } from 'https';
+import retry from 'async-retry';
+import { Buffer } from 'buffer';
 
-const {
+import {
   Datatypes,
   errors,
   validationHelper,
   httpsHelper,
   attest,
-} = require('./utils');
-const config = require('./config');
-const {
+} from './utils';
+import config from './config';
+import {
   Crypto,
   Http,
   RelayOutboundConfig,
   AttestationDoc,
   PcrManager,
-} = require('./core');
-const { TokenCreationError } = require('./utils/errors');
-const HttpsProxyAgent = require('./utils/proxyAgent');
-const { importTarget, matchTarget } = require('./utils/domainTargets');
+} from './core';
+import { TokenCreationError } from './utils/errors';
+import HttpsProxyAgent from './utils/proxyAgent';
+import { importTarget, matchTarget } from './utils/domainTargets';
+import type { Target } from './utils/domainTargets';
+import type {
+  MasterConfig,
+  SdkOptions,
+  OutboundRelayOptions,
+  SupportedCurve,
+  AttestationData,
+  AttestationCallback,
+  AttestationBindings,
+} from './types';
 
 const originalRequest = https.request;
 
+type Timer = ReturnType<typeof import('./core/repeatedTimer').default>;
+
 class EvervaultClient {
-  /** @type {{ [curveName: string]: import('./types').SupportedCurve }} */
-  static CURVES = {
+  static CURVES: {
+    readonly SECP256K1: SupportedCurve;
+    readonly PRIME256V1: SupportedCurve;
+  } = {
     SECP256K1: 'secp256k1',
     PRIME256V1: 'prime256v1',
   };
 
-  /** @typedef {ReturnType<import('./core/repeatedTimer')>} Timer */
-  /** @private @type {{ enclaves: Timer[] | null, relayOutbound: Timer | null}} */ _backgroundJobs;
+  private _backgroundJobs: {
+    enclaves: Timer[] | null;
+    relayOutbound: Timer | null;
+  };
+  private apiKey?: string;
+  private appId: string;
+  private config: MasterConfig;
+  private curve: SupportedCurve;
+  private http: ReturnType<typeof Http>;
+  private httpsHelper: typeof httpsHelper;
+  private retry?: boolean;
+  private crypto: ReturnType<typeof Crypto>;
+  private encryptionMode?: boolean;
 
-  /** @private @type {string} */ apiKey;
-  /** @private @type {string} */ appId;
-  /** @private @type {import('./types')} */ config;
-  /** @private @type {import('./types').SupportedCurve} */ curve;
-  /** @private @type {ReturnType<import('./core/http')>} */ http;
-  /** @private @type {import('./utils/httpsHelper')} */ httpsHelper;
-  /** @private @type {boolean | undefined} */ retry;
-  /** @private @type {ReturnType<import('./core/crypto')>} */ crypto;
+  // Hidden properties defined via defineHiddenProperty (Object.defineProperty).
+  private _ecdhTeamKey?: any;
+  private _ecdh?: any;
+  private _ecdhPublicKey?: any;
+  private _derivedAesKey?: any;
+  private _refreshInterval?: any;
 
-  /**
-   * @param {string} appId
-   * @param {string} apiKey
-   * @param {Partial<import('./types').SdkOptions & import('./types').OutboundRelayOptions>} options
-   */
-  constructor(appId, apiKey = undefined, options = {}) {
+  constructor(
+    appId: string,
+    apiKey: string | undefined = undefined,
+    options: Partial<SdkOptions & OutboundRelayOptions> = {}
+  ) {
     if (
       appId === '' ||
       !Datatypes.isString(appId) ||
@@ -69,7 +92,7 @@ class EvervaultClient {
       );
     }
     this.config = config;
-    let curve;
+    let curve: SupportedCurve;
     if (!options.curve || !this.config.encryption[options.curve]) {
       curve = EvervaultClient.CURVES.SECP256K1; //default to old curve
     } else {
@@ -96,7 +119,7 @@ class EvervaultClient {
 
     this.curve = curve;
     this.retry = options.retry;
-    this.http = Http(appId, apiKey, this.config.http, {
+    this.http = Http(appId, apiKey as string, this.config.http, {
       httpAgent: options.httpAgent,
       httpsAgent: options.httpsAgent,
     });
@@ -118,12 +141,10 @@ class EvervaultClient {
     this._shouldOverloadHttpModule(options, apiKey);
   }
 
-  /**
-   * @param {Record<string, import('./types').AttestationData | import('./types').AttestationCallback>} attestationData
-   * @param {import('./types').AttestationBindings} attestationBindings
-   * @throws {import('./utils/errors').MalformedAttestationData}
-   */
-  async enableEnclaves(attestationData, attestationBindings) {
+  async enableEnclaves(
+    attestationData: Record<string, AttestationData | AttestationCallback>,
+    attestationBindings: AttestationBindings
+  ) {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     attest.validateAttestationData(attestationData);
     // Store attestation documents in cache
@@ -160,13 +181,11 @@ class EvervaultClient {
     }
   }
 
-  /**
-   * @param {import('./types') AttestationData} attestationData
-   * @param {import('./types').AttestationBindings} attestationBindings
-   * @param {import('https').AgentOptions} option
-   * @throws {import('./utils/errors').MalformedAttestationData}
-   **/
-  async createEnclaveHttpsAgent(attestationData, attestationBindings, options) {
+  async createEnclaveHttpsAgent(
+    attestationData: Record<string, AttestationData | AttestationCallback>,
+    attestationBindings: AttestationBindings,
+    options?: AgentOptions
+  ) {
     attest.validateAttestationData(attestationData);
 
     const attestationCache = new AttestationDoc(
@@ -192,19 +211,15 @@ class EvervaultClient {
     );
   }
 
-  /** @returns {Promise<string>} */
-  async generateNonce() {
+  async generateNonce(): Promise<string> {
     const nonce = await this.crypto.generateBytes(16);
     return nonce.toString('base64').replaceAll(/=|\//g, '');
   }
 
-  /**
-   * @private
-   * @param {Partial<import('./types').SdkOptions & import('./types').OutboundRelayOptions>} options
-   * @param {string} apiKey
-   * @returns {Promise<void>}
-   */
-  async _shouldOverloadHttpModule(options, apiKey) {
+  private async _shouldOverloadHttpModule(
+    options: Partial<SdkOptions & OutboundRelayOptions>,
+    apiKey?: string
+  ): Promise<void> {
     if (options.decryptionDomains && options.decryptionDomains.length > 0) {
       const decryptionDomainsFilter = this._decryptionDomainsFilter(
         options.decryptionDomains
@@ -227,31 +242,26 @@ class EvervaultClient {
         originalRequest
       );
     } else {
-      https.request = originalRequest;
+      (https as any).request = originalRequest;
     }
   }
 
-  /**
-   * @private
-   * @returns {string[]}
-   */
-  _alwaysIgnoreDomains() {
+  private _alwaysIgnoreDomains(): string[] {
     const caHost = new URL(this.config.http.certHostname).host;
     const apiHost = new URL(this.config.http.baseUrl).host;
 
     return [caHost, apiHost, this.config.http.enclavesHostname];
   }
 
-  /**
-   * @private
-   * @param {string[]} decryptionDomains
-   * @returns {(domain: string, path: string) => boolean}
-   */
-  _decryptionDomainsFilter(decryptionDomains) {
+  private _decryptionDomainsFilter(
+    decryptionDomains: string[]
+  ): (domain: string, path: string) => boolean {
     const parsedDomains = decryptionDomains
       .map((decryptionDomain) => importTarget(decryptionDomain))
-      .filter((importedTarget) => importedTarget != null);
-    return (domain, path) =>
+      .filter(
+        (importedTarget): importedTarget is Target => importedTarget != null
+      );
+    return (domain: string, path: string) =>
       this._isDecryptionDomain(
         domain,
         path,
@@ -260,32 +270,28 @@ class EvervaultClient {
       );
   }
 
-  /**
-   * @private
-   * @param {string} domain
-   * @param {string} path
-   * @param {import('./utils/domainTargets').Target[]} decryptionDomains
-   * @param {string[]} alwaysIgnore
-   */
-  _isDecryptionDomain(domain, path, decryptionDomains, alwaysIgnore) {
+  private _isDecryptionDomain(
+    domain: string,
+    path: string,
+    decryptionDomains: Target[],
+    alwaysIgnore: string[]
+  ): boolean {
     if (alwaysIgnore.includes(domain)) return false;
     return decryptionDomains.some((decryptionDomain) =>
       matchTarget(domain, path, decryptionDomain)
     );
   }
 
-  /** @private @returns {(domain: string, path: string) => boolean} */
-  _relayOutboundConfigDomainFilter() {
+  private _relayOutboundConfigDomainFilter(): (
+    domain: string,
+    path: string
+  ) => boolean {
     return this._decryptionDomainsFilter(
-      RelayOutboundConfig.getDecryptionDomains()
+      RelayOutboundConfig.getDecryptionDomains() as string[]
     ).bind(this);
   }
 
-  /**
-   * @private
-   * @param {string | undefined} role
-   */
-  _refreshKeys(role) {
+  private _refreshKeys(role?: string | null) {
     this._ecdh.generateKeys();
     this.defineHiddenProperty(
       '_ecdhPublicKey',
@@ -312,12 +318,7 @@ class EvervaultClient {
     }
   }
 
-  /**
-   * @param {Object || String} data
-   * @param {String || undefined} role
-   * @returns {Promise<Object || String>}
-   */
-  async encrypt(data, role = null) {
+  async encrypt(data: any, role: string | null = null): Promise<any> {
     const dataRoleRegex = /^[a-z0-9-]{1,20}$/;
     if (role !== null && !dataRoleRegex.test(role)) {
       throw new Error(
@@ -344,7 +345,7 @@ class EvervaultClient {
       this.defineHiddenProperty(
         '_refreshInterval',
         setInterval(
-          (ref) => {
+          (ref: EvervaultClient) => {
             ref._refreshKeys(role);
           },
           this.config.encryption[this.curve].keyCycleMinutes * 60 * 1000,
@@ -362,21 +363,12 @@ class EvervaultClient {
     );
   }
 
-  /**
-   * @param {any} encryptedData
-   * @returns {Promise<any>}
-   */
-  async decrypt(encryptedData) {
+  async decrypt(encryptedData: any): Promise<any> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     return this.http.decrypt(encryptedData);
   }
 
-  /**
-   * @param {string} functionName
-   * @param {object} payload
-   * @returns {Promise<*>}
-   */
-  async run(functionName, payload) {
+  async run(functionName: string, payload: any): Promise<any> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     validationHelper.validateFunctionName(functionName);
     validationHelper.validatePayload(payload);
@@ -395,12 +387,7 @@ class EvervaultClient {
     }
   }
 
-  /**
-   * @param {string} functionName
-   * @param {object} payload
-   * @returns {Promise<*>}
-   */
-  async createRunToken(functionName, payload) {
+  async createRunToken(functionName: string, payload: any): Promise<any> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     validationHelper.validatePayload(payload);
     validationHelper.validateFunctionName(functionName);
@@ -409,10 +396,7 @@ class EvervaultClient {
     return response.data;
   }
 
-  /**
-   * @param {import('./types').OutboundRelayOptions} options
-   */
-  async enableOutboundRelay(options = {}) {
+  async enableOutboundRelay(options: OutboundRelayOptions = {}): Promise<void> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     validationHelper.validateRelayOutboundOptions(options);
     if (!options || !options.decryptionDomains) {
@@ -456,10 +440,7 @@ class EvervaultClient {
     }
   }
 
-  /**
-   * @returns {HttpsProxyAgent}
-   */
-  createRelayHttpsAgent() {
+  createRelayHttpsAgent(): HttpsProxyAgent {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     return this.httpsHelper.httpsRelayAgent(
       {
@@ -470,12 +451,7 @@ class EvervaultClient {
     );
   }
 
-  /**
-   * @private
-   * @param {string | number | symbol} property
-   * @param {*} value
-   */
-  defineHiddenProperty(property, value) {
+  private defineHiddenProperty(property: string | number | symbol, value: any) {
     Object.defineProperty(this, property, {
       enumerable: false,
       configurable: true,
@@ -484,7 +460,7 @@ class EvervaultClient {
     });
   }
 
-  async createClientSideDecryptToken(payload, expiry = null) {
+  async createClientSideDecryptToken(payload: any, expiry: any = null) {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     if (!payload) {
       throw new TokenCreationError(
@@ -495,4 +471,4 @@ class EvervaultClient {
   }
 }
 
-module.exports = EvervaultClient;
+export = EvervaultClient;

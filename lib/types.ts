@@ -1,3 +1,6 @@
+import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpsAgent } from 'https';
+
 export interface HttpConfig {
   baseUrl: string;
   userAgent: string;
@@ -7,7 +10,7 @@ export interface HttpConfig {
   pollInterval: string | number;
   attestationDocPollInterval: string | number;
   pcrProviderPollInterval: string | number;
-  proxiedMarker: Symbol;
+  proxiedMarker: symbol;
 }
 
 export interface CurveConfig {
@@ -44,8 +47,9 @@ export interface SdkOptions {
   curve?: SupportedCurve;
   retry?: boolean;
   enableOutboundRelay?: boolean;
-  httpAgent?: import('http').Agent;
-  httpsAgent?: import('https').Agent;
+  encryptionMode?: boolean;
+  httpAgent?: HttpAgent;
+  httpsAgent?: HttpsAgent;
 }
 
 export interface PCRs {

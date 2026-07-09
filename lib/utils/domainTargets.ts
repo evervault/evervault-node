@@ -2,12 +2,25 @@
  * Grouping of helpers and types to aid reasoning about destinations when intercepting outbound traffic.
  */
 
+export type MatcherSpecificity = 'wildcard' | 'absolute';
+export type MatcherType = 'host' | 'path';
+
+export interface Matcher {
+  type: MatcherType;
+  specificity: MatcherSpecificity;
+  value: string;
+}
+
+export interface Target {
+  rawValue: string;
+  host: Matcher;
+  path?: Matcher;
+}
+
 /**
  * Apply the matching logic based on the matcher type and specificity.
- * @param {string} givenValue
- * @param {import("./domainTargets").Matcher} matcher
  */
-function applyMatch(givenValue, matcher) {
+function applyMatch(givenValue: string, matcher: Matcher): boolean {
   if (matcher.specificity === 'absolute') {
     return givenValue === matcher.value;
   }
@@ -22,11 +35,12 @@ function applyMatch(givenValue, matcher) {
 
 /**
  * Apply a target matcher against the given host and path combination. If a path matcher is defined on the target, it will only match if *both* the host and path match.
- * @param {string} requestedHost
- * @param {string} requestedPath
- * @param {import('./domainTargets').Target} target
  */
-function matchTarget(requestedHost, requestedPath, target) {
+function matchTarget(
+  requestedHost: string,
+  requestedPath: string,
+  target: Target
+): boolean {
   if (target.path != null) {
     return (
       applyMatch(requestedHost, target.host) &&
@@ -38,20 +52,18 @@ function matchTarget(requestedHost, requestedPath, target) {
 
 /**
  * Check if the given hostname includes a protocol prefix.
- * @param {string} val
- * @returns {boolean}
  */
-function startsWithProto(val) {
+function startsWithProto(val: string): boolean {
   return val.startsWith('https://') || val.startsWith('http://');
 }
 
 /**
  * Create a matcher object from a hostname string. If the hostname begins with an asterisk, it will be treated as a wildcard matcher.
- * @param {string} host
- * @return {import('./domainTargets').Matcher}
  */
-function buildHostMatcher(host) {
-  const specificity = host.startsWith('*') ? 'wildcard' : 'absolute';
+function buildHostMatcher(host: string): Matcher {
+  const specificity: MatcherSpecificity = host.startsWith('*')
+    ? 'wildcard'
+    : 'absolute';
   const value = specificity === 'wildcard' ? host.slice(1) : host;
   return {
     type: 'host',
@@ -62,11 +74,11 @@ function buildHostMatcher(host) {
 
 /**
  * Create a matcher object from a path string. If the string ends with an asterisk, it will be treated as a wildcard matcher.
- * @param {string} path
- * @return {import('./domainTargets').Matcher}
  */
-function buildPathMatcher(path) {
-  const specificity = path.endsWith('*') ? 'wildcard' : 'absolute';
+function buildPathMatcher(path: string): Matcher {
+  const specificity: MatcherSpecificity = path.endsWith('*')
+    ? 'wildcard'
+    : 'absolute';
   const value = specificity === 'wildcard' ? path.slice(0, -1) : path;
   return {
     type: 'path',
@@ -77,10 +89,8 @@ function buildPathMatcher(path) {
 
 /**
  * Convert a user provided input into a target matcher, lightly validating the input in the process.
- * @param {unknown} rawInputValue
- * @returns {import("./domainTargets").Target | null}
  */
-function importTarget(rawInputValue) {
+function importTarget(rawInputValue: unknown): Target | null {
   if (typeof rawInputValue !== 'string' || rawInputValue.length === 0) {
     return null;
   }
@@ -108,7 +118,4 @@ function importTarget(rawInputValue) {
   };
 }
 
-module.exports = {
-  importTarget,
-  matchTarget,
-};
+export { importTarget, matchTarget };

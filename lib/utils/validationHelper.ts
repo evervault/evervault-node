@@ -1,8 +1,13 @@
-const crypto = require('crypto');
-const errors = require('./errors');
-const Datatypes = require('./datatypes');
+import * as crypto from 'crypto';
+import * as errors from './errors';
+import * as Datatypes from './datatypes';
+import type { OutboundRelayOptions, SdkOptions } from '../types';
 
-const validateApiKey = (appUuid, apiKey, options = {}) => {
+const validateApiKey = (
+  appUuid: string,
+  apiKey?: string,
+  options: Partial<SdkOptions> = {}
+): void => {
   if (options.encryptionMode === true) {
     return;
   }
@@ -27,7 +32,7 @@ const validateApiKey = (appUuid, apiKey, options = {}) => {
   }
 };
 
-const validatePayload = (payload) => {
+const validatePayload = (payload: any): void => {
   if (
     !Datatypes.isObjectStrict(payload) &&
     (payload != null || payload != undefined)
@@ -36,12 +41,14 @@ const validatePayload = (payload) => {
   }
 };
 
-const validateFunctionName = (functionName) => {
+const validateFunctionName = (functionName: string): void => {
   if (!Datatypes.isString(functionName))
     throw new errors.EvervaultError('Function name invalid');
 };
 
-const validateRelayOutboundOptions = (options = {}) => {
+const validateRelayOutboundOptions = (
+  options: OutboundRelayOptions = {}
+): void => {
   if (
     (Datatypes.isDefined(options) && !Datatypes.isObjectStrict(options)) ||
     (Datatypes.isDefined(options) &&
@@ -55,7 +62,7 @@ const validateRelayOutboundOptions = (options = {}) => {
   }
 };
 
-module.exports = {
+export {
   validateApiKey,
   validatePayload,
   validateFunctionName,
