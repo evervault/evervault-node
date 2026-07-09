@@ -5,6 +5,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const axios = require('axios');
 const { errors } = require('../lib/utils');
+const proxyquire = require('proxyquire');
 const { createProxyServer, createServer } = require('./utilities/mockServer');
 
 const testApiKey =
@@ -198,9 +199,9 @@ describe('evervault client', () => {
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
-      EvervaultClient = require('../lib');
       const config = require('../lib/config');
       config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient = proxyquire('../lib', { './config': config });
       Evervault = EvervaultClient;
     });
 
@@ -272,9 +273,9 @@ describe('evervault client', () => {
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
-      EvervaultClient = require('../lib');
       const config = require('../lib/config');
       config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient = proxyquire('../lib', { './config': config });
       Evervault = EvervaultClient;
     });
 
@@ -326,9 +327,9 @@ describe('evervault client', () => {
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
-      EvervaultClient = require('../lib');
       const config = require('../lib/config');
       config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient = proxyquire('../lib', { './config': config });
       Evervault = EvervaultClient;
     });
 
@@ -380,9 +381,9 @@ describe('evervault client', () => {
       // rewiring is needed to set the config environment variables
       // there isn't a clean way to do this at runtime because of Node.js
       // module caching system.
-      EvervaultClient = require('../lib');
       const config = require('../lib/config');
       config.http.baseUrl = `http://localhost:${server.address().port}`;
+      EvervaultClient = proxyquire('../lib', { './config': config });
       Evervault = EvervaultClient;
     });
 

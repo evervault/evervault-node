@@ -35,6 +35,10 @@ import type {
 } from './types';
 
 const originalRequest = https.request;
+// Tracks whether this process has overloaded `https.request` for Relay. We only
+// restore the original request when we were the ones who replaced it, so that a
+// plain client never clobbers an unrelated `https.request` (e.g. a test's nock).
+let httpsRequestOverloaded = false;
 
 type Timer = ReturnType<typeof import('./core/repeatedTimer').default>;
 
@@ -232,6 +236,7 @@ class EvervaultClient {
         this.http,
         originalRequest
       );
+      httpsRequestOverloaded = true;
     } else if (options.enableOutboundRelay) {
       await this.httpsHelper.overloadHttpsModule(
         apiKey,
@@ -241,8 +246,10 @@ class EvervaultClient {
         this.http,
         originalRequest
       );
-    } else {
+      httpsRequestOverloaded = true;
+    } else if (httpsRequestOverloaded) {
       (https as any).request = originalRequest;
+      httpsRequestOverloaded = false;
     }
   }
 
@@ -419,6 +426,7 @@ class EvervaultClient {
         this.http,
         originalRequest
       );
+      httpsRequestOverloaded = true;
     } else {
       const decryptionDomainsFilter = this._decryptionDomainsFilter(
         options.decryptionDomains
@@ -431,6 +439,7 @@ class EvervaultClient {
         this.http,
         originalRequest
       );
+      httpsRequestOverloaded = true;
     }
   }
 
