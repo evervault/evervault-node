@@ -23,9 +23,9 @@ export class FunctionRuntimeError extends EvervaultError {
 
 export class AttestationError extends EvervaultError {
   host: string;
-  cert: any;
+  cert: Buffer;
 
-  constructor(reason: string, host: string, cert: any) {
+  constructor(reason: string, host: string, cert: Buffer) {
     super(reason);
     this.host = host;
     this.cert = cert;
@@ -85,8 +85,8 @@ export const mapResponseCodeToError = ({
   headers,
 }: {
   status: number;
-  data: any;
-  headers: any;
+  data: { message?: string };
+  headers: Record<string, unknown>;
 }): EvervaultError => {
   if (status === 401)
     return new EvervaultError('Invalid authorization provided.');

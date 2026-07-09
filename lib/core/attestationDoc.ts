@@ -1,18 +1,19 @@
 import RepeatedTimer from './repeatedTimer';
+import type { HttpClient } from './http';
 import type { MasterConfig } from '../types';
 
 class AttestationDoc {
   appUuid: string;
-  http: any;
+  http: HttpClient;
   enclaves: string[];
   config: MasterConfig;
   polling: ReturnType<typeof RepeatedTimer> | null;
-  attestationDocCache: Record<string, any> | null;
+  attestationDocCache: Record<string, string> | null;
   hostname: string;
 
   constructor(
     config: MasterConfig,
-    http: any,
+    http: HttpClient,
     enclaves: string[],
     appUuid: string,
     hostname: string

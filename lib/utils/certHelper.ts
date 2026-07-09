@@ -2,7 +2,7 @@ import { X509Certificate } from 'crypto';
 import * as tls from 'tls';
 import * as net from 'net';
 
-const parseX509 = (cert: any) => {
+const parseX509 = (cert: string | Buffer) => {
   if (X509Certificate) {
     return new X509Certificate(cert);
   } else {

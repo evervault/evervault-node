@@ -4,12 +4,13 @@ import * as Datatypes from './datatypes';
 import * as certHelper from './certHelper';
 import HttpsProxyAgent from './proxyAgent';
 import config from '../config';
+import type { HttpClient } from '../core/http';
 
 const proxiedMarker = config.http.proxiedMarker;
 const origCreateSecureContext = tls.createSecureContext;
 const EVERVAULT_DOMAINS = ['evervault.com', 'evervault.io', 'evervault.dev'];
 
-const certificateUtil = (evClient: any) => {
+const certificateUtil = (evClient: HttpClient) => {
   let x509: any = null;
   async function updateCertificate() {
     const pem = await evClient.getCert();
@@ -70,7 +71,7 @@ const overloadHttpsModule = (
   tunnelHostname: string,
   domainFilter: (domain: string, path: string) => boolean,
   debugRequests = false,
-  evClient: any,
+  evClient: HttpClient,
   originalRequest: typeof https.request
 ): void => {
   function wrapMethodRequest(this: any, ...args: any[]) {
@@ -107,9 +108,16 @@ const overloadHttpsModule = (
   (https as any).request = wrapMethodRequest;
 };
 
+interface RelayAgentConfig {
+  hostname: string;
+  port?: number;
+  rejectUnauthorized?: boolean;
+  secureProxy?: boolean;
+}
+
 const httpsRelayAgent = (
-  agentConfig: any = { port: 443, rejectUnauthorized: true, secureProxy: true },
-  evClient: any,
+  agentConfig: RelayAgentConfig,
+  evClient: HttpClient,
   apiKey?: string
 ): HttpsProxyAgent => {
   const { updateCertificate, isCertificateInvalid } = certificateUtil(evClient);

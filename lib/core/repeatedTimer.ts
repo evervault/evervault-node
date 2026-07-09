@@ -4,7 +4,7 @@ export default (
   defaultInterval: number | string,
   cb: () => Promise<void> | void
 ) => {
-  const parsedInterval = parseFloat(defaultInterval as any);
+  const parsedInterval = parseFloat(String(defaultInterval));
   if (Number.isNaN(parsedInterval)) {
     throw new InvalidInterval(`Expected number, received ${parsedInterval}`);
   }

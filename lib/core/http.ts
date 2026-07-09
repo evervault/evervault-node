@@ -6,7 +6,13 @@ import type {
   Method,
   ResponseType,
 } from 'axios';
-import type { HttpConfig } from '../types';
+import type {
+  HttpConfig,
+  TeamKeyResponse,
+  ClientSideToken,
+  RelayOutboundConfigResponse,
+  DecryptableData,
+} from '../types';
 import type { Agent as HttpAgent } from 'http';
 import type { Agent as HttpsAgent } from 'https';
 
@@ -15,7 +21,7 @@ interface HttpAgents {
   httpsAgent?: HttpsAgent;
 }
 
-export default (
+const Http = (
   appUuid: string,
   apiKey: string,
   config: HttpConfig,
@@ -25,7 +31,7 @@ export default (
     method: Method,
     path: string,
     additionalHeaders: Record<string, string> = {},
-    data: any = undefined,
+    data: unknown = undefined,
     basicAuth = false,
     responseType: ResponseType = 'json'
   ): Promise<AxiosResponse> => {
@@ -64,13 +70,13 @@ export default (
 
   const post = (
     path: string,
-    data: any,
+    data: unknown,
     headers: Record<string, string> = { 'Content-Type': 'application/json' },
     basicAuth = false,
     responseType: ResponseType = 'json'
   ) => request('POST', path, headers, data, basicAuth, responseType);
 
-  const getCageKey = async () => {
+  const getCageKey = async (): Promise<TeamKeyResponse> => {
     const getCagesKeyCallback = async () => {
       return await get('cages/key', {}).catch((_e) => {
         throw new errors.EvervaultError(
@@ -85,7 +91,7 @@ export default (
     throw errors.mapResponseCodeToError(response);
   };
 
-  const getAppKey = async () => {
+  const getAppKey = async (): Promise<TeamKeyResponse> => {
     const getAppKeyCallback = async () => {
       return await get('keys', {
         'x-evervault-app-id': appUuid,
@@ -99,6 +105,7 @@ export default (
     if (response.status >= 200 && response.status < 300) {
       return response.data;
     }
+    throw errors.mapResponseCodeToError(response);
   };
 
   const getCert = async () => {
@@ -130,25 +137,30 @@ export default (
     return response.data;
   };
 
-  const getRelayOutboundConfig = async () => {
+  const getRelayOutboundConfig = async (): Promise<{
+    pollInterval: number | null;
+    data: RelayOutboundConfigResponse;
+  }> => {
     const response = await get('v2/relay-outbound').catch((e) => {
       throw new errors.EvervaultError(
         `An error occoured while retrieving the Relay Outbound configuration: ${e}`
       );
     });
     if (response.status >= 200 && response.status < 300) {
-      const pollIntervalHeaderValue: any = response.headers['x-poll-interval'];
+      const pollIntervalHeaderValue = response.headers['x-poll-interval'];
+      const pollInterval = parseFloat(String(pollIntervalHeaderValue));
       return {
-        pollInterval: isNaN(pollIntervalHeaderValue)
-          ? null
-          : parseFloat(pollIntervalHeaderValue),
+        pollInterval: Number.isNaN(pollInterval) ? null : pollInterval,
         data: response.data,
       };
     }
     throw errors.mapResponseCodeToError(response);
   };
 
-  const runFunction = async (functionName: string, payload: any) => {
+  const runFunction = async (
+    functionName: string,
+    payload: Record<string, unknown>
+  ) => {
     const response = await post(
       `${config.baseUrl}/functions/${functionName}/runs`,
       {
@@ -172,7 +184,10 @@ export default (
     throw errors.mapApiResponseToError(responseBody);
   };
 
-  const createRunToken = (functionName: string, payload: any) => {
+  const createRunToken = (
+    functionName: string,
+    payload: Record<string, unknown>
+  ) => {
     return post(
       `v2/functions/${functionName}/run-token`,
       {
@@ -212,7 +227,7 @@ export default (
     throw error;
   }
 
-  const decrypt = async (encryptedData: any) => {
+  const decrypt = async (encryptedData: DecryptableData): Promise<any> => {
     let contentType;
     let data;
     let responseType: ResponseType;
@@ -249,7 +264,11 @@ export default (
     throw errors.mapApiResponseToError(resBody);
   };
 
-  const createToken = async (action: string, payload: any, expiry?: any) => {
+  const createToken = async (
+    action: string,
+    payload: unknown,
+    expiry?: Date | number | null
+  ): Promise<ClientSideToken> => {
     let wellFormedExpiry;
     if (expiry) {
       if (expiry && expiry instanceof Date) {
@@ -305,3 +324,8 @@ export default (
     getAttestationDoc,
   };
 };
+
+export default Http;
+
+/** The HTTP client returned by {@link Http}. */
+export type HttpClient = ReturnType<typeof Http>;

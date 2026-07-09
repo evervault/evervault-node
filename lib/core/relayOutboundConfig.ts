@@ -1,4 +1,5 @@
 import RepeatedTimer from './repeatedTimer';
+import type { HttpClient } from './http';
 import type { MasterConfig } from '../types';
 
 let polling: ReturnType<typeof RepeatedTimer> | null = null;
@@ -26,7 +27,7 @@ const getDecryptionDomains = (): string[] | null => {
   return decryptionDomainsCache;
 };
 
-const init = async (config: MasterConfig, http: any) => {
+const init = async (config: MasterConfig, http: HttpClient) => {
   let pollingInterval = config.http.pollInterval;
 
   const getRelayOutboundConfigFromApi = async () => {
@@ -39,7 +40,7 @@ const init = async (config: MasterConfig, http: any) => {
     }
     decryptionDomainsCache = Object.values(
       configResponse.data.outboundDestinations
-    ).map((config: any) => config.destinationDomain);
+    ).map((destination) => destination.destinationDomain);
   };
 
   /* Initialization */

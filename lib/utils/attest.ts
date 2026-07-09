@@ -1,7 +1,9 @@
 import { AttestationError, MalformedAttestationData } from './errors';
 import tls from 'tls';
 import * as https from 'https';
-import type { HttpConfig } from '../types';
+import type { HttpConfig, AttestationBindings, PCRs } from '../types';
+import type PcrManager from '../core/pcrManager';
+import type AttestationDoc from '../core/attestationDoc';
 
 const origCheckServerIdentity = tls.checkServerIdentity;
 
@@ -20,10 +22,10 @@ function parseNameAndAppFromHost(hostname: string): {
 
 function attestConnection(
   hostname: string,
-  cert: any,
-  cagePcrManager: any,
-  attestationCache: any,
-  attestationBindings: any
+  cert: Buffer,
+  cagePcrManager: PcrManager,
+  attestationCache: AttestationDoc,
+  attestationBindings: AttestationBindings
 ): Error | undefined {
   try {
     if (!attestationBindings == null) {
@@ -38,11 +40,11 @@ function attestConnection(
     // check if PCRs for this cage have been given
 
     const pcrs = cagePcrManager.get(name);
-    var pcrsList = [];
+    let pcrsList: PCRs[] = [];
     if (Array.isArray(pcrs)) {
       pcrsList = pcrs;
     } else if (typeof pcrs === 'object') {
-      pcrsList = [pcrs];
+      pcrsList = [pcrs as PCRs];
     }
 
     let attestationDoc = attestationCache.get(name);
@@ -80,16 +82,16 @@ function attestConnection(
  */
 class EnclaveAgent extends https.Agent {
   config: HttpConfig;
-  attestationCache: any;
-  pcrManager: any;
-  attestationBindings: any;
+  attestationCache: AttestationDoc;
+  pcrManager: PcrManager;
+  attestationBindings: AttestationBindings;
 
   constructor(
     option: https.AgentOptions | undefined,
     config: HttpConfig,
-    attestationCache: any,
-    pcrManager: any,
-    attestationBindings: any
+    attestationCache: AttestationDoc,
+    pcrManager: PcrManager,
+    attestationBindings: AttestationBindings
   ) {
     super(option);
     this.config = config;
@@ -100,7 +102,7 @@ class EnclaveAgent extends https.Agent {
 
   #checkEnclaveServerIdentity = (
     hostname: string,
-    cert: any
+    cert: tls.PeerCertificate
   ): Error | undefined => {
     if (hostname.endsWith(this.config.enclavesHostname)) {
       const attestationResult = attestConnection(
@@ -118,7 +120,11 @@ class EnclaveAgent extends https.Agent {
     return origCheckServerIdentity(hostname, cert);
   };
 
-  createConnection(options: any, callback: any): any {
+  // Overrides https.Agent#createConnection to force TLS attestation. Node's
+  // Agent typings model this as returning a generic Duplex over RequestOptions,
+  // which doesn't match the tls.connect signature used here, so the params stay
+  // untyped.
+  createConnection(options: any, callback: any): tls.TLSSocket {
     options.checkServerIdentity = this.#checkEnclaveServerIdentity;
     return tls.connect(options, callback);
   }
@@ -126,13 +132,13 @@ class EnclaveAgent extends https.Agent {
 
 function addAttestationListener(
   config: HttpConfig,
-  attestationCache: any,
-  pcrManager: any,
-  attestationBindings: any
+  attestationCache: AttestationDoc,
+  pcrManager: PcrManager,
+  attestationBindings: AttestationBindings
 ): void {
   (tls as any).checkServerIdentity = function (
     hostname: string,
-    cert: any
+    cert: tls.PeerCertificate
   ): Error | undefined {
     // only attempt attestation if the host is a cage
     if (hostname.endsWith(config.enclavesHostname)) {

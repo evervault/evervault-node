@@ -6,7 +6,12 @@ import type {
   AttestationCallback,
 } from '../types';
 
-const staticPcrsToProvider = (pcrs: PCRs[]) => {
+interface PcrStoreEntry {
+  pcrs: AttestationData | null;
+  provider: () => Promise<AttestationData>;
+}
+
+const staticPcrsToProvider = (pcrs: PCRs[]): PcrStoreEntry => {
   const provider = async () => {
     return new Promise<PCRs[]>((resolve) => {
       resolve(pcrs);
@@ -19,8 +24,7 @@ const staticPcrsToProvider = (pcrs: PCRs[]) => {
 const loadPcrStore = (
   attestationData: Record<string, AttestationData | AttestationCallback>
 ) => {
-  const providers: Record<string, { pcrs: any; provider: () => Promise<any> }> =
-    {};
+  const providers: Record<string, PcrStoreEntry> = {};
   for (const [enclaveName, value] of Object.entries(attestationData)) {
     if (Array.isArray(value)) {
       providers[enclaveName] = staticPcrsToProvider(value);
@@ -37,7 +41,7 @@ const loadPcrStore = (
 };
 
 class PcrManager {
-  store: Record<string, any>;
+  store: Record<string, PcrStoreEntry>;
   config: MasterConfig;
   polling: ReturnType<typeof RepeatedTimer> | null;
 

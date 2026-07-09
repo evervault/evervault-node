@@ -32,6 +32,12 @@ import type {
   AttestationData,
   AttestationCallback,
   AttestationBindings,
+  EncryptableData,
+  EncryptedData,
+  DecryptableData,
+  FunctionRunResult,
+  RunToken,
+  ClientSideToken,
 } from './types';
 
 const originalRequest = https.request;
@@ -66,11 +72,13 @@ class EvervaultClient {
   private encryptionMode?: boolean;
 
   // Hidden properties defined via defineHiddenProperty (Object.defineProperty).
-  private _ecdhTeamKey?: any;
-  private _ecdh?: any;
-  private _ecdhPublicKey?: any;
-  private _derivedAesKey?: any;
-  private _refreshInterval?: any;
+  // These are populated imperatively (and invisibly to the type checker) by
+  // `defineHiddenProperty`, so they use definite assignment assertions.
+  private _ecdhTeamKey!: Buffer;
+  private _ecdh!: crypto.ECDH;
+  private _ecdhPublicKey!: Buffer;
+  private _derivedAesKey!: Buffer;
+  private _refreshInterval!: NodeJS.Timeout;
 
   constructor(
     appId: string,
@@ -325,7 +333,10 @@ class EvervaultClient {
     }
   }
 
-  async encrypt(data: any, role: string | null = null): Promise<any> {
+  async encrypt<T extends EncryptableData>(
+    data: T,
+    role: string | null = null
+  ): Promise<EncryptedData<T>> {
     const dataRoleRegex = /^[a-z0-9-]{1,20}$/;
     if (role !== null && !dataRoleRegex.test(role)) {
       throw new Error(
@@ -370,12 +381,15 @@ class EvervaultClient {
     );
   }
 
-  async decrypt(encryptedData: any): Promise<any> {
+  async decrypt<T = any>(encryptedData: DecryptableData): Promise<T> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     return this.http.decrypt(encryptedData);
   }
 
-  async run(functionName: string, payload: any): Promise<any> {
+  async run<T = any>(
+    functionName: string,
+    payload: Record<string, unknown>
+  ): Promise<FunctionRunResult<T>> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     validationHelper.validateFunctionName(functionName);
     validationHelper.validatePayload(payload);
@@ -394,7 +408,10 @@ class EvervaultClient {
     }
   }
 
-  async createRunToken(functionName: string, payload: any): Promise<any> {
+  async createRunToken(
+    functionName: string,
+    payload: Record<string, unknown>
+  ): Promise<RunToken> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     validationHelper.validatePayload(payload);
     validationHelper.validateFunctionName(functionName);
@@ -460,7 +477,10 @@ class EvervaultClient {
     );
   }
 
-  private defineHiddenProperty(property: string | number | symbol, value: any) {
+  private defineHiddenProperty(
+    property: string | number | symbol,
+    value: unknown
+  ) {
     Object.defineProperty(this, property, {
       enumerable: false,
       configurable: true,
@@ -469,7 +489,10 @@ class EvervaultClient {
     });
   }
 
-  async createClientSideDecryptToken(payload: any, expiry: any = null) {
+  async createClientSideDecryptToken(
+    payload: unknown,
+    expiry: Date | number | null = null
+  ): Promise<ClientSideToken> {
     validationHelper.validateApiKey(this.appId, this.apiKey);
     if (!payload) {
       throw new TokenCreationError(
