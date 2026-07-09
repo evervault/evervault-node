@@ -16,12 +16,13 @@
   "scripts": {
     "prepare": "husky install",
     "build": "tsup",
+    "build:test": "tsc -p tsconfig.build.json",
     "lint": "prettier --check \"./**/*.{ts,js}\"",
     "typecheck": "tsc --noEmit",
-    "test": "mocha",
-    "test:e2e": "mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
-    "test:filter": "mocha --grep",
-    "test:e2e:filter": "mocha 'e2e/**/*.test.js' --timeout 5000 --grep",
+    "test": "pnpm run build:test && mocha",
+    "test:e2e": "pnpm run build:test && mocha 'e2e/**/*.test.js' --timeout 5000 --exit",
+    "test:filter": "pnpm run build:test && mocha --grep",
+    "test:e2e:filter": "pnpm run build:test && mocha 'e2e/**/*.test.js' --timeout 5000 --grep",
     "test:coverage": "nyc --reporter=text pnpm run test",
     "prepublishOnly": "pnpm run build"
   },
