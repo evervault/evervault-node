@@ -2,5 +2,3 @@ dist
 node_modules
 coverage
 pnpm-lock.yaml
-lib/**/*.js
-lib/**/*.js.map

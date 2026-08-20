@@ -1,10 +1,6 @@
 types
 .direnv
 
-# Compiled JS emitted from lib/*.ts for running the test suite under plain Node
-lib/**/*.js
-lib/**/*.js.map
-
 # Logs
 logs
 *.log

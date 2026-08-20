@@ -9,4 +9,5 @@ export default defineConfig({
   target: 'node22',
   outDir: 'dist',
   keepNames: true,
+  cjsInterop: true,
 });
