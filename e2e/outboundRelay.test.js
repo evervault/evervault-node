@@ -4,7 +4,7 @@ const {
   http: { proxiedMarker, certHostname },
 } = require('../lib/config');
 const axios = require('axios');
-const { v4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 
 describe('Outbound Relay Test', () => {
   const appUuid = process.env.EV_APP_UUID;
@@ -28,7 +28,7 @@ describe('Outbound Relay Test', () => {
 
       await evervaultClient.enableOutboundRelay();
       const response = await axios.post(
-        `${syntheticEndpointUrl}?syntheticUuid=${v4()}&mode=outbound`,
+        `${syntheticEndpointUrl}?syntheticUuid=${randomUUID()}&mode=outbound`,
         encrypted
       );
       const body = response.data;

@@ -8,7 +8,6 @@ overrides:
   js-yaml@<=4.1.1: ^4.1.2
   serialize-javascript@<=7.0.2: ^7.0.3
   serialize-javascript@>=5.0.0 <7.0.5: ^7.0.5
-  uuid@<11.1.1: ^11.1.1
   lodash@>=4.0.0 <4.17.23: ^4.17.23
 
 importers:
@@ -88,9 +87,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      uuid:
-        specifier: ^11.1.1
-        version: 11.1.1
 
 packages:
 
@@ -2154,8 +2150,9 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  uuid@11.1.1:
-    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
+  uuid@8.3.2:
+    resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   which-module@2.0.1:
@@ -3505,7 +3502,7 @@ snapshots:
       istanbul-lib-coverage: 3.2.2
       p-map: 3.0.0
       rimraf: 3.0.2
-      uuid: 11.1.1
+      uuid: 8.3.2
 
   istanbul-lib-report@3.0.1:
     dependencies:
@@ -4235,7 +4232,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  uuid@11.1.1: {}
+  uuid@8.3.2: {}
 
   which-module@2.0.1: {}
 
