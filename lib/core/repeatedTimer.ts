@@ -1,7 +1,13 @@
-const { InvalidInterval } = require('../utils/errors');
+import { InvalidInterval } from '../utils/errors';
 
-module.exports = (defaultInterval, cb) => {
-  const parsedInterval = parseFloat(defaultInterval);
+export default (
+  defaultInterval: number | string,
+  cb: () => Promise<void> | void
+) => {
+  const parsedInterval =
+    typeof defaultInterval === 'string'
+      ? parseFloat(defaultInterval)
+      : defaultInterval;
   if (Number.isNaN(parsedInterval)) {
     throw new InvalidInterval(`Expected number, received ${parsedInterval}`);
   }
@@ -23,7 +29,7 @@ module.exports = (defaultInterval, cb) => {
     }
   };
 
-  const updateInterval = (newInterval) => {
+  const updateInterval = (newInterval: number) => {
     if (interval !== newInterval) {
       interval = newInterval;
       stop();
@@ -34,15 +40,15 @@ module.exports = (defaultInterval, cb) => {
   const getInterval = () => interval;
 
   const stop = () => {
-    clearInterval(currentIntervalId);
+    if (currentIntervalId) clearInterval(currentIntervalId);
     currentIntervalId = null;
   };
 
   const isRunning = () => currentIntervalId !== null;
 
   /* Initialization */
-  let interval = defaultInterval;
-  let currentIntervalId = null;
+  let interval: number = parsedInterval;
+  let currentIntervalId: NodeJS.Timeout | null = null;
   start();
 
   return {

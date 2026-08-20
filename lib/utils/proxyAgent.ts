@@ -1,8 +1,12 @@
-const net = require('net');
-const tls = require('tls');
-const url = require('url');
-const assert = require('assert');
-const { Agent } = require('agent-base');
+import * as net from 'net';
+import * as tls from 'tls';
+import * as url from 'url';
+import assert from 'assert';
+import agentBase from 'agent-base';
+
+// agent-base is a CommonJS module; import the default and pull `Agent` off it so
+// the ESM build doesn't attempt an unsupported named import from CJS.
+const { Agent } = agentBase as any;
 
 /**
  * The `HttpsProxyAgent` implements an HTTP Agent subclass that connects to
@@ -18,8 +22,19 @@ const { Agent } = require('agent-base');
  *
  * @api public
  */
-class HttpsProxyAgent extends Agent {
-  constructor(_opts, updateCertificateCallback, isCertificateInvalidCallback) {
+// agent-base's Agent typings (abstract callback shape, constructor overloads)
+// fight this vendored subclass; extend it untyped and rely on runtime behavior.
+class HttpsProxyAgent extends (Agent as any) {
+  secureProxy: boolean;
+  proxy: any;
+  private _updateCertificateCallback: any;
+  private _isCertificateInvalidCallback: any;
+
+  constructor(
+    _opts: any,
+    updateCertificateCallback?: any,
+    isCertificateInvalidCallback?: any
+  ) {
     let opts;
     if (typeof _opts === 'string') {
       opts = url.parse(_opts);
@@ -75,7 +90,7 @@ class HttpsProxyAgent extends Agent {
    *
    * @api protected
    */
-  async callback(req, opts) {
+  async callback(req: any, opts: any): Promise<any> {
     const { proxy, secureProxy } = this;
 
     // Wait until the proxy is ready to initialize
@@ -88,14 +103,14 @@ class HttpsProxyAgent extends Agent {
     }
 
     // Create a socket connection to the proxy server.
-    let socket;
+    let socket: any;
     if (secureProxy) {
       socket = tls.connect(proxy);
     } else {
       socket = net.connect(proxy);
     }
 
-    const headers = { ...proxy.headers };
+    const headers: Record<string, any> = { ...proxy.headers };
     const hostname = `${opts.host}:${opts.port}`;
     let payload = `CONNECT ${hostname} HTTP/1.1\r\n`;
 
@@ -157,7 +172,7 @@ class HttpsProxyAgent extends Agent {
     fakeSocket.readable = true;
 
     // Need to wait for the "socket" event to re-play the "data" events.
-    req.once('socket', (s) => {
+    req.once('socket', (s: any) => {
       assert(s.listenerCount('data') > 0);
 
       // Replay the "buffered" Buffer onto the fake `socket`, since at
@@ -171,24 +186,24 @@ class HttpsProxyAgent extends Agent {
   }
 }
 
-function isFunction(value) {
+function isFunction(value: any): boolean {
   return typeof value === 'function';
 }
 
-function resume(socket) {
+function resume(socket: any): void {
   socket.resume();
 }
 
-function isDefaultPort(port, secure) {
+function isDefaultPort(port: any, secure: any): boolean {
   return Boolean((!secure && port === 80) || (secure && port === 443));
 }
 
-function isHTTPS(protocol) {
+function isHTTPS(protocol: any): boolean {
   return typeof protocol === 'string' ? /^https:?$/i.test(protocol) : false;
 }
 
-function omit(obj, ...keys) {
-  const ret = {};
+function omit(obj: any, ...keys: string[]): any {
+  const ret: any = {};
 
   for (let key in obj) {
     if (!keys.includes(key)) {
@@ -198,14 +213,16 @@ function omit(obj, ...keys) {
   return ret;
 }
 
-function parseProxyResponse(socket) {
+function parseProxyResponse(
+  socket: any
+): Promise<{ statusCode: number; buffered: Buffer }> {
   return new Promise((resolve, reject) => {
     // we need to buffer any HTTP traffic that happens with the proxy before we get
     // the CONNECT response, so that if the response is anything other than an "200"
     // response code, then we can re-play the "data" events on the socket once the
     // HTTP parser is hooked up...
     let buffersLength = 0;
-    const buffers = [];
+    const buffers: Buffer[] = [];
 
     function read() {
       const b = socket.read();
@@ -218,12 +235,12 @@ function parseProxyResponse(socket) {
       socket.removeListener('readable', read);
     }
 
-    function onerror(err) {
+    function onerror(err: any) {
       cleanup();
       reject(err);
     }
 
-    function ondata(b) {
+    function ondata(b: Buffer) {
       buffers.push(b);
       buffersLength += b.length;
 
@@ -250,4 +267,4 @@ function parseProxyResponse(socket) {
   });
 }
 
-module.exports = HttpsProxyAgent;
+export default HttpsProxyAgent;

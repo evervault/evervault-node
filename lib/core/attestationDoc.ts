@@ -1,7 +1,23 @@
-const RepeatedTimer = require('./repeatedTimer');
+import RepeatedTimer from './repeatedTimer';
+import type { HttpClient } from './http';
+import type { MasterConfig } from '../types';
 
 class AttestationDoc {
-  constructor(config, http, enclaves, appUuid, hostname) {
+  appUuid: string;
+  http: HttpClient;
+  enclaves: string[];
+  config: MasterConfig;
+  polling: ReturnType<typeof RepeatedTimer> | null;
+  attestationDocCache: Record<string, string> | null;
+  hostname: string;
+
+  constructor(
+    config: MasterConfig,
+    http: HttpClient,
+    enclaves: string[],
+    appUuid: string,
+    hostname: string
+  ) {
     this.appUuid = appUuid.replace(/_/g, '-');
     this.http = http;
     this.enclaves = enclaves;
@@ -25,21 +41,21 @@ class AttestationDoc {
     return null;
   };
 
-  loadAttestationDoc = async (name) => {
+  loadAttestationDoc = async (name: string) => {
     try {
       const response = await this.http.getAttestationDoc(
         name,
         this.appUuid,
         this.hostname
       );
-      this.attestationDocCache[name] = response.attestation_doc;
+      this.attestationDocCache![name] = response.attestation_doc;
     } catch (e) {
       console.warn(`Couldn't load attestation doc for ${name} ${e}`);
     }
   };
 
-  get = (name) => {
-    const doc = this.attestationDocCache[name];
+  get = (name: string) => {
+    const doc = this.attestationDocCache![name];
     if (!doc) {
       console.warn(`No attestation doc found for ${name}`);
     }
@@ -65,10 +81,10 @@ class AttestationDoc {
   _getAttestationDocs = async () => {
     await Promise.all(
       this.enclaves.map(async (name) => {
-        await this.loadAttestationDoc(name, this.appUuid);
+        await this.loadAttestationDoc(name);
       })
     );
   };
 }
 
-module.exports = AttestationDoc;
+export default AttestationDoc;

@@ -1,10 +1,16 @@
-const { AttestationError, MalformedAttestationData } = require('./errors');
-const tls = require('tls');
-const https = require('https');
-const { hostname } = require('os');
+import { AttestationError, MalformedAttestationData } from './errors';
+import tls from 'tls';
+import * as https from 'https';
+import type { HttpConfig, AttestationBindings, PCRs } from '../types';
+import type PcrManager from '../core/pcrManager';
+import type AttestationDoc from '../core/attestationDoc';
+
 const origCheckServerIdentity = tls.checkServerIdentity;
 
-function parseNameAndAppFromHost(hostname) {
+function parseNameAndAppFromHost(hostname: string): {
+  name: string;
+  appUuid: string;
+} {
   const hostnameTokens = hostname.split('.');
   // Check if nonce prefix is present
   if (hostnameTokens[1] === 'attest') {
@@ -14,21 +20,13 @@ function parseNameAndAppFromHost(hostname) {
   }
 }
 
-/**
- * @param {string} hostname
- * @param {Buffer} cert
- * @param {import('../core/pcrManager')} pcrManager
- * @param {import('../core/attestationDoc')} attestationCache
- * @param {import('../types').AttestationBindings} attestationBindings
- * @returns {Error | undefined}
- */
 function attestConnection(
-  hostname,
-  cert,
-  cagePcrManager,
-  attestationCache,
-  attestationBindings
-) {
+  hostname: string,
+  cert: Buffer,
+  cagePcrManager: PcrManager,
+  attestationCache: AttestationDoc,
+  attestationBindings: AttestationBindings
+): Error | undefined {
   try {
     if (!attestationBindings == null) {
       throw new AttestationError(
@@ -42,11 +40,11 @@ function attestConnection(
     // check if PCRs for this cage have been given
 
     const pcrs = cagePcrManager.get(name);
-    var pcrsList = [];
+    let pcrsList: PCRs[] = [];
     if (Array.isArray(pcrs)) {
       pcrsList = pcrs;
     } else if (typeof pcrs === 'object') {
-      pcrsList = [pcrs];
+      pcrsList = [pcrs as PCRs];
     }
 
     let attestationDoc = attestationCache.get(name);
@@ -69,7 +67,7 @@ function attestConnection(
         cert
       );
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error(
       `EVERVAULT ERROR :: An unexpected error occurred while attempting to attest a connection to your Enclave`,
       err.message
@@ -83,18 +81,17 @@ function attestConnection(
  * Pass this to a https request to ensure that the connection is attested.
  */
 class EnclaveAgent extends https.Agent {
-  /**
-   * @param {import('https').AgentOptions} option
-   * @param {import('../core/attestationDoc')} attestationCache
-   * @param {import('../core/pcrManager')} pcrManager
-   * @param {import('../types').AttestationBindings} attestationBindings
-   * */
+  config: HttpConfig;
+  attestationCache: AttestationDoc;
+  pcrManager: PcrManager;
+  attestationBindings: AttestationBindings;
+
   constructor(
-    option,
-    config,
-    attestationCache,
-    pcrManager,
-    attestationBindings
+    option: https.AgentOptions | undefined,
+    config: HttpConfig,
+    attestationCache: AttestationDoc,
+    pcrManager: PcrManager,
+    attestationBindings: AttestationBindings
   ) {
     super(option);
     this.config = config;
@@ -103,7 +100,10 @@ class EnclaveAgent extends https.Agent {
     this.attestationBindings = attestationBindings;
   }
 
-  #checkEnclaveServerIdentity = (hostname, cert) => {
+  #checkEnclaveServerIdentity = (
+    hostname: string,
+    cert: tls.PeerCertificate
+  ): Error | undefined => {
     if (hostname.endsWith(this.config.enclavesHostname)) {
       const attestationResult = attestConnection(
         hostname,
@@ -120,31 +120,26 @@ class EnclaveAgent extends https.Agent {
     return origCheckServerIdentity(hostname, cert);
   };
 
-  createConnection(options, callback) {
+  // Overrides https.Agent#createConnection to force TLS attestation. Node's
+  // Agent typings model this as returning a generic Duplex over RequestOptions,
+  // which doesn't match the tls.connect signature used here, so the params stay
+  // untyped.
+  createConnection(options: any, callback: any): tls.TLSSocket {
     options.checkServerIdentity = this.#checkEnclaveServerIdentity;
     return tls.connect(options, callback);
   }
 }
 
-/**
- *
- * @param {import('../types').HttpConfig} config
- * @param {import('../core/attestationDoc')} attestationCache
- * @param {import('../core/pcrManager')} pcrManager
- * @param {import('../types').AttestationBindings} attestationBindings
- */
 function addAttestationListener(
-  config,
-  attestationCache,
-  pcrManager,
-  attestationBindings
-) {
-  /**
-   * @param {string} hostname
-   * @param {import('node:tls').PeerCertificate} cert
-   * @returns {Error | undefined}
-   */
-  tls.checkServerIdentity = function (hostname, cert) {
+  config: HttpConfig,
+  attestationCache: AttestationDoc,
+  pcrManager: PcrManager,
+  attestationBindings: AttestationBindings
+): void {
+  (tls as any).checkServerIdentity = function (
+    hostname: string,
+    cert: tls.PeerCertificate
+  ): Error | undefined {
     // only attempt attestation if the host is a cage
     if (hostname.endsWith(config.enclavesHostname)) {
       // we expect undefined when attestation is successful, else an error
@@ -167,23 +162,25 @@ function addAttestationListener(
 
 /**
  * Ensure that the provided attestation data is correctly structured
- * @param {unknown} providedAttestationData
- * @throws {MalformedAttestationData}
  */
-function validateAttestationData(providedAttestationData) {
-  const isObject = (val) =>
+function validateAttestationData(providedAttestationData: unknown): void {
+  const isObject = (val: unknown) =>
     val != null && typeof val === 'object' && !Array.isArray(val);
 
-  const isFunction = (val) => typeof val === 'function';
+  const isFunction = (val: unknown) => typeof val === 'function';
 
   if (!isObject(providedAttestationData)) {
     throw new MalformedAttestationData(
       `Expected an object to be provided as attestation data, received ${
-        Array.isArray(providedAttestationData) ? 'Array' : typeof val
+        Array.isArray(providedAttestationData)
+          ? 'Array'
+          : typeof providedAttestationData
       }`
     );
   }
-  const containsOnlyObjects = Object.values(providedAttestationData).every(
+  const containsOnlyObjects = Object.values(
+    providedAttestationData as Record<string, unknown>
+  ).every(
     (pcrs) =>
       isObject(pcrs) ||
       (Array.isArray(pcrs) && pcrs.every(isObject)) ||
@@ -196,7 +193,7 @@ function validateAttestationData(providedAttestationData) {
   }
 }
 
-module.exports = {
+export {
   attestConnection,
   addAttestationListener,
   parseNameAndAppFromHost,

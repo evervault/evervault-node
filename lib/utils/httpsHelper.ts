@@ -1,22 +1,23 @@
-const https = require('https');
-const tls = require('tls');
-const Datatypes = require('./datatypes');
-const certHelper = require('./certHelper');
-const HttpsProxyAgent = require('./proxyAgent');
-const {
-  http: { proxiedMarker },
-} = require('../config');
+import https from 'https';
+import tls from 'tls';
+import * as Datatypes from './datatypes';
+import * as certHelper from './certHelper';
+import HttpsProxyAgent from './proxyAgent';
+import config from '../config';
+import type { HttpClient } from '../core/http';
+
+const proxiedMarker = config.http.proxiedMarker;
 const origCreateSecureContext = tls.createSecureContext;
 const EVERVAULT_DOMAINS = ['evervault.com', 'evervault.io', 'evervault.dev'];
 
-const certificateUtil = (evClient) => {
-  let x509 = null;
+const certificateUtil = (evClient: HttpClient) => {
+  let x509: any = null;
   async function updateCertificate() {
     const pem = await evClient.getCert();
     let cert = pem.toString();
     x509 = certHelper.parseX509(cert);
-    tls.createSecureContext = (options) => {
-      const context = origCreateSecureContext(options);
+    (tls as any).createSecureContext = (options: any) => {
+      const context: any = origCreateSecureContext(options);
       context.context.addCACert(pem);
       return context;
     };
@@ -39,12 +40,10 @@ const certificateUtil = (evClient) => {
   };
 };
 
-/**
- *
- * @param {Parameters<typeof import('node:https').request>} args
- * @returns {{ domain: string, path: string }}
- */
-function getDomainAndPathFromArgs(args) {
+function getDomainAndPathFromArgs(args: any[]): {
+  domain: string;
+  path: string;
+} {
   if (typeof args[0] === 'string') {
     const parsedUrl = new URL(args[0]);
     return { domain: parsedUrl.host, path: parsedUrl.pathname };
@@ -54,7 +53,7 @@ function getDomainAndPathFromArgs(args) {
     return { domain: args[0].host, path: args[0].pathname };
   }
 
-  let domain, path;
+  let domain: any, path: any;
   for (const arg of args) {
     if (arg instanceof Object) {
       domain = domain ?? arg.hostname ?? arg.host;
@@ -67,28 +66,15 @@ function getDomainAndPathFromArgs(args) {
   };
 }
 
-/**
- * @param {string} apiKey
- * @param {string} tunnelHostname
- * @param {(domain: string, path: string) => boolean} domainFilter
- * @param {boolean} debugRequests
- * @param {ReturnType<typeof import('../core/http')>} evClient
- * @param {typeof import('node:https').request} originalRequest
- * @returns {void}
- */
 const overloadHttpsModule = (
-  apiKey,
-  tunnelHostname,
-  domainFilter,
+  apiKey: string | undefined,
+  tunnelHostname: string,
+  domainFilter: (domain: string, path: string) => boolean,
   debugRequests = false,
-  evClient,
-  originalRequest
-) => {
-  /**
-   * @param {Parameters<typeof import('node:https').request>} args
-   * @returns {ReturnType<typeof import('node:https').request>}
-   */
-  function wrapMethodRequest(...args) {
+  evClient: HttpClient,
+  originalRequest: typeof https.request
+): void => {
+  function wrapMethodRequest(this: any, ...args: any[]) {
     const { domain, path } = getDomainAndPathFromArgs(args);
     const shouldProxy = !!domain && domainFilter(domain, path);
     if (
@@ -101,7 +87,7 @@ const overloadHttpsModule = (
         `EVERVAULT DEBUG :: Request to domain: ${domain}${path}, Outbound Proxy enabled: ${shouldProxy}`
       );
     }
-    args = args.map((arg) => {
+    args = args.map((arg: any) => {
       if (shouldProxy && arg instanceof Object) {
         const { updateCertificate, isCertificateInvalid } =
           certificateUtil(evClient);
@@ -114,19 +100,26 @@ const overloadHttpsModule = (
       }
       return arg;
     });
-    const request = originalRequest.apply(this, args);
+    const request: any = (originalRequest as any).apply(this, args);
     request[proxiedMarker] = shouldProxy;
     return request;
   }
 
-  https.request = wrapMethodRequest;
+  (https as any).request = wrapMethodRequest;
 };
 
+interface RelayAgentConfig {
+  hostname: string;
+  port?: number;
+  rejectUnauthorized?: boolean;
+  secureProxy?: boolean;
+}
+
 const httpsRelayAgent = (
-  agentConfig = { port: 443, rejectUnauthorized: true, secureProxy: true },
-  evClient,
-  apiKey
-) => {
+  agentConfig: RelayAgentConfig,
+  evClient: HttpClient,
+  apiKey?: string
+): HttpsProxyAgent => {
   const { updateCertificate, isCertificateInvalid } = certificateUtil(evClient);
   const parsedUrl = new URL(agentConfig.hostname);
   const agent = new HttpsProxyAgent(
@@ -144,8 +137,4 @@ const httpsRelayAgent = (
   return agent;
 };
 
-module.exports = {
-  overloadHttpsModule,
-  httpsRelayAgent,
-  getDomainAndPathFromArgs,
-};
+export { overloadHttpsModule, httpsRelayAgent, getDomainAndPathFromArgs };

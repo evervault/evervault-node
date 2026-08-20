@@ -1,12 +1,11 @@
-const { X509Certificate } = require('crypto');
+import { X509Certificate } from 'crypto';
+import * as tls from 'tls';
+import * as net from 'net';
 
-const parseX509 = (cert) => {
+const parseX509 = (cert: string | Buffer) => {
   if (X509Certificate) {
     return new X509Certificate(cert);
   } else {
-    const tls = require('tls');
-    const net = require('net');
-
     const secureContext = tls.createSecureContext({
       cert,
     });
@@ -17,6 +16,4 @@ const parseX509 = (cert) => {
   }
 };
 
-module.exports = {
-  parseX509,
-};
+export { parseX509 };

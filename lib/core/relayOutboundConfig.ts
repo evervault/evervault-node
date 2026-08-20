@@ -1,7 +1,9 @@
-const RepeatedTimer = require('./repeatedTimer');
+import RepeatedTimer from './repeatedTimer';
+import type { HttpClient } from './http';
+import type { MasterConfig } from '../types';
 
-let polling = null;
-let decryptionDomainsCache = null;
+let polling: ReturnType<typeof RepeatedTimer> | null = null;
+let decryptionDomainsCache: string[] | null = null;
 
 const disablePolling = () => {
   if (polling) {
@@ -21,11 +23,11 @@ const clearCache = () => {
   decryptionDomainsCache = null;
 };
 
-const getDecryptionDomains = () => {
+const getDecryptionDomains = (): string[] | null => {
   return decryptionDomainsCache;
 };
 
-const init = async (config, http) => {
+const init = async (config: MasterConfig, http: HttpClient) => {
   let pollingInterval = config.http.pollInterval;
 
   const getRelayOutboundConfigFromApi = async () => {
@@ -38,7 +40,7 @@ const init = async (config, http) => {
     }
     decryptionDomainsCache = Object.values(
       configResponse.data.outboundDestinations
-    ).map((config) => config.destinationDomain);
+    ).map((destination) => destination.destinationDomain);
   };
 
   /* Initialization */
@@ -52,7 +54,7 @@ const init = async (config, http) => {
   return polling;
 };
 
-module.exports = {
+export {
   init,
   getDecryptionDomains,
   disablePolling,

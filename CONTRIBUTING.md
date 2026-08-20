@@ -30,7 +30,7 @@ The `pre-commit` hook ensures that code is formatted correctly. We use [prettier
 
 It should be possible to configure your editor to run prettier on save, which should make your life easier - have a look at [editor support](https://prettier.io/docs/en/editors.html).
 
-There is a test that is run whenever a pull request is made (`pnpm run lint`), so please ensure that your code is formatted correctly before committing!
+There is a test that is run whenever a pull request is made (`pnpm run format`), so please ensure that your code is formatted correctly before committing!
 
 ## Commit Formatting & Releases
 
