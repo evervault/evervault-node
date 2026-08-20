@@ -3,7 +3,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const sinon = require('sinon');
 
-const rewire = require('rewire');
+const proxyquire = require('proxyquire');
 const { errors } = require('../lib/utils');
 
 const testApiKey =
@@ -14,11 +14,13 @@ let EvervaultClient;
 const encryptStub = sinon.stub();
 describe('Testing the Evervault SDK Config', () => {
   beforeEach(() => {
-    EvervaultClient = rewire('../lib');
-    EvervaultClient.__set__({
-      Crypto: () => ({
-        encrypt: encryptStub,
-      }),
+    EvervaultClient = proxyquire('../lib', {
+      './core': {
+        ...require('../lib/core'),
+        Crypto: () => ({
+          encrypt: encryptStub,
+        }),
+      },
     });
   });
 

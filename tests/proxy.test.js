@@ -4,7 +4,7 @@ const http = require('http');
 const https = require('https');
 const assert = require('assert');
 const Proxy = require('proxy');
-const HttpsProxyAgent = require('../lib/utils/proxyAgent');
+const HttpsProxyAgent = require('../lib/utils/proxyAgent').default;
 const { httpsRelayAgent } = require('../lib/utils/httpsHelper');
 const { Http } = require('../lib/core');
 

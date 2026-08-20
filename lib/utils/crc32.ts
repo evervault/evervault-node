@@ -15,7 +15,7 @@ for (let i = 0; i < 256; i++) {
 //
 // @param {ArrayBuffer} buffer
 // @return {Number}
-function crc32(buffer) {
+function crc32(buffer: Buffer): number {
   let crc = 0xffffffff;
   const len = buffer.byteLength;
 
@@ -26,4 +26,4 @@ function crc32(buffer) {
   return crc ^ 0xffffffff;
 }
 
-module.exports = crc32;
+export default crc32;

@@ -1,6 +1,10 @@
-const crypto = require('crypto');
-const ASN1 = require('asn1js');
-const curveConstants = require('./constants');
+import * as crypto from 'crypto';
+import * as ASN1ns from 'asn1js';
+import curveConstants from './constants';
+
+// asn1js's constructor param typings are awkward for this low-level DER
+// encoder; treat the namespace as untyped here and rely on runtime behavior.
+const ASN1: any = ASN1ns;
 
 /**
  * Given an EC curve name and its constants, generate a DER encoder for its compressed public keys
@@ -9,7 +13,7 @@ const curveConstants = require('./constants');
  * @returns Function(compressedPubKey): base64EncodedString
  */
 const createCurve = () => {
-  return (curveName, compressedPubKey) => {
+  return (curveName: string, compressedPubKey: string): Buffer => {
     const asn1Encoder = buildEncoder(curveName);
     const decompressed = crypto.ECDH.convertKey(
       compressedPubKey,
@@ -17,13 +21,13 @@ const createCurve = () => {
       'base64',
       'hex',
       'uncompressed'
-    );
+    ).toString();
     return asn1Encoder(decompressed);
   };
 };
 
-const hexStringToUint8Array = (hexString) => {
-  return hexString.match(/../g).map((h) => parseInt(h, 16));
+const hexStringToUint8Array = (hexString: string): number[] => {
+  return hexString.match(/../g)!.map((h) => parseInt(h, 16));
 };
 
 const PUBLIC_KEY_TYPE = '1.2.840.10045.2.1';
@@ -35,7 +39,7 @@ const VERSION = '01';
 // https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03111/BSI-TR-03111_V-2-0_pdf.pdf?__blob=publicationFile&v=1
 //
 // The seed parameter is optional.
-const FieldId = (curveParams) => {
+const FieldId = (curveParams: any) => {
   return new ASN1.Sequence({
     name: 'fieldID',
     value: [
@@ -55,7 +59,7 @@ const FieldId = (curveParams) => {
   });
 };
 
-const Curve = (curveParams) => {
+const Curve = (curveParams: any) => {
   return new ASN1.Sequence({
     name: 'curve',
     value: curveParams.seed
@@ -93,7 +97,7 @@ const Curve = (curveParams) => {
   });
 };
 
-const ECParameters = (curveParams) => {
+const ECParameters = (curveParams: any) => {
   return new ASN1.Sequence({
     name: 'ecParameters',
     value: [
@@ -125,7 +129,7 @@ const ECParameters = (curveParams) => {
   });
 };
 
-const AlgorithmIdentifier = (curveParams) => {
+const AlgorithmIdentifier = (curveParams: any) => {
   return new ASN1.Sequence({
     name: 'algorithm',
     value: [
@@ -138,7 +142,7 @@ const AlgorithmIdentifier = (curveParams) => {
   });
 };
 
-const SubjectPublicKeyInfo = (curveParams, decompressedKey) => {
+const SubjectPublicKeyInfo = (curveParams: any, decompressedKey: string) => {
   return new ASN1.Sequence({
     name: 'SubjectPublicKeyInfo',
     value: [
@@ -151,14 +155,12 @@ const SubjectPublicKeyInfo = (curveParams, decompressedKey) => {
   });
 };
 
-const buildEncoder = (curveName) => {
-  const curveParams = curveConstants[curveName];
-  return (decompressedKey) => {
+const buildEncoder = (curveName: string) => {
+  const curveParams = curveConstants[curveName as keyof typeof curveConstants];
+  return (decompressedKey: string): Buffer => {
     const spki = SubjectPublicKeyInfo(curveParams, decompressedKey);
     return Buffer.from(spki.toString('hex'), 'hex');
   };
 };
 
-module.exports = {
-  encodePublicKey: createCurve(),
-};
+export const encodePublicKey = createCurve();
