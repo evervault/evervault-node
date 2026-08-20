@@ -21,7 +21,7 @@ const createCurve = () => {
       'base64',
       'hex',
       'uncompressed'
-    ) as string;
+    ).toString();
     return asn1Encoder(decompressed);
   };
 };

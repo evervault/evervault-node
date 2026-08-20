@@ -148,9 +148,10 @@ const Http = (
     });
     if (response.status >= 200 && response.status < 300) {
       const pollIntervalHeaderValue = response.headers['x-poll-interval'];
-      const pollInterval = parseFloat(String(pollIntervalHeaderValue));
       return {
-        pollInterval: Number.isNaN(pollInterval) ? null : pollInterval,
+        pollInterval: isNaN(pollIntervalHeaderValue)
+          ? null
+          : parseFloat(pollIntervalHeaderValue),
         data: response.data,
       };
     }

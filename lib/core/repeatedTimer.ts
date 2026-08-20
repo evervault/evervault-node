@@ -4,18 +4,21 @@ export default (
   defaultInterval: number | string,
   cb: () => Promise<void> | void
 ) => {
-  const parsedInterval = parseFloat(String(defaultInterval));
+  const parsedInterval =
+    typeof defaultInterval === 'string'
+      ? parseFloat(defaultInterval)
+      : defaultInterval;
   if (Number.isNaN(parsedInterval)) {
     throw new InvalidInterval(`Expected number, received ${parsedInterval}`);
   }
-  const createInterval = (): NodeJS.Timeout => {
+  const createInterval = () => {
     const initializedInterval = setInterval(async () => {
       try {
         await cb();
       } catch (e) {
         console.error(`EVERVAULT :: An error occurred while polling (${e})`);
       }
-    }, (interval as number) * 1000);
+    }, interval * 1000);
     initializedInterval.unref();
     return initializedInterval;
   };
@@ -44,7 +47,7 @@ export default (
   const isRunning = () => currentIntervalId !== null;
 
   /* Initialization */
-  let interval: number | string = defaultInterval;
+  let interval: number = parsedInterval;
   let currentIntervalId: NodeJS.Timeout | null = null;
   start();
 
