@@ -5,7 +5,7 @@ const nock = require('nock');
 const sinon = require('sinon');
 const axios = require('axios');
 const https = require('https');
-const rewire = require('rewire');
+const proxyquire = require('proxyquire');
 const { RelayOutboundConfig } = require('../lib/core');
 const { errors } = require('../lib/utils');
 const fixtures = require('./utilities/fixtures');
@@ -22,11 +22,13 @@ let EvervaultClient;
 const encryptStub = sinon.stub();
 describe('Testing the Evervault SDK', () => {
   beforeEach(() => {
-    EvervaultClient = rewire('../lib');
-    EvervaultClient.__set__({
-      Crypto: () => ({
-        encrypt: encryptStub,
-      }),
+    EvervaultClient = proxyquire('../lib', {
+      './core': {
+        ...require('../lib/core'),
+        Crypto: () => ({
+          encrypt: encryptStub,
+        }),
+      },
     });
   });
 

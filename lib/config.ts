@@ -1,4 +1,5 @@
-const { version } = require('../package.json');
+import { version } from '../package.json';
+import type { MasterConfig } from './types';
 
 const DEFAULT_API_URL = 'https://api.evervault.com';
 const DEFAULT_TUNNEL_HOSTNAME = 'https://relay.evervault.com:443';
@@ -9,8 +10,7 @@ const DEFAULT_MAX_FILE_SIZE_IN_MB = 25;
 const DEFAULT_ATTEST_POLL_INTERVAL = 120;
 const DEFAULT_PCR_PROVIDER_POLL_INTERVAL = 60;
 
-/** @type {import('./types').MasterConfig} */
-module.exports = {
+const config: MasterConfig = {
   http: {
     baseUrl: process.env.EV_API_URL || DEFAULT_API_URL,
     userAgent: `evervault-node/${version}`,
@@ -61,3 +61,5 @@ module.exports = {
     },
   },
 };
+
+export = config;

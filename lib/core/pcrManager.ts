@@ -1,8 +1,19 @@
-const RepeatedTimer = require('./repeatedTimer');
+import RepeatedTimer from './repeatedTimer';
+import type {
+  MasterConfig,
+  PCRs,
+  AttestationData,
+  AttestationCallback,
+} from '../types';
 
-const staticPcrsToProvider = (pcrs) => {
+interface PcrStoreEntry {
+  pcrs: AttestationData | null;
+  provider: () => Promise<AttestationData>;
+}
+
+const staticPcrsToProvider = (pcrs: PCRs[]): PcrStoreEntry => {
   const provider = async () => {
-    return new Promise((resolve) => {
+    return new Promise<PCRs[]>((resolve) => {
       resolve(pcrs);
     });
   };
@@ -10,8 +21,10 @@ const staticPcrsToProvider = (pcrs) => {
   return { pcrs, provider };
 };
 
-const loadPcrStore = (attestationData) => {
-  const providers = {};
+const loadPcrStore = (
+  attestationData: Record<string, AttestationData | AttestationCallback>
+) => {
+  const providers: Record<string, PcrStoreEntry> = {};
   for (const [enclaveName, value] of Object.entries(attestationData)) {
     if (Array.isArray(value)) {
       providers[enclaveName] = staticPcrsToProvider(value);
@@ -28,7 +41,14 @@ const loadPcrStore = (attestationData) => {
 };
 
 class PcrManager {
-  constructor(config, attestationData) {
+  store: Record<string, PcrStoreEntry>;
+  config: MasterConfig;
+  polling: ReturnType<typeof RepeatedTimer> | null;
+
+  constructor(
+    config: MasterConfig,
+    attestationData: Record<string, AttestationData | AttestationCallback>
+  ) {
     this.store = loadPcrStore(attestationData);
     this.config = config;
     this.polling = null;
@@ -48,7 +68,7 @@ class PcrManager {
     return null;
   };
 
-  fetchPcrs = async (enclaveName) => {
+  fetchPcrs = async (enclaveName: string) => {
     const enclave = this.store[enclaveName];
 
     if (!enclave || !enclave.provider) {
@@ -92,7 +112,7 @@ class PcrManager {
     }
   };
 
-  get = (enclaveName) => {
+  get = (enclaveName: string) => {
     const storedAttestationData = this.store[enclaveName];
     const pcrs = storedAttestationData ? storedAttestationData.pcrs : undefined;
 
@@ -137,4 +157,4 @@ class PcrManager {
   };
 }
 
-module.exports = PcrManager;
+export default PcrManager;

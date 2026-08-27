@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const Sinon = require('sinon');
 
 const { InvalidInterval } = require('../../lib/utils/errors');
-const RepeatedTimer = require('../../lib/core/repeatedTimer');
+const RepeatedTimer = require('../../lib/core/repeatedTimer').default;
 
 describe('RepeatedTimer Module', () => {
   it('Rejects when given a non-numeric value', () => {

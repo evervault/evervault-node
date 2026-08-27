@@ -15,24 +15,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [22, 24, 26]
         os: [ubuntu-latest]
         include:
           - perform-attestation: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - run: npm run lint
-      - run: npm run test:e2e
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run format
+      - run: pnpm run test:e2e
         env:
           EV_APP_UUID: ${{ secrets.EV_APP_UUID_V5 }}
           EV_API_KEY: ${{ secrets.EV_API_KEY_V5 }}

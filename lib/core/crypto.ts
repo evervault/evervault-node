@@ -1,13 +1,14 @@
-const crypto = require('crypto');
-const { Encoding } = require('../curves');
-const Datatypes = require('../utils/datatypes');
-const { errors } = require('../utils');
-const CRC32 = require('../utils/crc32');
+import * as crypto from 'crypto';
+import { Encoding } from '../curves';
+import * as Datatypes from '../utils/datatypes';
+import { errors } from '../utils';
+import CRC32 from '../utils/crc32';
+import type { CurveConfig } from '../types';
 
 const PRIME256V1 = 'prime256v1';
 const SECP256K1 = 'secp256k1';
 
-const generateBytes = (byteLength) => {
+const generateBytes = (byteLength: number): Promise<Buffer> => {
   return new Promise((resolve, reject) =>
     crypto.randomBytes(byteLength, (err, buf) => {
       return err ? reject(err) : resolve(buf);
@@ -17,22 +18,22 @@ const generateBytes = (byteLength) => {
 
 const DEFAULT_ENCRYPT_OPTIONS = {
   preserveObjectShape: true,
-  fieldsToEncrypt: undefined,
+  fieldsToEncrypt: undefined as string[] | undefined,
 };
 
-/**
- * @param {import('../types').CurveConfig} config
- */
-module.exports = (config) => {
-  let MAX_FILE_SIZE_IN_BYTES = config.maxFileSizeInMB * 1024 * 1024;
+type EncryptOptions = typeof DEFAULT_ENCRYPT_OPTIONS;
+
+const Crypto = (config: CurveConfig) => {
+  let MAX_FILE_SIZE_IN_BYTES = Number(config.maxFileSizeInMB) * 1024 * 1024;
   const _encryptObject = async (
-    curve,
-    ecdhTeamKey,
-    ecdhPublicKey,
-    derivedSecret,
-    data,
-    role
-  ) => {
+    curve: string,
+    ecdhTeamKey: any,
+    ecdhPublicKey: any,
+    derivedSecret: Buffer,
+    data: any,
+    role?: string | null,
+    _options?: EncryptOptions
+  ): Promise<any> => {
     return await _traverseObject(
       curve,
       ecdhTeamKey,
@@ -43,13 +44,13 @@ module.exports = (config) => {
     );
   };
   const _traverseObject = async (
-    curve,
-    ecdhTeamKey,
-    ecdhPublicKey,
-    derivedSecret,
-    data,
-    role
-  ) => {
+    curve: string,
+    ecdhTeamKey: any,
+    ecdhPublicKey: any,
+    derivedSecret: Buffer,
+    data: any,
+    role?: string | null
+  ): Promise<any> => {
     if (Datatypes.isEncryptable(data)) {
       return await _encryptString(
         curve,
@@ -74,9 +75,9 @@ module.exports = (config) => {
       }
       return encryptedObject;
     } else if (Datatypes.isArray(data)) {
-      const encryptedArray = [...data];
+      const encryptedArray: any[] = [...data];
       for (let [key, value] of Object.entries(encryptedArray)) {
-        encryptedArray[key] = await _traverseObject(
+        encryptedArray[key as any] = await _traverseObject(
           curve,
           ecdhTeamKey,
           ecdhPublicKey,
@@ -91,11 +92,16 @@ module.exports = (config) => {
     }
   };
 
-  const base64RemovePadding = (str) => {
+  const base64RemovePadding = (str: string): string => {
     return str.replace(/={1,2}$/, '');
   };
 
-  const getSharedSecret = (ecdh, publicKey, ephemeralPublicKey, curveName) => {
+  const getSharedSecret = (
+    ecdh: crypto.ECDH,
+    publicKey: any,
+    ephemeralPublicKey: any,
+    curveName: string
+  ): Buffer => {
     const secret = ecdh.computeSecret(Buffer.from(publicKey, 'base64'));
     const uncompressedKey = crypto.ECDH.convertKey(
       ephemeralPublicKey,
@@ -103,7 +109,7 @@ module.exports = (config) => {
       'base64',
       'base64',
       'uncompressed'
-    );
+    ) as string;
     const concatSecret = Buffer.concat([
       secret,
       Buffer.from([0x00, 0x00, 0x00, 0x01]),
@@ -116,11 +122,11 @@ module.exports = (config) => {
   };
 
   function createV2Aad(
-    dataType,
-    hasDataPolicy,
-    ephemeralPublicKeyBytes,
-    appPublicKeyBytes
-  ) {
+    dataType: string | undefined,
+    hasDataPolicy: boolean,
+    ephemeralPublicKeyBytes: Buffer,
+    appPublicKeyBytes: Buffer
+  ): Buffer {
     let dataTypeNumber = 0; // Default to String
 
     if (dataType === 'number') {
@@ -163,23 +169,23 @@ module.exports = (config) => {
   }
 
   const _encryptString = async (
-    curve,
-    ecdhTeamKey,
-    ecdhPublicKey,
-    derivedSecret,
-    str,
-    datatype,
-    role
-  ) => {
+    curve: string,
+    ecdhTeamKey: any,
+    ecdhPublicKey: any,
+    derivedSecret: Buffer,
+    str: any,
+    datatype: string | undefined,
+    role?: string | null
+  ): Promise<string> => {
     const keyIv = await generateBytes(config.ivLength);
     const cipher = crypto.createCipheriv(
-      config.cipherAlgorithm,
+      config.cipherAlgorithm as crypto.CipherGCMTypes,
       derivedSecret,
       keyIv,
       {
         authTagLength: config.authTagLength,
       }
-    );
+    ) as crypto.CipherGCM;
     if (role && (curve === PRIME256V1 || curve === SECP256K1)) {
       const aad = createV2Aad(
         datatype,
@@ -209,8 +215,11 @@ module.exports = (config) => {
     );
   };
 
-  const buildEncodedMetadata = (role, encryptionTimestamp) => {
-    let buffer = [];
+  const buildEncodedMetadata = (
+    role: string | null | undefined,
+    encryptionTimestamp: number
+  ): Buffer => {
+    let buffer: number[] = [];
 
     // Binary representation of a fixed map with 2 or 3 items, followed by the key-value pairs.
     buffer.push(0x80 | (!role ? 2 : 3));
@@ -249,8 +258,8 @@ module.exports = (config) => {
     return Buffer.from(buffer);
   };
 
-  const buildCipherBuffer = (data, role) => {
-    let result;
+  const buildCipherBuffer = (data: any, role?: string | null): Buffer => {
+    let result: Buffer;
     if (role) {
       const metadataBytes = buildEncodedMetadata(
         role,
@@ -265,10 +274,10 @@ module.exports = (config) => {
     return result;
   };
 
-  const _evVersionPrefix = (role) =>
+  const _evVersionPrefix = (role?: string | null | boolean): string =>
     role ? config.evVersionWithMetadata : config.evVersion;
 
-  const _evEncryptedFileVersion = () => {
+  const _evEncryptedFileVersion = (): Buffer => {
     if (config.ecdhCurve == 'secp256k1') {
       return Buffer.from([0x02]);
     } else if (config.ecdhCurve === 'prime256v1') {
@@ -279,12 +288,12 @@ module.exports = (config) => {
   };
 
   const _format = (
-    datatype = 'string',
-    keyIv,
-    ecdhPublicKey,
-    encryptedData,
-    role
-  ) => {
+    datatype: string | undefined = 'string',
+    keyIv: string,
+    ecdhPublicKey: any,
+    encryptedData: string,
+    role?: string | null
+  ): string => {
     return `ev:${_evVersionPrefix(role)}${
       datatype !== 'string' ? ':' + datatype : ''
     }:${base64RemovePadding(keyIv)}:${base64RemovePadding(
@@ -293,20 +302,20 @@ module.exports = (config) => {
   };
 
   const _encryptBytes = (
-    data,
-    setAuthData,
-    derivedSecret,
-    ecdhTeamKey,
-    keyIv
-  ) => {
+    data: Buffer,
+    setAuthData: boolean,
+    derivedSecret: Buffer,
+    ecdhTeamKey: any,
+    keyIv: Buffer
+  ): Buffer => {
     const cipher = crypto.createCipheriv(
-      config.cipherAlgorithm,
+      config.cipherAlgorithm as crypto.CipherGCMTypes,
       derivedSecret,
       keyIv,
       {
         authTagLength: config.authTagLength,
       }
-    );
+    ) as crypto.CipherGCM;
 
     if (setAuthData) {
       cipher.setAAD(Buffer.from(ecdhTeamKey, 'base64'));
@@ -320,13 +329,13 @@ module.exports = (config) => {
   };
 
   const _encryptFile = async (
-    curve,
-    ecdhTeamKey,
-    ecdhPublicKey,
-    derivedSecret,
-    data,
-    role
-  ) => {
+    curve: string,
+    ecdhTeamKey: any,
+    ecdhPublicKey: any,
+    derivedSecret: Buffer,
+    data: Buffer,
+    role?: string | null
+  ): Promise<Buffer> => {
     const fileSizeInBytes = data.length;
     if (role) {
       throw new errors.DataRolesNotSupportedError(
@@ -353,11 +362,15 @@ module.exports = (config) => {
     return _formatFile(keyIv, ecdhPublicKey, encryptedBuffer);
   };
 
-  const _calculateOffsetToData = () => {
+  const _calculateOffsetToData = (): Buffer => {
     return Buffer.from([0x37, 0x00]); // 55 bytes to starting byte of data if no metadtata
   };
 
-  const _formatFile = async (keyIv, ecdhPublicKey, encryptedData) => {
+  const _formatFile = async (
+    keyIv: Buffer,
+    ecdhPublicKey: any,
+    encryptedData: Buffer
+  ): Promise<Buffer> => {
     const evEncryptedFileIdentifier = Buffer.from([
       0x25, 0x45, 0x56, 0x45, 0x4e, 0x43,
     ]);
@@ -386,14 +399,14 @@ module.exports = (config) => {
   };
 
   const encrypt = async (
-    curve,
-    ecdhTeamKey,
-    ecdhPublicKey,
-    derivedSecret,
-    data,
-    role = undefined,
-    options = DEFAULT_ENCRYPT_OPTIONS
-  ) => {
+    curve: string,
+    ecdhTeamKey: any,
+    ecdhPublicKey: any,
+    derivedSecret: Buffer,
+    data: any,
+    role: string | null | undefined = undefined,
+    options: EncryptOptions = DEFAULT_ENCRYPT_OPTIONS
+  ): Promise<any> => {
     if (!Datatypes.isDefined(data)) {
       throw new Error('Data must not be undefined');
     }
@@ -449,3 +462,5 @@ module.exports = (config) => {
     buildEncodedMetadata,
   };
 };
+
+export default Crypto;

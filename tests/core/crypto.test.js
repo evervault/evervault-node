@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const crypto = require('crypto');
 const { unpack } = require('msgpackr');
-const Crypto = require('../../lib/core/crypto');
+const Crypto = require('../../lib/core/crypto').default;
 const { errors } = require('../../lib/utils');
 const crc32 = require('crc-32');
 

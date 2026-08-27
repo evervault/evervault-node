@@ -9,7 +9,7 @@ describe('Http Module', () => {
     'ev:key:1:3bOqOkKrVFrk2Ps9yM1tHEi90CvZCjsGIihoyZncM9SdLoXQxknPPjwxiMLyDVYyX:cRhR9o:tCZFZV';
   const testAppId = 'app_8022cc5a3073';
   const testValidConfig = require('../../lib/config').http;
-  const testHttpClient = require('../../lib/core/http')(
+  const testHttpClient = require('../../lib/core/http').default(
     testAppId,
     testApiKey,
     testValidConfig
@@ -707,14 +707,13 @@ describe('Http Module', () => {
   });
 
   describe('agent forwarding', () => {
-    const rewire = require('rewire');
+    const proxyquire = require('proxyquire');
 
     /**
      * Creates a rewired http module with a stub axios and optional agents,
      * returning both the client and a getter for the last captured axios config.
      */
     const buildClientWithAxiosStub = (agents = {}) => {
-      const httpModule = rewire('../../lib/core/http');
       let capturedConfig;
       const axiosStub = (cfg) => {
         capturedConfig = cfg;
@@ -724,7 +723,9 @@ describe('Http Module', () => {
           headers: { 'x-poll-interval': '5' },
         });
       };
-      httpModule.__set__('axios', axiosStub);
+      const httpModule = proxyquire('../../lib/core/http', {
+        axios: axiosStub,
+      }).default;
       const client = httpModule(testAppId, testApiKey, testValidConfig, agents);
       return {
         client,
